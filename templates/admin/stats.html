@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Статистика</h2>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Общие показатели</h3>
+        <ul>
+            <li>Досок: <strong>{{ total_boards }}</strong></li>
+            <li>Тредов: <strong>{{ total_threads }}</strong></li>
+            <li>Постов: <strong>{{ total_posts }}</strong></li>
+            <li>Файлов: <strong>{{ total_files }}</strong></li>
+            <li>Размер файлов: <strong>{{ "%.2f"|format(total_size_mb) }} МБ</strong></li>
+            <li>Размер БД: <strong>{{ "%.2f"|format(db_size_mb) }} МБ</strong></li>
+        </ul>
+    </div>
+
+    <div class="stat-card">
+        <h3>Дисковое пространство</h3>
+        <ul>
+            <li>Всего: <strong>{{ "%.1f"|format(total_disk_gb) }} ГБ</strong></li>
+            <li>Занято: <strong>{{ "%.1f"|format(used_disk_gb) }} ГБ</strong></li>
+            <li>Свободно: <strong>{{ "%.1f"|format(free_disk_gb) }} ГБ</strong></li>
+        </ul>
+    </div>
+
+    <div class="stat-card">
+        <h3>Активность по дням</h3>
+        <table class="admin-table">
+            <thead><tr><th>Дата</th><th>Тредов</th><th>Постов</th></tr></thead>
+            <tbody>
+                {% for i in range(7) %}
+                <tr>
+                    <td>{{ daily_threads[i][0] }}</td>
+                    <td>{{ daily_threads[i][1] }}</td>
+                    <td>{{ daily_posts[i][1] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="stat-card">
+        <h3>Топ досок по постам</h3>
+        <table class="admin-table">
+            <thead><tr><th>Доска</th><th>Постов</th></tr></thead>
+            <tbody>
+                {% for board in top_boards %}
+                <tr>
+                    <td>/{{ board.short_name }}/ - {{ board.name }}</td>
+                    <td>{{ board.post_count }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2">Нет данных</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if show_ips %}
+    <div class="stat-card">
+        <h3>Последние IP (топ 20)</h3>
+        <table class="admin-table">
+            <thead><tr><th>IP</th><th>Постов</th></tr></thead>
+            <tbody>
+                {% for ip, count in recent_ips %}
+                <tr><td>{{ ip }}</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

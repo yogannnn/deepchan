@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% set auto_refresh = config.AUTO_REFRESH_INTERVAL if config.AUTO_REFRESH_ENABLED else 0 %}
+{% block title %}{{ thread.posts.first().subject or 'Тред' }} — /{{ board.short_name }}/{% endblock %}
+{% block content %}
+<p>
+    <a href="{{ url_for('board', board_name=board.short_name) }}">← К списку тредов</a> |
+    <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">Обновить</a>
+    {% if thread.is_pinned %}📌{% endif %}
+    {% if thread.is_locked %}🔒{% endif %}
+</p>
+<hr>
+
+{% if not thread.is_locked %}
+<h3>Ответить</h3>
+<form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name, thread_id=thread.id) }}">
+    <label>Имя: <input type="text" name="name" value="Аноним"></label>
+    <label>Комментарий: <textarea name="comment" required autofocus>{{ quote_text or "" }}</textarea></label>
+    <label>Картинки (до 4): <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple></label>
+    <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
+    <label>Пароль: <input type="password" name="password"></label>
+    {% if config.CAPTCHA_ENABLED %}
+    <div class="captcha-block">
+        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
+        <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
+        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+    </div>
+    {% endif %}
+    <input type="submit" value="Ответить">
+</form>
+<hr>
+{% endif %}
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
+    {% endif %}
+    <span>Посты {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
+    {% if pagination.has_next %}
+        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
+    {% endif %}
+</div>
+<hr>
+{% endif %}
+
+{% for post in posts %}
+<div class="post" id="post{{ post.id }}">
+    <div class="post-header">
+        <span class="name">{{ post.name }}</span>
+        <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
+        {% if post.subject %}<span class="subject">{{ post.subject }}</span>{% endif %}
+        {% if post.sage %}<span class="sage">SAGE</span>{% endif %}
+        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a></span>
+
+        {% if post.password_hash %}
+        <div class="post-delete">
+            <details>
+                <summary>🗑️</summary>
+                <form method="post" action="{{ url_for('delete_post', board_name=board.short_name, post_id=post.id) }}" class="delete-form">
+                    <input type="password" name="password" placeholder="Пароль" size="12">
+                    <button type="submit">Удалить</button>
+                </form>
+            </details>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if post.files.count() > 0 %}
+    <div class="post-files">
+        {% for pf in post.files %}
+        <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
+            <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <blockquote>{{ post.comment | process_comment(board.short_name, thread.id) | safe }}</blockquote>
+</div>
+<hr>
+{% endfor %}
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
+    {% endif %}
+    <span>Посты {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
+    {% if pagination.has_next %}
+        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if thread.is_locked %}
+<p><strong>Тред закрыт.</strong></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+    {% if config.ANNOUNCEMENT_HTML %}
+    <div class="announcement">{{ config.ANNOUNCEMENT_HTML | safe }}</div>
+    {% endif %}
+{% block title %}Список досок{% endblock %}
+{% block content %}
+<h2>Доски</h2>
+<ul style="list-style: none; padding: 0;">
+{% for board in boards %}
+    <li style="margin-bottom: 10px;">
+        <a href="{{ url_for('board', board_name=board.short_name) }}" style="font-size: 1.2rem;">/{{ board.short_name }}/ - {{ board.name }}</a>
+        <span style="color: var(--text-dim);"> — {{ board.description }}</span>
+    </li>
+{% else %}
+    <li>Нет досок. Создайте через <a href="/admin">админку</a>.</li>
+{% endfor %}
+</ul>
+    {% if config.ANNOUNCEMENT_HTML %}
+    <div class="announcement">{{ config.ANNOUNCEMENT_HTML | safe }}</div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Глобальный поиск{% endblock %}
+{% block content %}
+<h2>🔍 Глобальный поиск</h2>
+<form method="get" action="{{ url_for('global_search') }}">
+    <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
+    <select name="board_id">
+        <option value="">Все доски</option>
+        {% for board in boards %}
+            <option value="{{ board.id }}" {% if selected_board == board.id %}selected{% endif %}>
+                /{{ board.short_name }}/ - {{ board.name }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Искать</button>
+</form>
+<hr>
+{% if query %}
+    {% if results %}
+        {% for post in results %}
+        <div class="post">
+            <div class="post-header">
+                <a href="{{ url_for('thread', board_name=post.thread.board.short_name, thread_id=post.thread.id) }}#post{{ post.id }}">
+                    /{{ post.thread.board.short_name }}/ #{{ post.id }}
+                </a>
+                <span>{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
+            </div>
+            <blockquote>{{ post.comment|truncate(300) }}</blockquote>
+        </div>
+        <hr>
+        {% endfor %}
+        {% if pagination and pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('global_search', q=query, board_id=selected_board, page=pagination.prev_num) }}">← Назад</a>
+            {% endif %}
+            <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+            {% if pagination.has_next %}
+                <a href="{{ url_for('global_search', q=query, board_id=selected_board, page=pagination.next_num) }}">Вперёд →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <p>Ничего не найдено.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

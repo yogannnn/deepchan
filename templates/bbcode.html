@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}BB-коды DeepChan{% endblock %}
+{% block content %}
+<h2>🧬 Поддерживаемые BB-коды</h2>
+<p>Используйте следующие теги для форматирования сообщений:</p>
+
+<table class="admin-table">
+    <thead>
+        <tr><th>BB-код</th><th>Результат</th><th>Пример</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>[b]текст[/b]</code></td><td><strong>Жирный</strong></td><td><code>[b]Привет[/b]</code> → <strong>Привет</strong></td></tr>
+        <tr><td><code>[i]текст[/i]</code></td><td><em>Курсив</em></td><td><code>[i]Курсив[/i]</code> → <em>Курсив</em></td></tr>
+        <tr><td><code>[u]текст[/u]</code></td><td><u>Подчёркнутый</u></td><td><code>[u]Подчеркнуть[/u]</code> → <u>Подчеркнуть</u></td></tr>
+        <tr><td><code>[s]текст[/s]</code></td><td><del>Зачёркнутый</del></td><td><code>[s]Старое[/s]</code> → <del>Старое</del></td></tr>
+        <tr><td><code>[spoiler]текст[/spoiler]</code></td><td><details class="spoiler"><summary>Спойлер</summary>Скрытый текст</details></td><td><code>[spoiler]Сюрприз![/spoiler]</code></td></tr>
+        <tr><td><code>[code]код[/code]</code></td><td><pre><code>print("Hello")</code></pre></td><td><code>[code]print("Hello")[/code]</code></td></tr>
+    </tbody>
+</table>
+
+<p>Теги можно комбинировать, например: <code>[b][i]жирный курсив[/i][/b]</code>.</p>
+<p><a href="{{ url_for('index') }}">← На главную</a></p>
+{% endblock %}

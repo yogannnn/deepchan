@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>{% if board %}Редактировать{% else %}Создать{% endif %} доску</h2>
+<form method="post">
+    <label>Короткое имя (латиница, без пробелов): <input type="text" name="short_name" value="{{ board.short_name if board else '' }}" required pattern="[a-zA-Z0-9]+"></label>
+    <label>Название: <input type="text" name="name" value="{{ board.name if board else '' }}" required></label>
+    <label>Описание: <textarea name="description">{{ board.description if board else '' }}</textarea></label>
+    <input type="submit" value="Сохранить">
+    <a href="{{ url_for('admin_boards') }}" class="btn">Отмена</a>
+</form>
+{% endblock %}

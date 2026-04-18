@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Просмотр треда #{{ thread.id }}</h2>
+<p>
+    Доска: <a href="{{ url_for('board', board_name=thread.board.short_name) }}">/{{ thread.board.short_name }}/</a>
+    | <a href="{{ url_for('thread', board_name=thread.board.short_name, thread_id=thread.id) }}">Смотреть на сайте</a>
+</p>
+
+<div class="admin-posts">
+    {% for post in posts %}
+    <div class="post">
+        <div class="post-header">
+            <span class="name">{{ post.name }}</span>
+            <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
+            {% if post.subject %}<span class="subject">{{ post.subject }}</span>{% endif %}
+            <span class="post-id">№{{ post.id }}</span>
+        </div>
+        {% if post.files.count() > 0 %}
+        <div class="post-files">
+            {% for pf in post.files %}
+            <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
+                <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <blockquote>{{ post.comment | process_comment(thread.board.short_name, thread.id) | safe }}</blockquote>
+        <div class="admin-post-actions">
+            <form method="post" action="{{ url_for('admin_delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост #{{ post.id }}?');">
+                <button type="submit" class="action-icon">🗑️ Удалить пост</button>
+            </form>
+        </div>
+    </div>
+    <hr>
+    {% endfor %}
+</div>
+{% endblock %}

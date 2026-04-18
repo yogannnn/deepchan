@@ -1,0 +1,32 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# База данных SQLite
+instance/*.db
+*.db
+
+# Загруженные файлы (если не хочешь коммитить)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Логи
+*.log
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Временные файлы
+*~
+*.swp
+*.swo
+
+# Конфигурация с секретами
+.env
+
+# Системные файлы
+.DS_Store
+Thumbs.db

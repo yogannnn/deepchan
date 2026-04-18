@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Управление банами</h2>
+<form method="post" action="{{ url_for('admin_add_ban') }}" class="filter-form">
+    <label>IP: <input type="text" name="ip_pattern" required placeholder="127.0.0.1"></label>
+    <label>Причина: <input type="text" name="reason"></label>
+    <label>Срок (дней, пусто — навсегда): <input type="number" name="expires_days" min="1"></label>
+    <button type="submit" class="btn">Забанить</button>
+</form>
+<hr>
+<table class="admin-table">
+    <thead>
+        <tr><th>IP</th><th>Причина</th><th>Создан</th><th>Истекает</th><th>Активен</th><th>Действия</th></tr>
+    </thead>
+    <tbody>
+        {% for ban in bans %}
+        <tr>
+            <td>{{ ban.ip_pattern }}</td>
+            <td>{{ ban.reason or '—' }}</td>
+            <td>{{ ban.created_at.strftime('%d.%m.%y %H:%M') }}</td>
+            <td>{{ ban.expires_at.strftime('%d.%m.%y %H:%M') if ban.expires_at else 'Никогда' }}</td>
+            <td>{{ '✅' if ban.active else '❌' }}</td>
+            <td class="actions">
+                <form method="post" action="{{ url_for('admin_toggle_ban', ban_id=ban.id) }}" style="display:inline;">
+                    <button type="submit" class="action-icon">🔄</button>
+                </form>
+                <form method="post" action="{{ url_for('admin_delete_ban', ban_id=ban.id) }}" style="display:inline;" onsubmit="return confirm('Снять бан?');">
+                    <button type="submit" class="action-icon">🗑️</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">Нет банов</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

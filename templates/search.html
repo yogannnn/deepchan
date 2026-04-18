@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Поиск по /{{ board.short_name }}/{% endblock %}
+{% block content %}
+<h2>Поиск по /{{ board.short_name }}/</h2>
+<form method="get" action="{{ url_for('search', board_name=board.short_name) }}">
+    <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
+    <button type="submit">Искать</button>
+</form>
+<hr>
+{% if query %}
+    {% if results %}
+        {% for post in results %}
+        <div class="post">
+            <div class="post-header">
+                <a href="{{ url_for('thread', board_name=board.short_name, thread_id=post.thread_id) }}#post{{ post.id }}">Пост №{{ post.id }}</a>
+                <span>{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
+            </div>
+            <blockquote>{{ post.comment|truncate(200) }}</blockquote>
+        </div>
+        <hr>
+        {% endfor %}
+        {% if pagination and pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('search', board_name=board.short_name, q=query, page=pagination.prev_num) }}">← Назад</a>
+            {% endif %}
+            <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+            {% if pagination.has_next %}
+                <a href="{{ url_for('search', board_name=board.short_name, q=query, page=pagination.next_num) }}">Вперёд →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <p>Ничего не найдено.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Глобальный каталог{% endblock %}
+{% block content %}
+<h2>🖼️ Глобальный каталог</h2>
+
+<form method="get" action="{{ url_for('global_catalog') }}" class="filter-form">
+    <label>Доска:
+        <select name="board_id">
+            <option value="">Все доски</option>
+            {% for b in boards %}
+                <option value="{{ b.id }}" {% if selected_board == b.id %}selected{% endif %}>
+                    /{{ b.short_name }}/ - {{ b.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+    <input type="submit" value="Применить" class="btn">
+</form>
+
+<div class="catalog">
+    {% for thread in threads %}
+        {% set op = thread.posts.first() %}
+        {% if op %}
+        <div class="catalog-item">
+            <a href="{{ url_for('thread', board_name=thread.board.short_name, thread_id=thread.id) }}">
+                {% if op.files.first() %}
+                    <img src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
+                {% else %}
+                    <div style="height:160px; background:#1a2a1a; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);">Нет картинки</div>
+                {% endif %}
+                <div class="catalog-item-board">/{{ thread.board.short_name }}/</div>
+                <div>{{ op.subject or 'Без темы' }}</div>
+            </a>
+            <small>💬 {{ thread.posts.count() - 1 }}</small>
+        </div>
+        {% endif %}
+    {% else %}
+        <p>Нет тредов.</p>
+    {% endfor %}
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.prev_num) }}">← Назад</a>
+    {% endif %}
+    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    {% if pagination.has_next %}
+        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.next_num) }}">Вперёд →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

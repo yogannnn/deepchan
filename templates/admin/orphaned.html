@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Осиротевшие файлы</h2>
+<p>Файлы, которые есть на диске, но отсутствуют в базе данных.</p>
+
+{% if orphaned %}
+<form method="post" action="{{ url_for('admin_cleanup_files') }}">
+    <input type="hidden" name="action" value="orphaned">
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить все осиротевшие файлы?');">🗑️ Удалить все ({{ orphaned|length }})</button>
+</form>
+<hr>
+<table class="admin-table">
+    <thead><tr><th>Путь</th><th>Размер (КБ)</th></tr></thead>
+    <tbody>
+    {% for path, size in orphaned %}
+        <tr><td>{{ path }}</td><td>{{ (size / 1024) | round(1) }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Осиротевших файлов не найдено.</p>
+{% endif %}
+{% endblock %}

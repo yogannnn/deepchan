@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Вордфильтр</h2>
+<form method="post" action="{{ url_for('admin_add_filter') }}" class="filter-form">
+    <label>Слово/Regex: <input type="text" name="pattern" required></label>
+    <label>Замена: <input type="text" name="replacement" value="[CENSORED]"></label>
+    <label><input type="checkbox" name="is_regex"> Это регулярное выражение</label>
+    <label>Действие:
+        <select name="action">
+            <option value="replace">Заменять</option>
+            <option value="block">Блокировать пост</option>
+        </select>
+    </label>
+    <button type="submit" class="btn">Добавить</button>
+</form>
+<hr>
+<table class="admin-table">
+    <thead>
+        <tr><th>Паттерн</th><th>Замена</th><th>Regex</th><th>Действие</th><th>Активен</th><th>Действия</th></tr>
+    </thead>
+    <tbody>
+        {% for f in filters %}
+        <tr>
+            <td><code>{{ f.pattern }}</code></td>
+            <td>{{ f.replacement }}</td>
+            <td>{{ '✅' if f.is_regex else '❌' }}</td>
+            <td>{{ 'Замена' if f.action == 'replace' else 'Блок' }}</td>
+            <td>{{ '✅' if f.active else '❌' }}</td>
+            <td class="actions">
+                <form method="post" action="{{ url_for('admin_toggle_filter', filter_id=f.id) }}" style="display:inline;">
+                    <button type="submit" class="action-icon">🔄</button>
+                </form>
+                <form method="post" action="{{ url_for('admin_delete_filter', filter_id=f.id) }}" style="display:inline;" onsubmit="return confirm('Удалить фильтр?');">
+                    <button type="submit" class="action-icon">🗑️</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">Нет фильтров</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
