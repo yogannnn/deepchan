@@ -14,7 +14,7 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     WTF_CSRF_ENABLED = False
-    CAPTCHA_ENABLED = False
+#   CAPTCHA_ENABLED = False
     # Настройки flask-simple-captcha
     CAPTCHA_LENGTH = 4
     CAPTCHA_DIGITS = True
@@ -24,4 +24,4 @@ class Config:
     CAPTCHA_FONT_SIZE = 32
     CAPTCHA_WIDTH = 200
     CAPTCHA_HEIGHT = 70
-    STATS_SHOW_IPS = False
+#   STATS_SHOW_IPS = False
