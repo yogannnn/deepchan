@@ -7,6 +7,9 @@
 <form method="post" action="{{ url_for('admin_cleanup_files') }}">
     <input type="hidden" name="action" value="orphaned">
     <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить все осиротевшие файлы?');">🗑️ Удалить все ({{ orphaned|length }})</button>
+    {% set csrf = csrf_token('cleanup_files') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 <hr>
 <table class="admin-table">

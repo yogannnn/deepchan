@@ -4,7 +4,7 @@ from config import Config
 from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, hash_password, check_password
 from forms import PostForm
 from utils import save_files, check_rate_limit, process_comment, check_ban, apply_word_filters, generate_captcha, verify_csrf_token, generate_csrf_token
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import logging
 import shutil
@@ -16,6 +16,27 @@ import time
 import random
 
 app = Flask(__name__)
+# Обработчики ошибок
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('errors/403.html'), 403
+
+@app.errorhandler(400)
+def bad_request(e):
+    return render_template('errors/400.html'), 400
+
+@app.errorhandler(500)
+@app.errorhandler(429)
+def too_many_requests(e):
+    return render_template('errors/429.html', description=e.description), 429
+def internal_error(e):
+    db.session.rollback()
+    return render_template('errors/500.html'), 500
+
 app.config.from_object(Config)
 db.init_app(app)
 app.secret_key = app.config['SECRET_KEY']
@@ -267,7 +288,7 @@ def create_post(board_name):
             db.session.add(pf)
 
         if not sage:
-            thread.bumped_at = datetime.utcnow()
+            thread.bumped_at = datetime.now(timezone.utc)
 
         fts_entry = PostFTS(
             post_id=post.id,
@@ -574,7 +595,7 @@ def admin_cleanup_files():
                         pass
         flash('Осиротевшие файлы удалены', 'success')
     elif action == 'old_threads':
-        threshold = datetime.utcnow() - timedelta(days=30)
+        threshold = datetime.now(timezone.utc) - timedelta(days=30)
         old_threads = Thread.query.filter(Thread.bumped_at < threshold).all()
         for t in old_threads:
             for p in t.posts:
@@ -602,7 +623,7 @@ def admin_add_ban():
     ip = request.form['ip_pattern']
     reason = request.form.get('reason', '')
     expires_days = request.form.get('expires_days', type=int)
-    expires = datetime.utcnow() + timedelta(days=expires_days) if expires_days else None
+    expires = datetime.now(timezone.utc) + timedelta(days=expires_days) if expires_days else None
     ban = Ban(ip_pattern=ip, reason=reason, expires_at=expires)
     db.session.add(ban)
     db.session.commit()
@@ -724,7 +745,7 @@ def admin_stats():
     total_files = PostFile.query.count()
     total_boards = Board.query.count()
 
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     daily_posts = []
     daily_threads = []
     for i in range(7):

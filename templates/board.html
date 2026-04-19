@@ -19,7 +19,7 @@
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
         <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
@@ -27,7 +27,7 @@
     </div>
     {% endif %}
     <input type="submit" value="Создать">
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>

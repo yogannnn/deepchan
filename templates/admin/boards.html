@@ -24,7 +24,7 @@
                 <a href="{{ url_for('admin_edit_board', board_id=board.id) }}" class="action-icon">✏️</a>
                 <form method="post" action="{{ url_for('admin_delete_board', board_id=board.id) }}" class="inline-form" onsubmit="return confirm('Удалить доску {{ board.short_name }}?');">
                     <button type="submit" class="action-icon">🗑️</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('delete_board') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>

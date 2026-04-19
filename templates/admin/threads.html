@@ -12,7 +12,7 @@
         </select>
     </label>
     <noscript><input type="submit" value="Применить"></noscript>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('bulk_threads') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
@@ -65,19 +65,19 @@
                 <td class="actions">
                     <form method="post" action="{{ url_for('admin_toggle_pin', thread_id=thread.id, board_id=selected_board) }}" class="inline-form">
                         <button type="submit" class="action-icon" title="Закрепить/открепить">📌</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('bulk_threads') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     </form>
                     <form method="post" action="{{ url_for('admin_toggle_lock', thread_id=thread.id, board_id=selected_board) }}" class="inline-form">
                         <button type="submit" class="action-icon" title="Закрыть/открыть">🔒</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('bulk_threads') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     </form>
                     <form method="post" action="{{ url_for('admin_delete_thread', thread_id=thread.id, board_id=selected_board) }}" class="inline-form" onsubmit="return confirm('Удалить тред #{{ thread.id }}?');">
                         <button type="submit" class="action-icon" title="Удалить">🗑️</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('bulk_threads') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     </form>
@@ -88,7 +88,7 @@
             {% endfor %}
         </tbody>
     </table>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('bulk_threads') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>

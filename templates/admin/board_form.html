@@ -7,7 +7,7 @@
     <label>Описание: <textarea name="description">{{ board.description if board else '' }}</textarea></label>
     <input type="submit" value="Сохранить">
     <a href="{{ url_for('admin_boards') }}" class="btn">Отмена</a>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('create_board') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>

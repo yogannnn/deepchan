@@ -6,7 +6,7 @@
     <label>Причина: <input type="text" name="reason"></label>
     <label>Срок (дней, пусто — навсегда): <input type="number" name="expires_days" min="1"></label>
     <button type="submit" class="btn">Забанить</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('add_ban') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
@@ -26,13 +26,13 @@
             <td class="actions">
                 <form method="post" action="{{ url_for('admin_toggle_ban', ban_id=ban.id) }}" style="display:inline;">
                     <button type="submit" class="action-icon">🔄</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('add_ban') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
                 <form method="post" action="{{ url_for('admin_delete_ban', ban_id=ban.id) }}" style="display:inline;" onsubmit="return confirm('Снять бан?');">
                     <button type="submit" class="action-icon">🗑️</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('add_ban') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>

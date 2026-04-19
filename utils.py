@@ -24,8 +24,8 @@ def check_rate_limit():
 
 def check_ban(ip):
     from models import Ban
-    from datetime import datetime
-    now = datetime.utcnow()
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
     ban = Ban.query.filter(
         Ban.ip_pattern == ip,
         Ban.active == True,

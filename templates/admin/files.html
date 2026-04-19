@@ -15,6 +15,9 @@
         <a href="{{ url_for('admin_files', board_id=selected_board, show_dupes=1) }}">🔍 Показать дубликаты</a>
     </label>
     <noscript><input type="submit" value="Применить"></noscript>
+    {% set csrf = csrf_token('delete_file') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 
 <div class="admin-actions">
@@ -33,6 +36,9 @@
                 (пост #{{ pf.post_id }}, доска /{{ pf.post.thread.board.short_name }}/)
                 <form method="post" action="{{ url_for('admin_delete_file', file_id=pf.id, board_id=selected_board) }}" style="display:inline;" onsubmit="return confirm('Удалить файл?');">
                     <button type="submit" class="action-icon">🗑️</button>
+    {% set csrf = csrf_token('delete_file') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
             </li>
         {% endfor %}
@@ -76,6 +82,9 @@
             <td class="actions">
                 <form method="post" action="{{ url_for('admin_delete_file', file_id=pf.id, board_id=selected_board) }}" onsubmit="return confirm('Удалить файл?');">
                     <button type="submit" class="action-icon">🗑️</button>
+    {% set csrf = csrf_token('delete_file') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
             </td>
         </tr>
@@ -90,5 +99,8 @@
 <form method="post" action="{{ url_for('admin_cleanup_files') }}" onsubmit="return confirm('Удалить треды старше 30 дней?');">
     <input type="hidden" name="action" value="old_threads">
     <button type="submit" class="btn btn-danger">🧹 Удалить старые треды (старше 30 дней)</button>
+    {% set csrf = csrf_token('delete_file') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 {% endblock %}

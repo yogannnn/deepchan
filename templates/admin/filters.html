@@ -12,7 +12,7 @@
         </select>
     </label>
     <button type="submit" class="btn">Добавить</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('add_filter') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
@@ -32,13 +32,13 @@
             <td class="actions">
                 <form method="post" action="{{ url_for('admin_toggle_filter', filter_id=f.id) }}" style="display:inline;">
                     <button type="submit" class="action-icon">🔄</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('add_filter') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
                 <form method="post" action="{{ url_for('admin_delete_filter', filter_id=f.id) }}" style="display:inline;" onsubmit="return confirm('Удалить фильтр?');">
                     <button type="submit" class="action-icon">🗑️</button>
-    {% set csrf = csrf_token('default') %}
+    {% set csrf = csrf_token('add_filter') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
