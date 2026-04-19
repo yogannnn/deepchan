@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set auto_refresh = config.AUTO_REFRESH_INTERVAL if config.AUTO_REFRESH_ENABLED else 0 %}
-{% block title %}{{ thread.posts.first().subject or 'Тред' }} — /{{ board.short_name }}/{% endblock %}
+{% block title %}{{ thread.posts.first().subject|e if thread.posts.first().subject else 'Тред' }} — /{{ board.short_name }}/{% endblock %}
 {% block content %}
 <p>
     <a href="{{ url_for('board', board_name=board.short_name) }}">← К списку тредов</a> |
@@ -15,7 +15,7 @@
 <form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name, thread_id=thread.id) }}">
     <label>Имя: <input type="text" name="name" value="Аноним"></label>
     <label>Комментарий: <textarea name="comment" required autofocus>{{ quote_text or "" }}</textarea></label>
-    <label>Картинки (до 4): <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple></label>
+    <label>Картинки: <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple></label>
     <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
@@ -46,7 +46,7 @@
 {% for post in posts %}
 <div class="post" id="post{{ post.id }}">
     <div class="post-header">
-        <span class="name">{{ post.name }}</span>
+        <span class="name">{{ post.name|e }}</span>
         <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
         {% if post.subject %}<span class="subject">{{ post.subject }}</span>{% endif %}
         {% if post.sage %}<span class="sage">SAGE</span>{% endif %}

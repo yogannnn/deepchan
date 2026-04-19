@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, abort, make_response, Response, flash, send_file, session
+import html
 from config import Config
 from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, hash_password, check_password
 from forms import PostForm
@@ -27,7 +28,6 @@ if not app.debug:
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbs'), exist_ok=True)
 
-# ===== Настройки =====
 def load_settings():
     with app.app_context():
         if not inspect(db.engine).has_table('setting'):
@@ -60,7 +60,6 @@ def save_setting(key, value):
     db.session.commit()
     app.config[key] = value
 
-# ===== Декоратор админки =====
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -73,7 +72,6 @@ def admin_required(f):
 def authenticate():
     return Response('Введите логин и пароль.', 401, {'WWW-Authenticate': 'Basic realm="Admin Area"'})
 
-# ===== Middleware (закрытие борды) =====
 @app.before_request
 def check_board_closed():
     if app.config.get('BOARD_CLOSED', False):
@@ -86,19 +84,17 @@ def check_board_closed():
 def board_closed():
     return render_template('board_closed.html')
 
-# ===== Капча =====
 @app.route('/captcha')
 def captcha_route():
     data, text = generate_captcha()
     session['captcha_text'] = text
     return send_file(io.BytesIO(data.getvalue()), mimetype='image/png')
 
-# ===== Глобальный каталог =====
 @app.route('/catalog', strict_slashes=False)
 def global_catalog():
     board_id = request.args.get('board_id', type=int)
     page = request.args.get('page', 1, type=int)
-    per_page = int(app.config.get('THREADS_PER_PAGE', 30))
+    per_page = app.config.get('THREADS_PER_PAGE', 30)
     query = Thread.query.filter(Thread.posts.any())
     if board_id:
         query = query.filter(Thread.board_id == board_id)
@@ -111,7 +107,6 @@ def global_catalog():
                            boards=boards,
                            selected_board=board_id)
 
-# ===== Глобальный поиск =====
 @app.route('/search', strict_slashes=False)
 def global_search():
     query = request.args.get('q', '').strip()
@@ -131,12 +126,10 @@ def global_search():
     return render_template('search_global.html', query=query, results=results, pagination=pagination,
                            boards=boards, selected_board=board_id)
 
-# ===== Инструкция по BB-кодам =====
 @app.route('/bbcode')
 def bbcode_help():
     return render_template('bbcode.html')
 
-# ===== Публичные роуты =====
 @app.route('/')
 def index():
     boards = Board.query.all()
@@ -146,7 +139,7 @@ def index():
 def board(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     page = request.args.get('page', 1, type=int)
-    per_page = int(app.config.get('THREADS_PER_PAGE', 50))
+    per_page = app.config.get('THREADS_PER_PAGE', 50)
     threads_paginated = board.threads.filter(Thread.posts.any()).order_by(
         Thread.is_pinned.desc(), Thread.bumped_at.desc()
     ).paginate(page=page, per_page=per_page, error_out=False)
@@ -160,17 +153,16 @@ def board(board_name):
 @app.route('/<string:board_name>/catalog', strict_slashes=False)
 def board_catalog(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
-    per_page = int(app.config.get('THREADS_PER_PAGE', 30))
+    per_page = app.config.get('THREADS_PER_PAGE', 30)
     threads = board.threads.filter(Thread.posts.any()).order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc()).limit(per_page).all()
     return render_template('catalog.html', board=board, threads=threads)
 
-# ===== Тред с цитированием =====
 @app.route('/<string:board_name>/thread/<int:thread_id>')
 def thread(board_name, thread_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
     page = request.args.get('page', 1, type=int)
-    per_page = int(app.config.get('POSTS_PER_PAGE', 50))
+    per_page = app.config.get('POSTS_PER_PAGE', 50)
     posts_paginated = thread.posts.order_by(Post.created_at.asc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -204,11 +196,8 @@ def create_post(board_name):
                 form.comment.errors.append('Нужно ввести комментарий или прикрепить файл')
                 return render_template('error.html', form=form), 400
         else:
-            if not form.subject.data:
-                form.subject.errors.append('Тема обязательна для нового треда')
-                return render_template('error.html', form=form), 400
-            if not form.files.data:
-                form.files.errors.append('Для нового треда нужна хотя бы одна картинка')
+            if not form.subject.data and not form.files.data and not form.comment.data:
+                form.comment.errors.append('Нужно ввести комментарий или прикрепить файл')
                 return render_template('error.html', form=form), 400
             thread = Thread(board_id=board.id)
             db.session.add(thread)
@@ -219,10 +208,13 @@ def create_post(board_name):
 
         saved_files = save_files(form.files.data)
 
+        safe_name = html.escape(form.name.data) if form.name.data else 'Аноним'
+        safe_subject = html.escape(form.subject.data) if form.subject.data else None
+
         post = Post(
             thread_id=thread.id,
-            name=form.name.data or 'Аноним',
-            subject=filtered_subject if not thread_id else None,
+            name=safe_name,
+            subject=safe_subject if not thread_id else None,
             comment=filtered_comment,
             sage=sage,
             password_hash=hash_password(form.password.data) if form.password.data else None,
@@ -254,7 +246,7 @@ def create_post(board_name):
 
         if thread_id:
             total_posts = thread.posts.count()
-            per_page = int(app.config.get('POSTS_PER_PAGE', 50))
+            per_page = app.config.get('POSTS_PER_PAGE', 50)
             last_page = (total_posts + per_page - 1) // per_page
             return redirect(url_for('thread', board_name=board_name, thread_id=thread_id, page=last_page))
         else:
@@ -297,7 +289,6 @@ def delete_post(board_name, post_id):
         db.session.commit()
         return redirect(url_for('thread', board_name=board.short_name, thread_id=thread.id))
 
-# ===== Локальный поиск по доске =====
 @app.route('/<string:board_name>/search')
 def board_search(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
@@ -634,8 +625,6 @@ def admin_settings():
         save_setting('RATE_LIMIT_SECONDS', request.form.get('rate_limit_seconds', '30'))
         save_setting('HEADER_HTML', request.form.get('header_html', ''))
         save_setting('FOOTER_HTML', request.form.get('footer_html', ''))
-        save_setting('ANNOUNCEMENT_HTML', request.form.get('announcement_html', ''))
-        save_setting('ANNOUNCEMENT_HTML', request.form.get('announcement_html', ''))
         save_setting('SITE_TITLE', request.form.get('site_title', 'Имиджборда'))
         save_setting('THREADS_PER_PAGE', request.form.get('threads_per_page', '50'))
         save_setting('POSTS_PER_PAGE', request.form.get('posts_per_page', '50'))
@@ -654,8 +643,6 @@ def admin_settings():
         'rate_limit_seconds': app.config.get('RATE_LIMIT_SECONDS', 30),
         'header_html': app.config.get('HEADER_HTML', ''),
         'footer_html': app.config.get('FOOTER_HTML', ''),
-        'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
-        'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
         'site_title': app.config.get('SITE_TITLE', 'Имиджборда'),
         'threads_per_page': app.config.get('THREADS_PER_PAGE', 50),
         'posts_per_page': app.config.get('POSTS_PER_PAGE', 50),
@@ -664,7 +651,6 @@ def admin_settings():
     }
     return render_template('admin/settings.html', **ctx)
 
-# ===== Статистика =====
 @app.route('/admin/stats')
 @admin_required
 def admin_stats():
@@ -723,7 +709,6 @@ def admin_stats():
                            recent_ips=recent_ips,
                            show_ips=show_ips)
 
-# Глобальный CSRF
 from flask_wtf.csrf import generate_csrf
 app.jinja_env.globals['csrf_token'] = generate_csrf
 

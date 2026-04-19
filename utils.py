@@ -5,6 +5,7 @@ import time
 import hashlib
 import random
 import io
+import html
 from PIL import Image
 from flask import current_app, request, abort
 from models import Post
@@ -54,7 +55,7 @@ def save_files(files):
     saved = []
     if not files:
         return saved
-    for idx, f in enumerate(files[:current_app.config.get('MAX_FILES', 4)]):
+    for idx, f in enumerate(files[:4]):
         if f.filename == '':
             continue
         random_hex = secrets.token_hex(8)
@@ -82,65 +83,60 @@ def save_files(files):
     return saved
 
 def parse_bbcode(text):
-    # Жирный
     text = re.sub(r'\[b\](.*?)\[/b\]', r'<strong>\1</strong>', text, flags=re.IGNORECASE|re.DOTALL)
-    # Курсив
     text = re.sub(r'\[i\](.*?)\[/i\]', r'<em>\1</em>', text, flags=re.IGNORECASE|re.DOTALL)
-    # Подчёркнутый
     text = re.sub(r'\[u\](.*?)\[/u\]', r'<u>\1</u>', text, flags=re.IGNORECASE|re.DOTALL)
-    # Зачёркнутый
     text = re.sub(r'\[s\](.*?)\[/s\]', r'<del>\1</del>', text, flags=re.IGNORECASE|re.DOTALL)
-    # Спойлер
     text = re.sub(r'\[spoiler\](.*?)\[/spoiler\]', r'<details class="spoiler"><summary>Спойлер</summary>\1</details>', text, flags=re.IGNORECASE|re.DOTALL)
-    # Код
     text = re.sub(r'\[code\](.*?)\[/code\]', r'<pre><code>\1</code></pre>', text, flags=re.IGNORECASE|re.DOTALL)
     return text
 
 def process_urls(text):
-    # Шаг 1: Сохраняем magnet-ссылки
-    magnet_map = {}
-    def magnet_saver(match):
+    # Magnet
+    def magnet_replace(match):
         url = match.group(0)
-        placeholder = f"__MAGNET_{len(magnet_map)}__"
-        magnet_map[placeholder] = f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
-        return placeholder
-    text = re.sub(r'magnet:\?[^\s<>"\']+', magnet_saver, text, flags=re.IGNORECASE)
+        return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
+    text = re.sub(r'magnet:\?[^\s<>"\']+', magnet_replace, text, flags=re.IGNORECASE)
 
-    # Шаг 2: Обрабатываем остальные URL
-    def url_replacer(match):
+    # Основной обработчик URL и IP
+    def url_replace(match):
         url = match.group(0)
-        if url.startswith('__MAGNET_'):
-            return url
+        # localhost (IPv4, IPv6)
+        if re.search(r'^(https?://)?(127\.0\.0\.1|\[::1\]|::1)([/:]|$)', url, re.IGNORECASE):
+            if not url.startswith('http://') and not url.startswith('https://'):
+                url = 'http://' + url
+            return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{match.group(0)}</a>'
+        # i2p/onion
         if re.search(r'\.(i2p|onion)(/|$)', url, re.IGNORECASE):
             if not url.startswith('http://') and not url.startswith('https://'):
                 url = 'http://' + url
             return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{match.group(0)}</a>'
-        else:
-            return f'{match.group(0)} <span class="clearnet-warning">[Alert! ClearNet]</span>'
+        # всё остальное (включая IP) — клирнет
+        return f'{match.group(0)}<span class="clearnet-warning">ClearNet</span>'
 
-    text = re.sub(r'''(?i)\b((?:https?://|ftp://)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}|i2p|onion)(?:/[^\s<>"']*)?)\b''', url_replacer, text)
-
-    # Шаг 3: Возвращаем magnet-ссылки
-    for placeholder, link in magnet_map.items():
-        text = text.replace(placeholder, link)
+    # Доменные имена
+    text = re.sub(r'''(?i)\b((?:https?://|ftp://)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}|i2p|onion)(?:/[^\s<>"']*)?)\b''', url_replace, text)
+    # IPv4 адреса
+    text = re.sub(r'''(?i)\b((?:https?://|ftp://)?(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?::[0-9]+)?(?:/[^\s<>"']*)?\b''', url_replace, text)
     return text
 
 def process_comment(text, board_name, thread_id):
-    # Сначала BB-коды
-    text = parse_bbcode(text)
-    # Затем цитирование
+    text = html.escape(text)
+    text = text.replace('&gt;&gt;', '>>')
+    text = text.replace('&#91;', '[').replace('&#93;', ']')
+
     def replace_quote(match):
         num = match.group(1)
         quoted_post = Post.query.filter_by(id=num, thread_id=thread_id).first()
         if quoted_post:
-            quote_text = quoted_post.comment
+            quote_text = html.escape(quoted_post.comment)
             if len(quote_text) > 200:
                 quote_text = quote_text[:200] + "..."
             return f'<blockquote class="inline-quote"><a href="{current_app.url_for("thread", board_name=board_name, thread_id=thread_id)}#post{num}">&gt;&gt;{num}</a> {quote_text}</blockquote>'
         return match.group(0)
 
     text = re.sub(r'>>(\d+)', replace_quote, text)
-    # Затем ссылки
+    text = parse_bbcode(text)
     text = process_urls(text)
     return text
 

@@ -715,3 +715,45 @@ code {
     border-radius: 8px;
     color: #b3ffb3;
 }
+
+/* Обновлённый стиль предупреждения о клирнете */
+.clearnet-warning {
+    display: inline-block;
+    background-color: #cc0000;
+    color: #aaccff;          /* мягкий синий */
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 5px;
+    margin-left: 5px;
+    border-radius: 4px;
+    vertical-align: super;
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid #ff6666;
+}
+.clearnet-warning:hover {
+    background-color: #ff2222;
+    color: #ffffff;
+}
+
+/* Компактная метка ClearNet */
+.clearnet-warning {
+    display: inline-block;
+    background-color: #cc0000;
+    color: #aaccff;
+    font-size: 0.65rem;
+    font-weight: bold;
+    padding: 1px 4px;
+    margin-left: 4px;
+    border-radius: 3px;
+    vertical-align: super;
+    line-height: 1.2;
+    text-decoration: none;
+    border: none;
+}
+
+/* Увеличенная высота поля комментария */
+textarea {
+    min-height: 200px;
+    resize: vertical;
+}

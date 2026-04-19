@@ -14,7 +14,7 @@
     <label>Имя: <input type="text" name="name" value="Аноним"></label><br>
     <label>Тема: <input type="text" name="subject" required></label><br>
     <label>Комментарий: <textarea name="comment" required></textarea></label><br>
-    <label>Картинки (до 4): <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple required></label><br>
+    <label>Картинки: <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple required></label><br>
     <label>Пароль: <input type="password" name="password"></label><br>
             {% if config.CAPTCHA_ENABLED %}
             {% endif %}
@@ -57,7 +57,7 @@
         <div class="thread-info">
             <div class="thread-title">
                 <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
-                    {{ op.subject or 'Без темы' }}
+                    {{ op.subject|e if op.subject else 'Без темы' }}
                 </a>
                 <span class="thread-badges">
                     {% if thread.is_pinned %}📌{% endif %}
