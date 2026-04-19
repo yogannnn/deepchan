@@ -10,9 +10,9 @@
     {% for post in posts %}
     <div class="post">
         <div class="post-header">
-            <span class="name">{{ post.name }}</span>
+            <span class="name">{{ post.name|e }}</span>
             <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
-            {% if post.subject %}<span class="subject">{{ post.subject }}</span>{% endif %}
+            {% if post.subject %}<span class="subject">{{ post.subject|e }}</span>{% endif %}
             <span class="post-id">№{{ post.id }}</span>
         </div>
         {% if post.files.count() > 0 %}
