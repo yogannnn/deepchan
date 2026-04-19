@@ -58,6 +58,14 @@
             Максимальное разрешение (пикселей):
             <input type="number" name="max_image_dimension" value="{{ max_image_dimension }}" min="100" max="10000">
         </label>
+        <label>
+            <input type="checkbox" name="webp_convert_enabled" {% if webp_convert_enabled %}checked{% endif %}>
+            Конвертировать изображения в WEBP (кроме анимированных GIF)
+        <label>
+            <input type="checkbox" name="stealth_trim" {% if stealth_trim %}checked{% endif %}>
+            Обрезать изображения до 2000px (защита от стеганографии)
+        </label>
+        </label>
     </div>
 
     <!-- ===== АВТООБНОВЛЕНИЕ ===== -->

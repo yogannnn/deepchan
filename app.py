@@ -12,6 +12,8 @@ from logging.handlers import RotatingFileHandler
 from sqlalchemy import inspect, text, func
 from functools import wraps
 import io
+import time
+import random
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -37,7 +39,7 @@ def load_settings():
         settings = Setting.query.all()
         for s in settings:
             if s.key == 'DEPLOY_MODE':
-                continue  # пропускаем, берём из os.environ
+                continue
             if s.key in ('CAPTCHA_ENABLED', 'STATS_SHOW_IPS', 'BOARD_CLOSED', 'AUTO_REFRESH_ENABLED'):
                 app.config[s.key] = s.value == 'True'
             elif s.key in ('AUTO_REFRESH_INTERVAL', 'RATE_LIMIT_SECONDS', 'THREADS_PER_PAGE', 'POSTS_PER_PAGE', 'MAX_FILES', 'MAX_CONTENT_LENGTH', 'MAX_IMAGE_DIMENSION'):
@@ -46,6 +48,10 @@ def load_settings():
                 app.config[s.key] = s.value
             elif s.key == 'ALLOWED_EXTENSIONS':
                 app.config['ALLOWED_EXTENSIONS'] = s.value.split(',') if s.value else ['jpg', 'jpeg', 'png', 'gif']
+            elif s.key == 'WEBP_CONVERT_ENABLED':
+                app.config['WEBP_CONVERT_ENABLED'] = s.value == 'True'
+            elif s.key == 'STEALTH_TRIM':
+                app.config['STEALTH_TRIM'] = s.value == 'True'
             elif s.value == 'True':
                 app.config[s.key] = True
             elif s.value == 'False':
@@ -237,7 +243,7 @@ def create_post(board_name):
             db.session.add(pf)
 
         if not sage:
-            thread.bumped_at = datetime.now(datetime.UTC)
+            thread.bumped_at = datetime.utcnow()
 
         fts_entry = PostFTS(
             post_id=post.id,
@@ -533,7 +539,7 @@ def admin_cleanup_files():
                         pass
         flash('Осиротевшие файлы удалены', 'success')
     elif action == 'old_threads':
-        threshold = datetime.now(datetime.UTC) - timedelta(days=30)
+        threshold = datetime.utcnow() - timedelta(days=30)
         old_threads = Thread.query.filter(Thread.bumped_at < threshold).all()
         for t in old_threads:
             for p in t.posts:
@@ -560,7 +566,7 @@ def admin_add_ban():
     ip = request.form['ip_pattern']
     reason = request.form.get('reason', '')
     expires_days = request.form.get('expires_days', type=int)
-    expires = datetime.now(datetime.UTC) + timedelta(days=expires_days) if expires_days else None
+    expires = datetime.utcnow() + timedelta(days=expires_days) if expires_days else None
     ban = Ban(ip_pattern=ip, reason=reason, expires_at=expires)
     db.session.add(ban)
     db.session.commit()
@@ -639,9 +645,10 @@ def admin_settings():
         allowed = ','.join(request.form.getlist('allowed_extensions'))
         save_setting('ALLOWED_EXTENSIONS', allowed)
         save_setting('ANNOUNCEMENT_HTML', request.form.get('announcement_html', ''))
-        # Новые настройки лимитов
         save_setting('MAX_CONTENT_LENGTH', int(request.form.get('max_content_length', 10)) * 1024 * 1024)
         save_setting('MAX_IMAGE_DIMENSION', request.form.get('max_image_dimension', '5000'))
+        save_setting('WEBP_CONVERT_ENABLED', 'webp_convert_enabled' in request.form)
+        save_setting('STEALTH_TRIM', 'stealth_trim' in request.form)
         flash('Настройки сохранены', 'success')
         return redirect(url_for('admin_settings'))
 
@@ -660,9 +667,10 @@ def admin_settings():
         'max_files': app.config.get('MAX_FILES', 4),
         'allowed_extensions': app.config.get('ALLOWED_EXTENSIONS', ['jpg','jpeg','png','gif']),
         'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
-        # Новые поля для шаблона
-        'max_content_length': app.config.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024) // (1024 * 1024),
+        'max_content_length': int(app.config.get('MAX_CONTENT_LENGTH') or 10*1024*1024) // (1024 * 1024),
         'max_image_dimension': app.config.get('MAX_IMAGE_DIMENSION', 5000),
+        'webp_convert_enabled': app.config.get('WEBP_CONVERT_ENABLED', True),
+        'stealth_trim': app.config.get('STEALTH_TRIM', True),
     }
     return render_template('admin/settings.html', **ctx)
 
@@ -674,12 +682,12 @@ def admin_stats():
     total_files = PostFile.query.count()
     total_boards = Board.query.count()
 
-    today = datetime.now(datetime.UTC).date()
+    today = datetime.utcnow().date()
     daily_posts = []
     daily_threads = []
     for i in range(7):
         day = today - timedelta(days=i)
-        start = datetime(day.year, day.month, day.day, tzinfo=datetime.UTC)
+        start = datetime(day.year, day.month, day.day)
         end = start + timedelta(days=1)
         posts_count = Post.query.filter(Post.created_at >= start, Post.created_at < end).count()
         threads_count = Thread.query.filter(Thread.created_at >= start, Thread.created_at < end).count()
@@ -724,7 +732,24 @@ def admin_stats():
                            recent_ips=recent_ips,
                            show_ips=show_ips)
 
-# ===== КЕШИРОВАНИЕ СТАТИКИ (правильное) =====
+# ===== WSGI Middleware для удаления заголовков и задержки =====
+class ParanoidMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        def custom_start_response(status, headers, exc_info=None):
+            # Удаляем Server и X-Powered-By из заголовков
+            new_headers = [(k, v) for k, v in headers if k not in ('Server', 'X-Powered-By')]
+            return start_response(status, new_headers, exc_info)
+
+        # Случайная задержка 5-50 мс
+        time.sleep(random.uniform(0.005, 0.05))
+        return self.app(environ, custom_start_response)
+
+app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
+
+# ===== КЕШИРОВАНИЕ СТАТИКИ =====
 @app.after_request
 def add_cache_headers(response):
     if request.path.startswith('/static'):
@@ -785,4 +810,4 @@ if __name__ == '__main__':
     else:
         from waitress import serve
         print("🚀 Запуск через Waitress (production) на http://127.0.0.1:5000")
-        serve(app, host='127.0.0.1', port=5000, threads=4, channel_timeout=300)
+        serve(app, host='127.0.0.1', port=5000, threads=4, channel_timeout=300, ident=None)

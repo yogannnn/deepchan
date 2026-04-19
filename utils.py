@@ -6,7 +6,7 @@ import hashlib
 import random
 import io
 import html
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from flask import current_app, request, abort
 from models import Post
 
@@ -24,7 +24,7 @@ def check_rate_limit():
 def check_ban(ip):
     from models import Ban
     from datetime import datetime
-    now = datetime.now(datetime.UTC)
+    now = datetime.utcnow()
     ban = Ban.query.filter(
         Ban.ip_pattern == ip,
         Ban.active == True,
@@ -57,54 +57,113 @@ def save_files(files):
         return saved
 
     max_files = current_app.config.get('MAX_FILES', 4)
-    max_dimension = current_app.config.get('MAX_IMAGE_DIMENSION', 5000)
+    if len(files) > max_files:
+        abort(400, description=f"Слишком много файлов (максимум {max_files})")
 
-    for idx, f in enumerate(files[:max_files]):
+    max_dimension = current_app.config.get('MAX_IMAGE_DIMENSION', 5000)
+    webp_enabled = current_app.config.get('WEBP_CONVERT_ENABLED', True)
+
+    for idx, f in enumerate(files):
         if f.filename == '':
             continue
 
+        # 1. Проверка размера
         f.stream.seek(0, os.SEEK_END)
         file_size = f.tell()
         f.stream.seek(0)
         if file_size > current_app.config.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024):
             abort(400, description="Файл слишком большой")
 
+        # 2. Верификация
         try:
             f.stream.seek(0)
             img = Image.open(f.stream)
             img.verify()
-        except Exception as e:
-            abort(400, description=f"Некорректный файл изображения: {str(e)}")
+        except (UnidentifiedImageError, Exception) as e:
+            current_app.logger.warning(f"Image verification failed: {e}")
+            abort(400, description="Некорректный файл изображения")
 
+        # 3. Повторное открытие
         f.stream.seek(0)
         img = Image.open(f.stream)
 
+        # 4. Проверка разрешения
         if img.width > max_dimension or img.height > max_dimension:
-            abort(400, description=f"Разрешение изображения превышает {max_dimension}x{max_dimension}")
+            abort(400, description=f"Разрешение превышает {max_dimension}x{max_dimension}")
 
-        if img.mode in ('RGBA', 'P'):
-            img = img.convert('RGB')
+        # 5. Определяем, анимированный ли GIF
+        is_animated_gif = False
+        if img.format == 'GIF':
+            try:
+                img.seek(1)
+                is_animated_gif = True
+            except EOFError:
+                pass
+            finally:
+                img.seek(0)
 
-        random_hex = secrets.token_hex(8)
-        _, f_ext = os.path.splitext(f.filename)
-        f_ext = f_ext.lower()
-        if f_ext == '.jpg':
-            f_ext = '.jpeg'
-        picture_fn = random_hex + f_ext
-        picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
+        # 6. Параноик: обрезаем большие изображения для борьбы со стеганографией
+        stealth_trim = current_app.config.get('STEALTH_TRIM', True)
+        if stealth_trim and (img.width > 2000 or img.height > 2000):
+            img.thumbnail((2000, 2000), Image.LANCZOS)
 
-        img.save(picture_path, optimize=True, quality=85, exif=Image.Exif())
+        # 7. Генерация имени и расширения
+        random_hex = secrets.token_hex(16)
+        if webp_enabled and not is_animated_gif:
+            # Конвертируем в WEBP
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGB")
+            ext = ".webp"
+            picture_fn = random_hex + ext
+            picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
+            img.save(picture_path, format="WEBP", quality=85, method=6, save_all=False)
+        else:
+            # Сохраняем в исходном формате (или как есть для анимированного GIF)
+            ext = os.path.splitext(f.filename)[1].lower()
+            if ext == '.jpg':
+                ext = '.jpeg'
+            elif is_animated_gif:
+                ext = '.gif'
+            else:
+                pass
+            picture_fn = random_hex + ext
+            picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
 
-        thumb_fn = random_hex + '_thumb' + f_ext
+            # Принудительная конвертация палитры, если нужно
+            if img.mode in ('RGBA', 'P') and not is_animated_gif:
+                img = img.convert('RGB')
+            # Сохраняем с удалением EXIF
+            save_kwargs = {'optimize': True, 'quality': 85}
+            if not is_animated_gif:
+                save_kwargs['exif'] = Image.Exif()
+                img.save(picture_path, **save_kwargs)
+            else:
+                img.save(picture_path, save_all=True, loop=0, **save_kwargs)
+
+        file_size = os.path.getsize(picture_path)
+
+        # 8. Миниатюра
+        thumb_fn = random_hex + "_thumb" + (".webp" if webp_enabled and not is_animated_gif else ext)
         thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
-        img.thumbnail((200, 200))
-        img.save(thumb_path, optimize=True, quality=85, exif=Image.Exif())
+        try:
+            thumb_img = Image.open(picture_path)
+            if thumb_img.mode not in ("RGB", "RGBA"):
+                thumb_img = thumb_img.convert("RGB")
+            thumb_img.thumbnail((200, 200))
+            if webp_enabled:
+                thumb_img.save(thumb_path, format="WEBP", quality=80, method=6)
+            else:
+                thumb_img.save(thumb_path, optimize=True, quality=80)
+        except Exception as e:
+            current_app.logger.warning(f"Thumbnail generation failed: {e}")
+            thumb_fn = None
 
+        # 9. SHA-256 хеш содержимого (для поиска дубликатов)
         f.stream.seek(0)
         file_data = f.read()
-        md5 = hashlib.md5(file_data).hexdigest()
+        sha256 = hashlib.sha256(file_data).hexdigest()
 
-        saved.append((picture_fn, thumb_fn, idx, file_size, md5))
+        saved.append((picture_fn, thumb_fn, idx, file_size, sha256))
 
     return saved
 
