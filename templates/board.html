@@ -13,20 +13,16 @@
 <form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name) }}">
     <label>Имя: <input type="text" name="name" value="Аноним"></label><br>
     <label>Тема: <input type="text" name="subject" required></label><br>
-    <label>Комментарий: <textarea name="comment" required></textarea></label><br>
-    <label>Картинки: <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple required></label><br>
+    <label>Комментарий: <textarea name="comment"></textarea></label><br>
+    <label>Картинки: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif"></label><br>
     <label>Пароль: <input type="password" name="password"></label><br>
-            {% if config.CAPTCHA_ENABLED %}
-            {% endif %}
-            {% if config.CAPTCHA_ENABLED %}
-            {% endif %}
-            {% if config.CAPTCHA_ENABLED %}
-            <div class="captcha-block">
-                <img src="{{ url_for("captcha_route") }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for("captcha_route") }}?'+Math.random();">
-                    <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
-                <label>Введите код: <input type="text" name="captcha_answer" required></label>
-            </div>
-            {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    <div class="captcha-block">
+        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
+        <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
+        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+    </div>
+    {% endif %}
     <input type="submit" value="Создать">
 </form>
 <hr>
@@ -57,7 +53,7 @@
         <div class="thread-info">
             <div class="thread-title">
                 <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
-                    {{ op.subject|e if op.subject else 'Без темы' }}
+                    {{ op.subject|e if op and op.subject else 'Без темы' }}
                 </a>
                 <span class="thread-badges">
                     {% if thread.is_pinned %}📌{% endif %}

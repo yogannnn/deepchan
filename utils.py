@@ -24,7 +24,7 @@ def check_rate_limit():
 def check_ban(ip):
     from models import Ban
     from datetime import datetime
-    now = datetime.utcnow()
+    now = datetime.now(datetime.UTC)
     ban = Ban.query.filter(
         Ban.ip_pattern == ip,
         Ban.active == True,
@@ -55,31 +55,57 @@ def save_files(files):
     saved = []
     if not files:
         return saved
-    for idx, f in enumerate(files[:4]):
+
+    max_files = current_app.config.get('MAX_FILES', 4)
+    max_dimension = current_app.config.get('MAX_IMAGE_DIMENSION', 5000)
+
+    for idx, f in enumerate(files[:max_files]):
         if f.filename == '':
             continue
+
+        f.stream.seek(0, os.SEEK_END)
+        file_size = f.tell()
+        f.stream.seek(0)
+        if file_size > current_app.config.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024):
+            abort(400, description="Файл слишком большой")
+
+        try:
+            f.stream.seek(0)
+            img = Image.open(f.stream)
+            img.verify()
+        except Exception as e:
+            abort(400, description=f"Некорректный файл изображения: {str(e)}")
+
+        f.stream.seek(0)
+        img = Image.open(f.stream)
+
+        if img.width > max_dimension or img.height > max_dimension:
+            abort(400, description=f"Разрешение изображения превышает {max_dimension}x{max_dimension}")
+
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+
         random_hex = secrets.token_hex(8)
         _, f_ext = os.path.splitext(f.filename)
+        f_ext = f_ext.lower()
+        if f_ext == '.jpg':
+            f_ext = '.jpeg'
         picture_fn = random_hex + f_ext
         picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
+
+        img.save(picture_path, optimize=True, quality=85, exif=Image.Exif())
+
+        thumb_fn = random_hex + '_thumb' + f_ext
+        thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
+        img.thumbnail((200, 200))
+        img.save(thumb_path, optimize=True, quality=85, exif=Image.Exif())
 
         f.stream.seek(0)
         file_data = f.read()
         md5 = hashlib.md5(file_data).hexdigest()
-        file_size = len(file_data)
-
-        f.stream.seek(0)
-        i = Image.open(f.stream)
-        if i.mode in ('RGBA', 'P'):
-            i = i.convert('RGB')
-        i.save(picture_path, optimize=True, quality=85)
-
-        thumb_fn = random_hex + '_thumb' + f_ext
-        thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
-        i.thumbnail((200, 200))
-        i.save(thumb_path)
 
         saved.append((picture_fn, thumb_fn, idx, file_size, md5))
+
     return saved
 
 def parse_bbcode(text):
@@ -92,31 +118,24 @@ def parse_bbcode(text):
     return text
 
 def process_urls(text):
-    # Magnet
     def magnet_replace(match):
         url = match.group(0)
         return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
     text = re.sub(r'magnet:\?[^\s<>"\']+', magnet_replace, text, flags=re.IGNORECASE)
 
-    # Основной обработчик URL и IP
     def url_replace(match):
         url = match.group(0)
-        # localhost (IPv4, IPv6)
         if re.search(r'^(https?://)?(127\.0\.0\.1|\[::1\]|::1)([/:]|$)', url, re.IGNORECASE):
             if not url.startswith('http://') and not url.startswith('https://'):
                 url = 'http://' + url
             return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{match.group(0)}</a>'
-        # i2p/onion
         if re.search(r'\.(i2p|onion)(/|$)', url, re.IGNORECASE):
             if not url.startswith('http://') and not url.startswith('https://'):
                 url = 'http://' + url
             return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{match.group(0)}</a>'
-        # всё остальное (включая IP) — клирнет
         return f'{match.group(0)}<span class="clearnet-warning">ClearNet</span>'
 
-    # Доменные имена
     text = re.sub(r'''(?i)\b((?:https?://|ftp://)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}|i2p|onion)(?:/[^\s<>"']*)?)\b''', url_replace, text)
-    # IPv4 адреса
     text = re.sub(r'''(?i)\b((?:https?://|ftp://)?(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?::[0-9]+)?(?:/[^\s<>"']*)?\b''', url_replace, text)
     return text
 

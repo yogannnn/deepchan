@@ -30,14 +30,18 @@ os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbs'), exist_ok=True)
 
 def load_settings():
     with app.app_context():
+        # DEPLOY_MODE берём только из переменной окружения, не из БД
+        app.config['DEPLOY_MODE'] = os.environ.get('DEPLOY_MODE', 'production')
         if not inspect(db.engine).has_table('setting'):
             return
         settings = Setting.query.all()
         for s in settings:
+            if s.key == 'DEPLOY_MODE':
+                continue  # пропускаем, берём из os.environ
             if s.key in ('CAPTCHA_ENABLED', 'STATS_SHOW_IPS', 'BOARD_CLOSED', 'AUTO_REFRESH_ENABLED'):
                 app.config[s.key] = s.value == 'True'
-            elif s.key in ('AUTO_REFRESH_INTERVAL', 'RATE_LIMIT_SECONDS', 'THREADS_PER_PAGE', 'POSTS_PER_PAGE', 'MAX_FILES'):
-                app.config[s.key] = int(s.value) if s.value.isdigit() else 4
+            elif s.key in ('AUTO_REFRESH_INTERVAL', 'RATE_LIMIT_SECONDS', 'THREADS_PER_PAGE', 'POSTS_PER_PAGE', 'MAX_FILES', 'MAX_CONTENT_LENGTH', 'MAX_IMAGE_DIMENSION'):
+                app.config[s.key] = int(s.value) if s.value.isdigit() else 5000
             elif s.key in ('HEADER_HTML', 'FOOTER_HTML', 'SITE_TITLE'):
                 app.config[s.key] = s.value
             elif s.key == 'ALLOWED_EXTENSIONS':
@@ -94,7 +98,7 @@ def captcha_route():
 def global_catalog():
     board_id = request.args.get('board_id', type=int)
     page = request.args.get('page', 1, type=int)
-    per_page = app.config.get('THREADS_PER_PAGE', 30)
+    per_page = int(app.config.get('THREADS_PER_PAGE', 30))
     query = Thread.query.filter(Thread.posts.any())
     if board_id:
         query = query.filter(Thread.board_id == board_id)
@@ -139,7 +143,7 @@ def index():
 def board(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     page = request.args.get('page', 1, type=int)
-    per_page = app.config.get('THREADS_PER_PAGE', 50)
+    per_page = int(app.config.get('THREADS_PER_PAGE', 50))
     threads_paginated = board.threads.filter(Thread.posts.any()).order_by(
         Thread.is_pinned.desc(), Thread.bumped_at.desc()
     ).paginate(page=page, per_page=per_page, error_out=False)
@@ -153,7 +157,7 @@ def board(board_name):
 @app.route('/<string:board_name>/catalog', strict_slashes=False)
 def board_catalog(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
-    per_page = app.config.get('THREADS_PER_PAGE', 30)
+    per_page = int(app.config.get('THREADS_PER_PAGE', 30))
     threads = board.threads.filter(Thread.posts.any()).order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc()).limit(per_page).all()
     return render_template('catalog.html', board=board, threads=threads)
 
@@ -162,7 +166,7 @@ def thread(board_name, thread_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
     page = request.args.get('page', 1, type=int)
-    per_page = app.config.get('POSTS_PER_PAGE', 50)
+    per_page = int(app.config.get('POSTS_PER_PAGE', 50))
     posts_paginated = thread.posts.order_by(Post.created_at.asc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -196,7 +200,10 @@ def create_post(board_name):
                 form.comment.errors.append('Нужно ввести комментарий или прикрепить файл')
                 return render_template('error.html', form=form), 400
         else:
-            if not form.subject.data and not form.files.data and not form.comment.data:
+            if not form.subject.data:
+                form.subject.errors.append('Тема обязательна для нового треда')
+                return render_template('error.html', form=form), 400
+            if not form.files.data and not form.comment.data:
                 form.comment.errors.append('Нужно ввести комментарий или прикрепить файл')
                 return render_template('error.html', form=form), 400
             thread = Thread(board_id=board.id)
@@ -230,7 +237,7 @@ def create_post(board_name):
             db.session.add(pf)
 
         if not sage:
-            thread.bumped_at = datetime.utcnow()
+            thread.bumped_at = datetime.now(datetime.UTC)
 
         fts_entry = PostFTS(
             post_id=post.id,
@@ -246,7 +253,7 @@ def create_post(board_name):
 
         if thread_id:
             total_posts = thread.posts.count()
-            per_page = app.config.get('POSTS_PER_PAGE', 50)
+            per_page = int(app.config.get('POSTS_PER_PAGE', 50))
             last_page = (total_posts + per_page - 1) // per_page
             return redirect(url_for('thread', board_name=board_name, thread_id=thread_id, page=last_page))
         else:
@@ -526,7 +533,7 @@ def admin_cleanup_files():
                         pass
         flash('Осиротевшие файлы удалены', 'success')
     elif action == 'old_threads':
-        threshold = datetime.utcnow() - timedelta(days=30)
+        threshold = datetime.now(datetime.UTC) - timedelta(days=30)
         old_threads = Thread.query.filter(Thread.bumped_at < threshold).all()
         for t in old_threads:
             for p in t.posts:
@@ -553,7 +560,7 @@ def admin_add_ban():
     ip = request.form['ip_pattern']
     reason = request.form.get('reason', '')
     expires_days = request.form.get('expires_days', type=int)
-    expires = datetime.utcnow() + timedelta(days=expires_days) if expires_days else None
+    expires = datetime.now(datetime.UTC) + timedelta(days=expires_days) if expires_days else None
     ban = Ban(ip_pattern=ip, reason=reason, expires_at=expires)
     db.session.add(ban)
     db.session.commit()
@@ -632,6 +639,9 @@ def admin_settings():
         allowed = ','.join(request.form.getlist('allowed_extensions'))
         save_setting('ALLOWED_EXTENSIONS', allowed)
         save_setting('ANNOUNCEMENT_HTML', request.form.get('announcement_html', ''))
+        # Новые настройки лимитов
+        save_setting('MAX_CONTENT_LENGTH', int(request.form.get('max_content_length', 10)) * 1024 * 1024)
+        save_setting('MAX_IMAGE_DIMENSION', request.form.get('max_image_dimension', '5000'))
         flash('Настройки сохранены', 'success')
         return redirect(url_for('admin_settings'))
 
@@ -650,6 +660,9 @@ def admin_settings():
         'max_files': app.config.get('MAX_FILES', 4),
         'allowed_extensions': app.config.get('ALLOWED_EXTENSIONS', ['jpg','jpeg','png','gif']),
         'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
+        # Новые поля для шаблона
+        'max_content_length': app.config.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024) // (1024 * 1024),
+        'max_image_dimension': app.config.get('MAX_IMAGE_DIMENSION', 5000),
     }
     return render_template('admin/settings.html', **ctx)
 
@@ -661,12 +674,12 @@ def admin_stats():
     total_files = PostFile.query.count()
     total_boards = Board.query.count()
 
-    today = datetime.utcnow().date()
+    today = datetime.now(datetime.UTC).date()
     daily_posts = []
     daily_threads = []
     for i in range(7):
         day = today - timedelta(days=i)
-        start = datetime(day.year, day.month, day.day)
+        start = datetime(day.year, day.month, day.day, tzinfo=datetime.UTC)
         end = start + timedelta(days=1)
         posts_count = Post.query.filter(Post.created_at >= start, Post.created_at < end).count()
         threads_count = Thread.query.filter(Thread.created_at >= start, Thread.created_at < end).count()
@@ -715,22 +728,17 @@ def admin_stats():
 @app.after_request
 def add_cache_headers(response):
     if request.path.startswith('/static'):
-        # Убираем любые no-cache/no-store
         response.cache_control.no_cache = None
         response.cache_control.no_store = None
-        # CSS и шрифты
         if request.path.endswith('.css') or '/fonts/' in request.path:
             response.cache_control.max_age = 604800
             response.cache_control.public = True
-        # Изображения
         elif request.path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
             response.cache_control.max_age = 86400
             response.cache_control.public = True
-        # Остальная статика
         else:
             response.cache_control.max_age = 3600
     else:
-        # HTML не кешируем
         response.cache_control.no_cache = True
         response.cache_control.no_store = True
     return response
@@ -770,4 +778,11 @@ if __name__ == '__main__':
             b = Board(short_name='b', name='Бред', description='Общий раздел')
             db.session.add(b)
             db.session.commit()
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    deploy_mode = app.config.get('DEPLOY_MODE', 'production')
+    if deploy_mode == 'development':
+        print("🚀 Запуск через Flask development server на http://127.0.0.1:5000")
+        app.run(host='127.0.0.1', port=5000, debug=True, threaded=True)
+    else:
+        from waitress import serve
+        print("🚀 Запуск через Waitress (production) на http://127.0.0.1:5000")
+        serve(app, host='127.0.0.1', port=5000, threads=4, channel_timeout=300)

@@ -11,8 +11,8 @@ def allowed_extensions_validator():
 class PostForm(FlaskForm):
     name = StringField('Имя', validators=[Optional(), Length(max=80)], default='Аноним')
     subject = StringField('Тема', validators=[Optional(), Length(max=200)])
-    comment = TextAreaField('Комментарий', validators=[DataRequired()])
-    files = MultipleFileField('Картинки (до 4)', validators=[Optional()])
+    comment = TextAreaField('Комментарий', validators=[Optional()])
+    files = MultipleFileField('Картинки', validators=[Optional()])
     sage = BooleanField('Sage (не поднимать тред)')
     password = PasswordField('Пароль (для удаления)', validators=[Optional()])
     captcha_answer = StringField('Капча', validators=[Optional()])

@@ -14,8 +14,8 @@
 <h3>Ответить</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name, thread_id=thread.id) }}">
     <label>Имя: <input type="text" name="name" value="Аноним"></label>
-    <label>Комментарий: <textarea name="comment" required autofocus>{{ quote_text or "" }}</textarea></label>
-    <label>Картинки: <input type="file" name="files" multiple multiple accept="image/jpeg,image/png,image/gif" multiple></label>
+    <label>Комментарий: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
+    <label>Картинки: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif"></label>
     <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
@@ -48,7 +48,7 @@
     <div class="post-header">
         <span class="name">{{ post.name|e }}</span>
         <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
-        {% if post.subject %}<span class="subject">{{ post.subject }}</span>{% endif %}
+        {% if post.subject %}<span class="subject">{{ post.subject|e }}</span>{% endif %}
         {% if post.sage %}<span class="sage">SAGE</span>{% endif %}
         <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a></span>
 
