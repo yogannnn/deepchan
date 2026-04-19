@@ -631,6 +631,7 @@ def admin_settings():
         save_setting('MAX_FILES', request.form.get('max_files', '4'))
         allowed = ','.join(request.form.getlist('allowed_extensions'))
         save_setting('ALLOWED_EXTENSIONS', allowed)
+        save_setting('ANNOUNCEMENT_HTML', request.form.get('announcement_html', ''))
         flash('Настройки сохранены', 'success')
         return redirect(url_for('admin_settings'))
 
@@ -643,6 +644,7 @@ def admin_settings():
         'rate_limit_seconds': app.config.get('RATE_LIMIT_SECONDS', 30),
         'header_html': app.config.get('HEADER_HTML', ''),
         'footer_html': app.config.get('FOOTER_HTML', ''),
+        'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
         'site_title': app.config.get('SITE_TITLE', 'Имиджборда'),
         'threads_per_page': app.config.get('THREADS_PER_PAGE', 50),
         'posts_per_page': app.config.get('POSTS_PER_PAGE', 50),
