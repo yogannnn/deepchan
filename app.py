@@ -644,12 +644,12 @@ def admin_settings():
         'rate_limit_seconds': app.config.get('RATE_LIMIT_SECONDS', 30),
         'header_html': app.config.get('HEADER_HTML', ''),
         'footer_html': app.config.get('FOOTER_HTML', ''),
-        'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
         'site_title': app.config.get('SITE_TITLE', 'Имиджборда'),
         'threads_per_page': app.config.get('THREADS_PER_PAGE', 50),
         'posts_per_page': app.config.get('POSTS_PER_PAGE', 50),
         'max_files': app.config.get('MAX_FILES', 4),
         'allowed_extensions': app.config.get('ALLOWED_EXTENSIONS', ['jpg','jpeg','png','gif']),
+        'announcement_html': app.config.get('ANNOUNCEMENT_HTML', ''),
     }
     return render_template('admin/settings.html', **ctx)
 
@@ -710,6 +710,30 @@ def admin_stats():
                            free_disk_gb=free_disk_gb,
                            recent_ips=recent_ips,
                            show_ips=show_ips)
+
+# ===== КЕШИРОВАНИЕ СТАТИКИ (правильное) =====
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith('/static'):
+        # Убираем любые no-cache/no-store
+        response.cache_control.no_cache = None
+        response.cache_control.no_store = None
+        # CSS и шрифты
+        if request.path.endswith('.css') or '/fonts/' in request.path:
+            response.cache_control.max_age = 604800
+            response.cache_control.public = True
+        # Изображения
+        elif request.path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
+            response.cache_control.max_age = 86400
+            response.cache_control.public = True
+        # Остальная статика
+        else:
+            response.cache_control.max_age = 3600
+    else:
+        # HTML не кешируем
+        response.cache_control.no_cache = True
+        response.cache_control.no_store = True
+    return response
 
 from flask_wtf.csrf import generate_csrf
 app.jinja_env.globals['csrf_token'] = generate_csrf
