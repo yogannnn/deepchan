@@ -29,3 +29,11 @@ class Config:
     CAPTCHA_WIDTH = 200
     CAPTCHA_HEIGHT = 70
 #   STATS_SHOW_IPS = False
+
+# SQLite WAL и таймаут
+SQLALCHEMY_ENGINE_OPTIONS = {
+    'connect_args': {
+        'timeout': 5,
+        'check_same_thread': False,
+    }
+}

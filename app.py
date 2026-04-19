@@ -814,6 +814,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        db.session.execute(text("PRAGMA journal_mode=WAL;"))
         if not inspect(db.engine).has_table('setting'):
             Setting.__table__.create(db.engine)
         load_settings()
