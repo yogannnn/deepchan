@@ -1,4 +1,3 @@
-from sqlalchemy import Float
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -42,8 +41,6 @@ class PostFile(db.Model):
     file_order = db.Column(db.Integer, default=0)
     file_size = db.Column(db.Integer, default=0)
     md5_hash = db.Column(db.String(32))
-    file_type = db.Column(db.String(20), default='image')
-    duration = db.Column(db.Float, nullable=True)
 
 class PostFTS(db.Model):
     __tablename__ = 'post_fts'

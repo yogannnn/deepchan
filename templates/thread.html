@@ -15,7 +15,7 @@
 <form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name, thread_id=thread.id) }}">
     <label>Имя: <input type="text" name="name" value="Аноним"></label>
     <label>Комментарий: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
-    <label>Картинки: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif"></label>
+    <label>Файлы: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,video/quicktime"></label>
     <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
@@ -76,11 +76,16 @@
 
     {% if post.files.count() > 0 %}
     <div class="post-files">
-        {% for pf in post.files %}
-        <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
-            <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
-        </a>
-        {% endfor %}
+{% for pf in post.files %}        {% if pf.file_type == 'video' %}            <video controls width="100%" preload="metadata" poster="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) if pf.thumb_path else '' }}">
+                <source src="{{ url_for('static', filename='uploads/' + pf.file_path) }}" type="video/{{ pf.file_path.split('.')[-1] }}">
+                Ваш браузер не поддерживает видео.
+            </video>
+        {% else %}
+            <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
+                <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
+            </a>
+        {% endif %}
+    {% endfor %}
     </div>
     {% endif %}
 

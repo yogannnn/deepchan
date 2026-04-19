@@ -14,7 +14,7 @@
     <label>Имя: <input type="text" name="name" value="Аноним"></label><br>
     <label>Тема: <input type="text" name="subject" required></label><br>
     <label>Комментарий: <textarea name="comment"></textarea></label><br>
-    <label>Картинки: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif"></label><br>
+    <label>Файлы: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,video/quicktime"></label><br>
     <label>Пароль: <input type="password" name="password"></label><br>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">

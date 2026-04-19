@@ -59,12 +59,20 @@
             <input type="number" name="max_image_dimension" value="{{ max_image_dimension }}" min="100" max="10000">
         </label>
         <label>
+            Максимальная длительность видео (сек):
+            <input type="number" name="max_video_duration" value="{{ max_video_duration }}" min="10" max="600">
+        </label>
+        <label>
+            Максимальный размер видео (МБ):
+            <input type="number" name="max_video_size" value="{{ max_video_size }}" min="1" max="500">
+        </label>
+        <label>
             <input type="checkbox" name="webp_convert_enabled" {% if webp_convert_enabled %}checked{% endif %}>
             Конвертировать изображения в WEBP (кроме анимированных GIF)
+        </label>
         <label>
             <input type="checkbox" name="stealth_trim" {% if stealth_trim %}checked{% endif %}>
             Обрезать изображения до 2000px (защита от стеганографии)
-        </label>
         </label>
     </div>
 
@@ -112,8 +120,5 @@
     </div>
 
     <button type="submit" class="btn">Сохранить</button>
-    {% set csrf = csrf_token('save_settings') %}
-    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
-    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 {% endblock %}

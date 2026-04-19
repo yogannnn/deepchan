@@ -1,3 +1,15 @@
+#!/bin/bash
+# video_part2.sh — полная замена utils.py с поддержкой видео
+
+cd ~/deepchan
+source .venv/bin/activate
+
+echo "🎬 Часть 2: Обновляем utils.py для обработки видео..."
+
+# Сделаем бэкап
+cp utils.py utils_backup_video.py
+
+cat > utils.py << 'EOF'
 import os
 import secrets
 import re
@@ -9,7 +21,7 @@ import io
 import html
 import subprocess
 import json
-from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont
+from PIL import Image, UnidentifiedImageError
 from flask import current_app, request, abort
 from models import Post
 
@@ -20,9 +32,8 @@ def check_rate_limit():
     now = time.time()
     if ip in _last_post_time:
         elapsed = now - _last_post_time[ip]
-        limit = int(current_app.config.get('RATE_LIMIT_SECONDS', 30))
-        if elapsed < limit:
-            abort(429, description=f"Слишком часто. Подождите {limit - int(elapsed)} сек.")
+        if elapsed < current_app.config.get('RATE_LIMIT_SECONDS', 30):
+            abort(429, description=f"Слишком часто. Подождите {current_app.config.get('RATE_LIMIT_SECONDS', 30) - int(elapsed)} сек.")
     _last_post_time[ip] = now
 
 def check_ban(ip):
@@ -55,17 +66,8 @@ def apply_word_filters(text):
                     text = text.replace(f.pattern, f.replacement)
     return text
 
-def add_watermark(img, text, position=(5, 5)):
-    draw = ImageDraw.Draw(img)
-    try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16)
-    except:
-        font = ImageFont.load_default()
-    draw.text((position[0]+1, position[1]+1), text, font=font, fill=(0,0,0))
-    draw.text(position, text, font=font, fill=(255,255,255))
-    return img
-
 def get_video_duration(filepath):
+    """Возвращает длительность видео в секундах или None при ошибке."""
     try:
         result = subprocess.run(
             ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
@@ -80,27 +82,12 @@ def get_video_duration(filepath):
     return None
 
 def generate_video_thumbnail(video_path, thumb_path, width=200):
+    """Извлекает кадр из видео и сохраняет как WEBP."""
     try:
-        tmp_thumb = thumb_path + ".tmp.webp"
         subprocess.run(
             ['ffmpeg', '-i', video_path, '-ss', '00:00:01', '-vframes', '1',
-             '-vf', f'scale={width}:-1', '-y', tmp_thumb],
+             '-vf', f'scale={width}:-1', '-y', thumb_path],
             capture_output=True, timeout=15, check=True
-        )
-        img = Image.open(tmp_thumb)
-        img = add_watermark(img, "video")
-        img.save(thumb_path, format="WEBP", quality=80)
-        os.remove(tmp_thumb)
-        return True
-    except Exception:
-        return False
-
-def clean_video_metadata(input_path, output_path):
-    """Удаляет все метаданные из видео (перепаковка без перекодирования)."""
-    try:
-        subprocess.run(
-            ['ffmpeg', '-i', input_path, '-map_metadata', '-1', '-c', 'copy', '-y', output_path],
-            capture_output=True, timeout=30, check=True
         )
         return True
     except Exception:
@@ -141,7 +128,6 @@ def save_files(files):
             if file_size > max_video_size:
                 abort(400, description=f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)")
 
-            # Сохраняем оригинал во временный файл
             video_tmp = os.path.join(current_app.config['UPLOAD_FOLDER'], secrets.token_hex(16) + '.' + ext)
             f.save(video_tmp)
 
@@ -153,12 +139,7 @@ def save_files(files):
             random_hex = secrets.token_hex(16)
             picture_fn = random_hex + '.' + ext
             picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
-
-            # Очищаем метаданные и сохраняем финальный файл
-            if not clean_video_metadata(video_tmp, picture_path):
-                os.remove(video_tmp)
-                abort(400, description="Ошибка обработки видео")
-            os.remove(video_tmp)
+            os.rename(video_tmp, picture_path)
 
             thumb_fn = random_hex + '_thumb.webp'
             thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
@@ -235,7 +216,6 @@ def save_files(files):
                 if thumb_img.mode not in ("RGB", "RGBA"):
                     thumb_img = thumb_img.convert("RGB")
                 thumb_img.thumbnail((200, 200))
-                thumb_img = add_watermark(thumb_img, "img")
                 if webp_enabled:
                     thumb_img.save(thumb_path, format="WEBP", quality=80, method=6)
                 else:
@@ -322,3 +302,6 @@ def verify_csrf_token(user_id, action, token, timestamp, secret_key, max_age=600
         return False
     expected_token, _ = generate_csrf_token(user_id, action, secret_key, timestamp)
     return hmac.compare_digest(expected_token, token)
+EOF
+
+echo "✅ Часть 2 завершена. utils.py обновлён."
