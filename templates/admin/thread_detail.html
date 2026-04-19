@@ -28,6 +28,9 @@
         <div class="admin-post-actions">
             <form method="post" action="{{ url_for('admin_delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост #{{ post.id }}?');">
                 <button type="submit" class="action-icon">🗑️ Удалить пост</button>
+    {% set csrf = csrf_token('default') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
             </form>
         </div>
     </div>

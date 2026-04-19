@@ -3,6 +3,7 @@ import secrets
 import re
 import time
 import hashlib
+import hmac
 import random
 import io
 import html
@@ -67,14 +68,12 @@ def save_files(files):
         if f.filename == '':
             continue
 
-        # 1. Проверка размера
         f.stream.seek(0, os.SEEK_END)
         file_size = f.tell()
         f.stream.seek(0)
         if file_size > current_app.config.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024):
             abort(400, description="Файл слишком большой")
 
-        # 2. Верификация
         try:
             f.stream.seek(0)
             img = Image.open(f.stream)
@@ -83,15 +82,12 @@ def save_files(files):
             current_app.logger.warning(f"Image verification failed: {e}")
             abort(400, description="Некорректный файл изображения")
 
-        # 3. Повторное открытие
         f.stream.seek(0)
         img = Image.open(f.stream)
 
-        # 4. Проверка разрешения
         if img.width > max_dimension or img.height > max_dimension:
             abort(400, description=f"Разрешение превышает {max_dimension}x{max_dimension}")
 
-        # 5. Определяем, анимированный ли GIF
         is_animated_gif = False
         if img.format == 'GIF':
             try:
@@ -102,15 +98,12 @@ def save_files(files):
             finally:
                 img.seek(0)
 
-        # 6. Параноик: обрезаем большие изображения для борьбы со стеганографией
         stealth_trim = current_app.config.get('STEALTH_TRIM', True)
         if stealth_trim and (img.width > 2000 or img.height > 2000):
             img.thumbnail((2000, 2000), Image.LANCZOS)
 
-        # 7. Генерация имени и расширения
         random_hex = secrets.token_hex(16)
         if webp_enabled and not is_animated_gif:
-            # Конвертируем в WEBP
             if img.mode not in ("RGB", "RGBA"):
                 img = img.convert("RGB")
             ext = ".webp"
@@ -118,21 +111,16 @@ def save_files(files):
             picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
             img.save(picture_path, format="WEBP", quality=85, method=6, save_all=False)
         else:
-            # Сохраняем в исходном формате (или как есть для анимированного GIF)
             ext = os.path.splitext(f.filename)[1].lower()
             if ext == '.jpg':
                 ext = '.jpeg'
             elif is_animated_gif:
                 ext = '.gif'
-            else:
-                pass
             picture_fn = random_hex + ext
             picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
 
-            # Принудительная конвертация палитры, если нужно
             if img.mode in ('RGBA', 'P') and not is_animated_gif:
                 img = img.convert('RGB')
-            # Сохраняем с удалением EXIF
             save_kwargs = {'optimize': True, 'quality': 85}
             if not is_animated_gif:
                 save_kwargs['exif'] = Image.Exif()
@@ -142,7 +130,6 @@ def save_files(files):
 
         file_size = os.path.getsize(picture_path)
 
-        # 8. Миниатюра
         thumb_fn = random_hex + "_thumb" + (".webp" if webp_enabled and not is_animated_gif else ext)
         thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
         try:
@@ -158,7 +145,6 @@ def save_files(files):
             current_app.logger.warning(f"Thumbnail generation failed: {e}")
             thumb_fn = None
 
-        # 9. SHA-256 хеш содержимого (для поиска дубликатов)
         f.stream.seek(0)
         file_data = f.read()
         sha256 = hashlib.sha256(file_data).hexdigest()
@@ -224,3 +210,17 @@ def generate_captcha():
     captcha_text = ''.join(random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=5))
     data = image.generate(captcha_text)
     return data, captcha_text
+
+# ===== CSRF PROTECTION =====
+def generate_csrf_token(user_id, action, secret_key, timestamp=None):
+    if timestamp is None:
+        timestamp = int(time.time())
+    message = f"{user_id}:{action}:{timestamp}"
+    token = hmac.new(secret_key.encode(), message.encode(), hashlib.sha256).hexdigest()
+    return token, timestamp
+
+def verify_csrf_token(user_id, action, token, timestamp, secret_key, max_age=600):
+    if int(time.time()) - int(timestamp) > max_age:
+        return False
+    expected_token, _ = generate_csrf_token(user_id, action, secret_key, timestamp)
+    return hmac.compare_digest(expected_token, token)

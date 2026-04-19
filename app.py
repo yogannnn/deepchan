@@ -3,7 +3,7 @@ import html
 from config import Config
 from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, hash_password, check_password
 from forms import PostForm
-from utils import save_files, check_rate_limit, process_comment, check_ban, apply_word_filters, generate_captcha
+from utils import save_files, check_rate_limit, process_comment, check_ban, apply_word_filters, generate_captcha, verify_csrf_token, generate_csrf_token
 from datetime import datetime, timedelta
 import os
 import logging
@@ -32,7 +32,6 @@ os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbs'), exist_ok=True)
 
 def load_settings():
     with app.app_context():
-        # DEPLOY_MODE берём только из переменной окружения, не из БД
         app.config['DEPLOY_MODE'] = os.environ.get('DEPLOY_MODE', 'production')
         if not inspect(db.engine).has_table('setting'):
             return
@@ -81,6 +80,30 @@ def admin_required(f):
 
 def authenticate():
     return Response('Введите логин и пароль.', 401, {'WWW-Authenticate': 'Basic realm="Admin Area"'})
+
+def csrf_protect(action):
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if request.method == 'POST':
+                user_id = request.authorization.username if request.authorization else 'anonymous'
+                token = request.form.get('csrf_token')
+                timestamp = request.form.get('csrf_timestamp')
+                if not token or not timestamp:
+                    abort(403, description='CSRF token missing')
+                if not verify_csrf_token(user_id, action, token, timestamp, app.config['SECRET_KEY']):
+                    abort(403, description='CSRF token invalid')
+            return f(*args, **kwargs)
+        return decorated
+    return decorator
+
+@app.context_processor
+def inject_csrf_token():
+    def make_csrf_token(action):
+        user_id = request.authorization.username if request.authorization else 'anonymous'
+        token, timestamp = generate_csrf_token(user_id, action, app.config['SECRET_KEY'])
+        return {'token': token, 'timestamp': timestamp}
+    return dict(csrf_token=make_csrf_token)
 
 @app.before_request
 def check_board_closed():
@@ -190,6 +213,7 @@ def thread(board_name, thread_id):
                            quote_text=quote_text)
 
 @app.route('/<string:board_name>/post', methods=['POST'])
+@csrf_protect('post')
 def create_post(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     form = PostForm()
@@ -268,6 +292,7 @@ def create_post(board_name):
         return render_template('error.html', form=form), 400
 
 @app.route('/<string:board_name>/delete/<int:post_id>', methods=['POST'])
+@csrf_protect('delete_post')
 def delete_post(board_name, post_id):
     post = Post.query.get_or_404(post_id)
     password = request.form.get('password')
@@ -341,6 +366,7 @@ def admin_boards():
 
 @app.route('/admin/boards/create', methods=['GET', 'POST'])
 @admin_required
+@csrf_protect('create_board')
 def admin_create_board():
     if request.method == 'POST':
         b = Board(
@@ -355,6 +381,7 @@ def admin_create_board():
 
 @app.route('/admin/boards/edit/<int:board_id>', methods=['GET', 'POST'])
 @admin_required
+@csrf_protect('edit_board')
 def admin_edit_board(board_id):
     board = Board.query.get_or_404(board_id)
     if request.method == 'POST':
@@ -367,6 +394,7 @@ def admin_edit_board(board_id):
 
 @app.route('/admin/boards/delete/<int:board_id>', methods=['POST'])
 @admin_required
+@csrf_protect('delete_board')
 def admin_delete_board(board_id):
     board = Board.query.get_or_404(board_id)
     db.session.delete(board)
@@ -386,6 +414,7 @@ def admin_threads():
 
 @app.route('/admin/threads/toggle_pin/<int:thread_id>', methods=['POST'])
 @admin_required
+@csrf_protect('toggle_pin')
 def admin_toggle_pin(thread_id):
     thread = Thread.query.get_or_404(thread_id)
     thread.is_pinned = not thread.is_pinned
@@ -394,6 +423,7 @@ def admin_toggle_pin(thread_id):
 
 @app.route('/admin/threads/toggle_lock/<int:thread_id>', methods=['POST'])
 @admin_required
+@csrf_protect('toggle_lock')
 def admin_toggle_lock(thread_id):
     thread = Thread.query.get_or_404(thread_id)
     thread.is_locked = not thread.is_locked
@@ -402,6 +432,7 @@ def admin_toggle_lock(thread_id):
 
 @app.route('/admin/threads/delete/<int:thread_id>', methods=['POST'])
 @admin_required
+@csrf_protect('delete_thread')
 def admin_delete_thread(thread_id):
     thread = Thread.query.get_or_404(thread_id)
     for post in thread.posts:
@@ -417,6 +448,7 @@ def admin_delete_thread(thread_id):
 
 @app.route('/admin/threads/bulk', methods=['POST'])
 @admin_required
+@csrf_protect('bulk_threads')
 def admin_bulk_threads():
     action = request.form.get('action')
     thread_ids = request.form.getlist('thread_ids')
@@ -451,6 +483,7 @@ def admin_thread_detail(thread_id):
 
 @app.route('/admin/post/delete/<int:post_id>', methods=['POST'])
 @admin_required
+@csrf_protect('delete_post')
 def admin_delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     thread = post.thread
@@ -490,6 +523,7 @@ def admin_files():
 
 @app.route('/admin/files/delete/<int:file_id>', methods=['POST'])
 @admin_required
+@csrf_protect('delete_file')
 def admin_delete_file(file_id):
     pf = PostFile.query.get_or_404(file_id)
     try:
@@ -520,6 +554,7 @@ def admin_orphaned_files():
 
 @app.route('/admin/files/cleanup', methods=['POST'])
 @admin_required
+@csrf_protect('cleanup_files')
 def admin_cleanup_files():
     action = request.form.get('action')
     if action == 'orphaned':
@@ -562,6 +597,7 @@ def admin_bans():
 
 @app.route('/admin/bans/add', methods=['POST'])
 @admin_required
+@csrf_protect('add_ban')
 def admin_add_ban():
     ip = request.form['ip_pattern']
     reason = request.form.get('reason', '')
@@ -575,6 +611,7 @@ def admin_add_ban():
 
 @app.route('/admin/bans/toggle/<int:ban_id>', methods=['POST'])
 @admin_required
+@csrf_protect('toggle_ban')
 def admin_toggle_ban(ban_id):
     ban = Ban.query.get_or_404(ban_id)
     ban.active = not ban.active
@@ -583,6 +620,7 @@ def admin_toggle_ban(ban_id):
 
 @app.route('/admin/bans/delete/<int:ban_id>', methods=['POST'])
 @admin_required
+@csrf_protect('delete_ban')
 def admin_delete_ban(ban_id):
     ban = Ban.query.get_or_404(ban_id)
     db.session.delete(ban)
@@ -598,6 +636,7 @@ def admin_filters():
 
 @app.route('/admin/filters/add', methods=['POST'])
 @admin_required
+@csrf_protect('add_filter')
 def admin_add_filter():
     pattern = request.form['pattern']
     replacement = request.form.get('replacement', '[CENSORED]')
@@ -611,6 +650,7 @@ def admin_add_filter():
 
 @app.route('/admin/filters/toggle/<int:filter_id>', methods=['POST'])
 @admin_required
+@csrf_protect('toggle_filter')
 def admin_toggle_filter(filter_id):
     wf = WordFilter.query.get_or_404(filter_id)
     wf.active = not wf.active
@@ -619,6 +659,7 @@ def admin_toggle_filter(filter_id):
 
 @app.route('/admin/filters/delete/<int:filter_id>', methods=['POST'])
 @admin_required
+@csrf_protect('delete_filter')
 def admin_delete_filter(filter_id):
     wf = WordFilter.query.get_or_404(filter_id)
     db.session.delete(wf)
@@ -628,6 +669,7 @@ def admin_delete_filter(filter_id):
 
 @app.route('/admin/settings', methods=['GET', 'POST'])
 @admin_required
+@csrf_protect('save_settings')
 def admin_settings():
     if request.method == 'POST':
         save_setting('CAPTCHA_ENABLED', 'captcha_enabled' in request.form)
@@ -739,11 +781,9 @@ class ParanoidMiddleware:
 
     def __call__(self, environ, start_response):
         def custom_start_response(status, headers, exc_info=None):
-            # Удаляем Server и X-Powered-By из заголовков
             new_headers = [(k, v) for k, v in headers if k not in ('Server', 'X-Powered-By')]
             return start_response(status, new_headers, exc_info)
 
-        # Случайная задержка 5-50 мс
         time.sleep(random.uniform(0.005, 0.05))
         return self.app(environ, custom_start_response)
 
