@@ -18,7 +18,7 @@
     <label>Пароль: <input type="password" name="password"></label><br>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
-        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
+        <img loading="lazy" src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
@@ -53,7 +53,7 @@
         {% set op = thread.posts.first() %}
         {% if op and op.files.first() %}
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
-            <img src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
+            <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
         </a>
         {% endif %}
         <div class="thread-info">

@@ -67,7 +67,7 @@
             <td>{{ pf.id }}</td>
             <td>
                 <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
-                    <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" width="50" height="50">
+                    <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" width="50" height="50">
                 </a>
             </td>
             <td>{{ pf.file_path }}</td>

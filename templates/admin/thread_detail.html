@@ -19,7 +19,7 @@
         <div class="post-files">
             {% for pf in post.files %}
             <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
-                <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
             </a>
             {% endfor %}
         </div>

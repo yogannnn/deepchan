@@ -5,6 +5,7 @@
 <p>
     <a href="{{ url_for('board', board_name=board.short_name) }}">← К списку тредов</a> |
     <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">Обновить</a>
+    | <span>Пост {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
     {% if thread.is_pinned %}📌{% endif %}
     {% if thread.is_locked %}🔒{% endif %}
 </p>
@@ -13,6 +14,9 @@
 {% if not thread.is_locked %}
 <h3>Ответить</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name, thread_id=thread.id) }}">
+    {% set csrf = csrf_token('post') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     <label>Имя: <input type="text" name="name" value="Аноним"></label>
     <label>Комментарий: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
     <label>Файлы: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,video/quicktime"></label>
@@ -20,18 +24,12 @@
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
-        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
-    {% set csrf = csrf_token('post') %}
-    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
-    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+        <img loading="lazy" src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" loading="lazy" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
         <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
     <input type="submit" value="Ответить">
-    {% set csrf = csrf_token('post') %}
-    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
-    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 <hr>
 {% endif %}
@@ -41,7 +39,7 @@
     {% if pagination.has_prev %}
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
-    <span>Посты {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
+    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
     {% if pagination.has_next %}
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}
@@ -63,31 +61,28 @@
             <details>
                 <summary>🗑️</summary>
                 <form method="post" action="{{ url_for('delete_post', board_name=board.short_name, post_id=post.id) }}" class="delete-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token('delete_post').token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('delete_post').timestamp }}">
                     <input type="password" name="password" placeholder="Пароль" size="12">
                     <button type="submit">Удалить</button>
-    {% set csrf = csrf_token('post') %}
-    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
-    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
             </details>
         </div>
         {% endif %}
     </div>
 
-    {% if post.files.count() > 0 %}
-    <div class="post-files">
-{% for pf in post.files %}        {% if pf.file_type == 'video' %}            <video controls width="100%" preload="metadata" poster="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) if pf.thumb_path else '' }}">
+    {% for pf in post.files %}
+        {% if pf.file_type == 'video' %}
+            <video controls width="100%" preload="metadata" poster="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) if pf.thumb_path else '' }}">
                 <source src="{{ url_for('static', filename='uploads/' + pf.file_path) }}" type="video/{{ pf.file_path.split('.')[-1] }}">
                 Ваш браузер не поддерживает видео.
             </video>
         {% else %}
             <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
-                <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img" loading="lazy">
             </a>
         {% endif %}
     {% endfor %}
-    </div>
-    {% endif %}
 
     <blockquote>{{ post.comment | process_comment(board.short_name, thread.id) | safe }}</blockquote>
 </div>
@@ -99,7 +94,7 @@
     {% if pagination.has_prev %}
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
-    <span>Посты {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
+    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
     {% if pagination.has_next %}
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}

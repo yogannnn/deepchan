@@ -11,7 +11,7 @@
     <div class="catalog-item">
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
             {% if op.files.first() %}
-                <img src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
             {% else %}
                 <div style="height:160px; background:#1a2a1a; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);">Нет картинки</div>
             {% endif %}
