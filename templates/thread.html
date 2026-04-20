@@ -19,12 +19,12 @@
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     <label>Имя: <input type="text" name="name" value="Аноним"></label>
     <label>Комментарий: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
-    <label>Файлы: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,video/quicktime"></label>
+    <label>Файлы: <input type="file" name="files" multiple accept="*/*"></label>
     <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
-        <img loading="lazy" src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" loading="lazy" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
+        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" loading="lazy" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
         <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
@@ -77,9 +77,14 @@
                 <source src="{{ url_for('static', filename='uploads/' + pf.file_path) }}" type="video/{{ pf.file_path.split('.')[-1] }}">
                 Ваш браузер не поддерживает видео.
             </video>
+        {% elif pf.file_type == 'audio' %}
+            <audio controls preload="metadata">
+                <source src="{{ url_for('static', filename='uploads/' + pf.file_path) }}" type="audio/{{ pf.file_path.split('.')[-1] }}">
+                Ваш браузер не поддерживает аудио.
+            </audio>
         {% else %}
             <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
-                <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img" loading="lazy">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" alt="img">
             </a>
         {% endif %}
     {% endfor %}

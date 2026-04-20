@@ -11,25 +11,22 @@
 
 <h3>Создать тред</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name) }}">
-    <label>Имя: <input type="text" name="name" value="Аноним"></label><br>
-    <label>Тема: <input type="text" name="subject" required></label><br>
-    <label>Комментарий: <textarea name="comment"></textarea></label><br>
-    <label>Файлы: <input type="file" name="files" multiple accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,video/quicktime"></label><br>
-    <label>Пароль: <input type="password" name="password"></label><br>
-    {% if config.CAPTCHA_ENABLED %}
-    <div class="captcha-block">
-        <img loading="lazy" src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+    <label>Имя: <input type="text" name="name" value="Аноним"></label><br>
+    <label>Тема: <input type="text" name="subject" required></label><br>
+    <label>Комментарий: <textarea name="comment"></textarea></label><br>
+    <label>Файлы: <input type="file" name="files" multiple accept="*/*"></label><br>
+    <label>Пароль: <input type="password" name="password"></label><br>
+    {% if config.CAPTCHA_ENABLED %}
+    <div class="captcha-block">
+        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" loading="lazy" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
         <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
     <input type="submit" value="Создать">
-    {% set csrf = csrf_token('post') %}
-    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
-    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 <hr>
 
@@ -53,7 +50,7 @@
         {% set op = thread.posts.first() %}
         {% if op and op.files.first() %}
         <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
-            <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
+            <img src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb" loading="lazy">
         </a>
         {% endif %}
         <div class="thread-info">

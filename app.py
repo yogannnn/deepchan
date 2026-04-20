@@ -44,7 +44,7 @@ def load_settings():
                 continue
             if s.key in ('CAPTCHA_ENABLED', 'STATS_SHOW_IPS', 'BOARD_CLOSED', 'AUTO_REFRESH_ENABLED'):
                 app.config[s.key] = s.value == 'True'
-            elif s.key in ('AUTO_REFRESH_INTERVAL', 'RATE_LIMIT_SECONDS', 'THREADS_PER_PAGE', 'POSTS_PER_PAGE', 'MAX_FILES', 'MAX_CONTENT_LENGTH', 'MAX_IMAGE_DIMENSION', 'MAX_VIDEO_DURATION', 'MAX_VIDEO_SIZE'):
+            elif s.key in ('AUTO_REFRESH_INTERVAL', 'RATE_LIMIT_SECONDS', 'THREADS_PER_PAGE', 'POSTS_PER_PAGE', 'MAX_FILES', 'MAX_CONTENT_LENGTH', 'MAX_IMAGE_DIMENSION', 'MAX_VIDEO_DURATION', 'MAX_VIDEO_SIZE', 'MAX_AUDIO_DURATION', 'MAX_AUDIO_SIZE'):
                 app.config[s.key] = int(s.value) if s.value.isdigit() else 5000
             elif s.key in ('HEADER_HTML', 'FOOTER_HTML', 'SITE_TITLE'):
                 app.config[s.key] = s.value
@@ -694,6 +694,8 @@ def admin_settings():
         save_setting('MAX_IMAGE_DIMENSION', request.form.get('max_image_dimension', '5000'))
         save_setting('MAX_VIDEO_DURATION', request.form.get('max_video_duration', '180'))
         save_setting('MAX_VIDEO_SIZE', int(request.form.get('max_video_size', 50)) * 1024 * 1024)
+        save_setting('MAX_AUDIO_DURATION', request.form.get('max_audio_duration', '600'))
+        save_setting('MAX_AUDIO_SIZE', int(request.form.get('max_audio_size', 30)) * 1024 * 1024)
         save_setting('WEBP_CONVERT_ENABLED', 'webp_convert_enabled' in request.form)
         save_setting('STEALTH_TRIM', 'stealth_trim' in request.form)
         flash('Настройки сохранены', 'success')
@@ -718,6 +720,8 @@ def admin_settings():
         'max_image_dimension': app.config.get('MAX_IMAGE_DIMENSION', 5000),
         'max_video_duration': app.config.get('MAX_VIDEO_DURATION', 180),
         'max_video_size': app.config.get('MAX_VIDEO_SIZE', 50 * 1024 * 1024) // (1024 * 1024),
+        'max_audio_duration': app.config.get('MAX_AUDIO_DURATION', 600),
+        'max_audio_size': app.config.get('MAX_AUDIO_SIZE', 30 * 1024 * 1024) // (1024 * 1024),
         'webp_convert_enabled': app.config.get('WEBP_CONVERT_ENABLED', True),
         'stealth_trim': app.config.get('STEALTH_TRIM', True),
     }
