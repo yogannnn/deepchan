@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Радио DeepChan{% endblock %}
+{% block content %}
+<h2>📻 Радио DeepChan</h2>
+<audio controls autoplay style="width:100%;">
+    <source src="{{ url_for('radio_stream') }}" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио.
+</audio>
+<hr>
+<h3>Плейлист</h3>
+<ul>
+{% for track in tracks %}
+    <li>{{ track.artist or 'Unknown' }} — {{ track.title or 'Untitled' }} ({{ track.duration|int }} сек)</li>
+{% else %}
+    <li>Плейлист пуст</li>
+{% endfor %}
+</ul>
+{% endblock %}

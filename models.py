@@ -83,3 +83,17 @@ def check_password(password, hashed):
     if password and hashed:
         return check_password_hash(hashed, password)
     return False
+
+# ===== Радио =====
+class RadioTrack(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post_file_id = db.Column(db.Integer, db.ForeignKey('post_file.id'), nullable=True)  # если из поста
+    artist = db.Column(db.String(200))
+    title = db.Column(db.String(200))
+    file_path = db.Column(db.String(255))          # путь в static/radio/playlist/
+    original_hash = db.Column(db.String(64))       # SHA-256 исходного файла
+    duration = db.Column(db.Float)
+    approved = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Связь с PostFile (опционально)
+    post_file = db.relationship('PostFile', backref='radio_track', uselist=False, foreign_keys=[post_file_id])

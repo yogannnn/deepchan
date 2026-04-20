@@ -37,3 +37,4 @@ SQLALCHEMY_ENGINE_OPTIONS = {
         'check_same_thread': False,
     }
 }
+RADIO_FOLDER = os.path.join(basedir, 'static', 'radio')

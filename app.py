@@ -2,13 +2,20 @@ from flask import Flask, render_template, redirect, url_for, request, abort, mak
 from flask_compress import Compress
 import html
 from config import Config
-from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, hash_password, check_password
+from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, RadioTrack, hash_password, check_password
 from forms import PostForm
-from utils import save_files, check_rate_limit, process_comment, check_ban, apply_word_filters, generate_captcha, verify_csrf_token, generate_csrf_token
+from utils import (
+    save_files, check_rate_limit, process_comment, check_ban, apply_word_filters,
+    generate_captcha, verify_csrf_token, generate_csrf_token, get_file_hash,
+    get_media_duration, convert_for_radio, update_icecast_playlist
+)
 from datetime import datetime, timedelta, timezone
 import os
 import logging
 import shutil
+import secrets
+import requests
+import subprocess
 from logging.handlers import RotatingFileHandler
 from sqlalchemy import inspect, text, func
 from functools import wraps
@@ -54,6 +61,10 @@ def load_settings():
                 app.config['WEBP_CONVERT_ENABLED'] = s.value == 'True'
             elif s.key == 'STEALTH_TRIM':
                 app.config['STEALTH_TRIM'] = s.value == 'True'
+            elif s.key == 'RADIO_ENABLED':
+                app.config['RADIO_ENABLED'] = s.value == 'True'
+            elif s.key == 'RADIO_BITRATE':
+                app.config['RADIO_BITRATE'] = s.value
             elif s.value == 'True':
                 app.config[s.key] = True
             elif s.value == 'False':
@@ -268,6 +279,20 @@ def create_post(board_name):
             pf = PostFile(post_id=post.id, file_path=fn, thumb_path=tn, file_order=order,
                           file_size=size, md5_hash=sha256, file_type=file_type, duration=duration)
             db.session.add(pf)
+
+            # Если это аудио, добавляем в таблицу радио на модерацию
+            if file_type == 'audio' and app.config.get('RADIO_ENABLED', False):
+                if not RadioTrack.query.filter_by(original_hash=sha256).first():
+                    track = RadioTrack(
+                        post_file_id=pf.id,
+                        artist='Unknown',
+                        title='Untitled',
+                        original_hash=sha256,
+                        duration=duration,
+                        approved=False,
+                        file_path=fn
+                    )
+                    db.session.add(track)
 
         if not sage:
             thread.bumped_at = datetime.now(timezone.utc)
@@ -698,6 +723,8 @@ def admin_settings():
         save_setting('MAX_AUDIO_SIZE', int(request.form.get('max_audio_size', 30)) * 1024 * 1024)
         save_setting('WEBP_CONVERT_ENABLED', 'webp_convert_enabled' in request.form)
         save_setting('STEALTH_TRIM', 'stealth_trim' in request.form)
+        save_setting('RADIO_ENABLED', 'radio_enabled' in request.form)
+        save_setting('RADIO_BITRATE', request.form.get('radio_bitrate', '128k'))
         flash('Настройки сохранены', 'success')
         return redirect(url_for('admin_settings'))
 
@@ -724,6 +751,8 @@ def admin_settings():
         'max_audio_size': app.config.get('MAX_AUDIO_SIZE', 30 * 1024 * 1024) // (1024 * 1024),
         'webp_convert_enabled': app.config.get('WEBP_CONVERT_ENABLED', True),
         'stealth_trim': app.config.get('STEALTH_TRIM', True),
+        'radio_enabled': app.config.get('RADIO_ENABLED', False),
+        'radio_bitrate': app.config.get('RADIO_BITRATE', '128k'),
     }
     return render_template('admin/settings.html', **ctx)
 
@@ -785,7 +814,211 @@ def admin_stats():
                            recent_ips=recent_ips,
                            show_ips=show_ips)
 
-# ===== WSGI Middleware для удаления заголовков и задержки =====
+# ===== РАДИО =====
+
+def is_icecast_running():
+    import subprocess
+    result = subprocess.run(["pgrep", "-f", "icecast2"], capture_output=True)
+    return result.returncode == 0
+
+@app.route('/admin/radio')
+@admin_required
+def admin_radio():
+    status = request.args.get('status', 'pending')
+    query = RadioTrack.query
+    if status == 'approved':
+        query = query.filter(RadioTrack.approved == True)
+    elif status == 'rejected':
+        query = query.filter(RadioTrack.approved == False, RadioTrack.post_file_id.isnot(None))
+    else:
+        query = query.filter(RadioTrack.approved == False)
+    tracks = query.order_by(RadioTrack.created_at.desc()).all()
+    icecast_running = is_icecast_running()
+    return render_template('admin/radio.html', tracks=tracks, status=status, icecast_running=icecast_running)
+
+@app.route('/admin/radio/icecast/start', methods=['POST'])
+@admin_required
+@csrf_protect('icecast_start')
+def admin_icecast_start():
+    result = subprocess.run(['/bin/bash', '/root/deepchan/radio_control.sh', 'start'], capture_output=True, text=True, timeout=10)
+    if result.returncode != 0:
+        flash(f'Ошибка запуска: {result.stderr}', 'error')
+    else:
+        flash('Icecast запущен', 'success')
+    return redirect(url_for('admin_radio'))
+    subprocess.run(['/root/deepchan/radio_control.sh', 'start'], capture_output=True)
+    flash('Icecast запущен', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/icecast/stop', methods=['POST'])
+@admin_required
+@csrf_protect('icecast_stop')
+def admin_icecast_stop():
+    result = subprocess.run(['/bin/bash', '/root/deepchan/radio_control.sh', 'stop'], capture_output=True, text=True, timeout=10)
+    if result.returncode != 0:
+        flash(f'Ошибка остановки: {result.stderr}', 'error')
+    else:
+        flash('Icecast остановлен', 'success')
+    return redirect(url_for('admin_radio'))
+    subprocess.run(['/root/deepchan/radio_control.sh', 'stop'], capture_output=True)
+    flash('Icecast остановлен', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/icecast/restart', methods=['POST'])
+@admin_required
+@csrf_protect('icecast_restart')
+def admin_icecast_restart():
+    result = subprocess.run(['/bin/bash', '/root/deepchan/radio_control.sh', 'restart'], capture_output=True, text=True, timeout=10)
+    if result.returncode != 0:
+        flash(f'Ошибка перезапуска: {result.stderr}', 'error')
+    else:
+        flash('Icecast перезапущен', 'success')
+    return redirect(url_for('admin_radio'))
+    subprocess.run(['/root/deepchan/radio_control.sh', 'restart'], capture_output=True)
+    flash('Icecast перезапущен', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/upload', methods=['POST'])
+@admin_required
+@csrf_protect('upload_radio')
+def admin_radio_upload():
+    if 'file' not in request.files:
+        flash('Файл не выбран', 'error')
+        return redirect(url_for('admin_radio'))
+    f = request.files['file']
+    if f.filename == '':
+        flash('Файл не выбран', 'error')
+        return redirect(url_for('admin_radio'))
+    ext = f.filename.rsplit('.', 1)[-1].lower()
+    if ext not in ['mp3', 'ogg', 'flac', 'wav', 'm4a']:
+        flash('Недопустимый формат', 'error')
+        return redirect(url_for('admin_radio'))
+    tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], secrets.token_hex(16) + '.' + ext)
+    f.save(tmp_path)
+    file_hash = get_file_hash(tmp_path)
+    if RadioTrack.query.filter_by(original_hash=file_hash).first():
+        os.remove(tmp_path)
+        flash('Трек уже существует в базе радио', 'error')
+        return redirect(url_for('admin_radio'))
+    track = RadioTrack(
+        artist=request.form.get('artist', 'Unknown'),
+        title=request.form.get('title', 'Untitled'),
+        original_hash=file_hash,
+        duration=get_media_duration(tmp_path),
+        approved=False
+    )
+    db.session.add(track)
+    db.session.commit()
+    pending_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'radio_pending')
+    os.makedirs(pending_dir, exist_ok=True)
+    pending_path = os.path.join(pending_dir, f'radio_pending_{track.id}.{ext}')
+    os.rename(tmp_path, pending_path)
+    track.file_path = pending_path
+    db.session.commit()
+    flash('Трек добавлен на модерацию', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/approve/<int:track_id>', methods=['POST'])
+@admin_required
+@csrf_protect('approve_radio')
+def admin_radio_approve(track_id):
+    track = RadioTrack.query.get_or_404(track_id)
+    if track.approved:
+        flash('Трек уже одобрен', 'error')
+        return redirect(url_for('admin_radio'))
+    radio_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'radio_playlist')
+    os.makedirs(radio_dir, exist_ok=True)
+    output_path = os.path.join(radio_dir, f'radio_{track.id}.mp3')
+    try:
+        convert_for_radio(track.file_path, output_path, track.artist, track.title, app.config.get('RADIO_BITRATE', '128k'))
+    except Exception as e:
+        flash(f'Ошибка конвертации: {str(e)}', 'error')
+        return redirect(url_for('admin_radio'))
+    if os.path.exists(track.file_path):
+        os.remove(track.file_path)
+    track.file_path = output_path
+    track.approved = True
+    db.session.commit()
+    playlist_file = os.path.join(radio_dir, 'playlist.txt')
+    approved_tracks = RadioTrack.query.filter_by(approved=True).all()
+    update_icecast_playlist(playlist_file, approved_tracks)
+    flash('Трек одобрен и добавлен в плейлист', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/reject/<int:track_id>', methods=['POST'])
+@admin_required
+@csrf_protect('reject_radio')
+def admin_radio_reject(track_id):
+    track = RadioTrack.query.get_or_404(track_id)
+    if track.approved:
+        flash('Нельзя отклонить уже одобренный трек', 'error')
+        return redirect(url_for('admin_radio'))
+    if os.path.exists(track.file_path):
+        os.remove(track.file_path)
+    track.approved = False
+    track.file_path = None
+    db.session.commit()
+    flash('Трек отклонён', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/edit/<int:track_id>', methods=['GET', 'POST'])
+@admin_required
+@csrf_protect('edit_radio')
+def admin_radio_edit(track_id):
+    track = RadioTrack.query.get_or_404(track_id)
+    if request.method == 'POST':
+        track.artist = request.form.get('artist', '')
+        track.title = request.form.get('title', '')
+        db.session.commit()
+        flash('Метаданные обновлены', 'success')
+        return redirect(url_for('admin_radio'))
+    return render_template('admin/radio_edit.html', track=track)
+
+@app.route('/admin/radio/delete/<int:track_id>', methods=['POST'])
+@admin_required
+@csrf_protect('delete_radio')
+def admin_radio_delete(track_id):
+    track = RadioTrack.query.get_or_404(track_id)
+    if track.file_path and os.path.exists(track.file_path):
+        os.remove(track.file_path)
+    db.session.delete(track)
+    db.session.commit()
+    if track.approved:
+        playlist_file = os.path.join(app.config['UPLOAD_FOLDER'], 'radio_playlist', 'playlist.txt')
+        approved_tracks = RadioTrack.query.filter_by(approved=True).all()
+        update_icecast_playlist(playlist_file, approved_tracks)
+    flash('Трек удалён', 'success')
+    return redirect(url_for('admin_radio'))
+
+@app.route('/admin/radio/toggle', methods=['POST'])
+@admin_required
+@csrf_protect('toggle_radio')
+def admin_radio_toggle():
+    current = app.config.get('RADIO_ENABLED', False)
+    save_setting('RADIO_ENABLED', not current)
+    flash(f'Радио {"включено" if not current else "выключено"}', 'success')
+    return redirect(url_for('admin_radio'))
+
+# ===== Публичное радио =====
+@app.route('/radio')
+def radio_page():
+    if not app.config.get('RADIO_ENABLED', False):
+        return render_template('radio_disabled.html')
+    tracks = RadioTrack.query.filter_by(approved=True).order_by(RadioTrack.created_at.desc()).all()
+    return render_template('radio.html', tracks=tracks)
+
+@app.route('/radio-stream')
+def radio_stream():
+    if not app.config.get('RADIO_ENABLED', False):
+        abort(503)
+    icecast_url = 'http://127.0.0.1:8000/stream'
+    resp = requests.get(icecast_url, stream=True)
+    def generate():
+        for chunk in resp.iter_content(chunk_size=4096):
+            yield chunk
+    return Response(generate(), content_type=resp.headers.get('content-type', 'audio/mpeg'))
+
+# ===== WSGI Middleware =====
 class ParanoidMiddleware:
     def __init__(self, app):
         self.app = app
@@ -827,6 +1060,8 @@ if __name__ == '__main__':
         db.create_all()
         if not inspect(db.engine).has_table('setting'):
             Setting.__table__.create(db.engine)
+        if not inspect(db.engine).has_table('radio_track'):
+            RadioTrack.__table__.create(db.engine)
         load_settings()
         with db.engine.connect() as conn:
             res = conn.execute(text("PRAGMA table_info(post)"))

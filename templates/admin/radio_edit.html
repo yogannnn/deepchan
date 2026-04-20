@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Редактировать метаданные</h2>
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token('edit_radio').token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('edit_radio').timestamp }}">
+    <label>Исполнитель: <input type="text" name="artist" value="{{ track.artist or '' }}"></label>
+    <label>Название: <input type="text" name="title" value="{{ track.title or '' }}"></label>
+    <button type="submit" class="btn">Сохранить</button>
+    <a href="{{ url_for('admin_radio') }}" class="btn">Отмена</a>
+</form>
+{% endblock %}

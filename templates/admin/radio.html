@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>🎵 Управление радио</h2>
+
+<div style="margin-bottom: 20px;">
+    <a href="?status=pending" class="btn {% if status == 'pending' %}btn-primary{% endif %}">⏳ На модерации</a>
+    <a href="?status=approved" class="btn {% if status == 'approved' %}btn-primary{% endif %}">✅ Одобрено</a>
+    <a href="?status=rejected" class="btn {% if status == 'rejected' %}btn-primary{% endif %}">❌ Отклонено</a>
+</div>
+
+<h3>❄️ Управление Icecast</h3>
+    <p>Статус: {% if icecast_running %}<span style="color:#66ff66;">🟢 Запущен</span>{% else %}<span style="color:#aa5555;">🔴 Остановлен</span>{% endif %}</p>
+<form method="post" action="{{ url_for('admin_icecast_start') }}" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token('icecast_start').token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('icecast_start').timestamp }}">
+    <button type="submit" class="btn btn-success">▶️ Запустить Icecast</button>
+</form>
+<form method="post" action="{{ url_for('admin_icecast_stop') }}" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token('icecast_stop').token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('icecast_stop').timestamp }}">
+    <button type="submit" class="btn btn-danger">⏹️ Остановить Icecast</button>
+</form>
+<form method="post" action="{{ url_for('admin_icecast_restart') }}" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token('icecast_restart').token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('icecast_restart').timestamp }}">
+    <button type="submit" class="btn btn-warning">🔄 Перезапустить</button>
+</form>
+<hr>
+<form method="post" action="{{ url_for('admin_radio_toggle') }}" style="margin-bottom: 20px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token('toggle_radio').token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('toggle_radio').timestamp }}">
+    <button type="submit" class="btn btn-{% if config.RADIO_ENABLED %}danger{% else %}success{% endif %}">
+        {% if config.RADIO_ENABLED %}⏸️ Выключить радио{% else %}▶️ Включить радио{% endif %}
+    </button>
+</form>
+
+<hr>
+
+<h3>➕ Загрузить трек</h3>
+<form method="post" enctype="multipart/form-data" action="{{ url_for('admin_radio_upload') }}" style="margin-bottom: 30px; padding: 15px; background: var(--surface); border-radius: 8px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token('upload_radio').token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('upload_radio').timestamp }}">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <label>Исполнитель: <input type="text" name="artist" placeholder="Неизвестен"></label>
+        <label>Название: <input type="text" name="title" placeholder="Без названия"></label>
+    </div>
+    <label>Файл (mp3, ogg, flac, wav, m4a): <input type="file" name="file" accept="audio/*" required></label>
+    <button type="submit" class="btn">Загрузить на модерацию</button>
+</form>
+
+<hr>
+
+<h3>📋 Список треков ({{ status }})</h3>
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Исполнитель</th>
+            <th>Название</th>
+            <th>Длит.</th>
+            <th>Источник</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for track in tracks %}
+        <tr>
+            <td>{{ track.id }}</td>
+            <td>{{ track.artist or '—' }}</td>
+            <td>{{ track.title or '—' }}</td>
+            <td>{{ track.duration|int if track.duration else '—' }} с</td>
+            <td>
+                {% if track.post_file_id %}
+                    Пост #{{ track.post_file.post_id }}
+                {% else %}
+                    Админ
+                {% endif %}
+            </td>
+            <td>
+                {% if track.approved %}
+                    <span style="color: #66ff66;">Одобрен</span>
+                {% elif track.file_path is none and track.approved == false %}
+                    <span style="color: #aa5555;">Отклонён</span>
+                {% else %}
+                    <span style="color: #ffaa00;">На модерации</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('admin_radio_edit', track_id=track.id) }}" class="btn btn-sm">✏️</a>
+                {% if not track.approved and track.file_path %}
+                <form method="post" action="{{ url_for('admin_radio_approve', track_id=track.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token('approve_radio').token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('approve_radio').timestamp }}">
+                    <button type="submit" class="btn btn-sm btn-success" title="Одобрить">✅</button>
+                </form>
+                <form method="post" action="{{ url_for('admin_radio_reject', track_id=track.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token('reject_radio').token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('reject_radio').timestamp }}">
+                    <button type="submit" class="btn btn-sm btn-warning" title="Отклонить">❌</button>
+                </form>
+                {% endif %}
+                <form method="post" action="{{ url_for('admin_radio_delete', track_id=track.id) }}" style="display:inline;" onsubmit="return confirm('Удалить трек навсегда?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token('delete_radio').token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('delete_radio').timestamp }}">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Удалить">🗑️</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">Нет треков в этой категории.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
