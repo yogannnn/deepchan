@@ -32,3 +32,4 @@ __pycache__/
 Thumbs.db
 *.zip
 zzz.sh
+*.log.*
