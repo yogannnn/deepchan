@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, abort, make_response, Response, flash, send_file, session
+from flask_compress import Compress
 import html
 from config import Config
 from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, hash_password, check_password
@@ -16,27 +17,8 @@ import time
 import random
 
 app = Flask(__name__)
-# Обработчики ошибок
-@app.errorhandler(404)
-def not_found(e):
-    return render_template('errors/404.html'), 404
-
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template('errors/403.html'), 403
-
-@app.errorhandler(400)
-def bad_request(e):
-    return render_template('errors/400.html'), 400
-
-@app.errorhandler(500)
-@app.errorhandler(429)
-def too_many_requests(e):
-    return render_template('errors/429.html', description=e.description), 429
-def internal_error(e):
-    db.session.rollback()
-    return render_template('errors/500.html'), 500
-
+# Включаем Gzip сжатие (экономия трафика в i2p)
+Compress(app)
 app.config.from_object(Config)
 db.init_app(app)
 app.secret_key = app.config['SECRET_KEY']
@@ -285,8 +267,6 @@ def create_post(board_name):
         for fn, tn, order, size, sha256, file_type, duration in saved_files:
             pf = PostFile(post_id=post.id, file_path=fn, thumb_path=tn, file_order=order,
                           file_size=size, md5_hash=sha256, file_type=file_type, duration=duration)
-            pf = PostFile(post_id=post.id, file_path=fn, thumb_path=tn, file_order=order,
-                          file_size=size, md5_hash=sha256)
             db.session.add(pf)
 
         if not sage:
@@ -756,7 +736,7 @@ def admin_stats():
     daily_threads = []
     for i in range(7):
         day = today - timedelta(days=i)
-        start = datetime(day.year, day.month, day.day)
+        start = datetime(day.year, day.month, day.day, tzinfo=timezone.utc)
         end = start + timedelta(days=1)
         posts_count = Post.query.filter(Post.created_at >= start, Post.created_at < end).count()
         threads_count = Thread.query.filter(Thread.created_at >= start, Thread.created_at < end).count()
@@ -841,17 +821,10 @@ app.jinja_env.globals['csrf_token'] = generate_csrf
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        db.session.execute(text("PRAGMA journal_mode=WAL;"))
         if not inspect(db.engine).has_table('setting'):
             Setting.__table__.create(db.engine)
         load_settings()
         with db.engine.connect() as conn:
-            # Добавляем колонки для видео (если их нет)
-            for col, col_type in [('file_type', 'VARCHAR(20) DEFAULT "image"'), ('duration', 'FLOAT')]:
-                res = conn.execute(text(f"PRAGMA table_info(post_file)"))
-                cols = [row[1] for row in res]
-                if col not in cols:
-                    conn.execute(text(f"ALTER TABLE post_file ADD COLUMN {col} {col_type}"))
             res = conn.execute(text("PRAGMA table_info(post)"))
             cols = [row[1] for row in res]
             if 'search_text' not in cols:
@@ -862,15 +835,11 @@ if __name__ == '__main__':
                 post.search_text = (post.comment + ' ' + (post.subject or '')).lower()
         db.session.commit()
         with db.engine.connect() as conn:
-            # Добавляем колонки для видео (если их нет)
-            for col, col_type in [('file_type', 'VARCHAR(20) DEFAULT "image"'), ('duration', 'FLOAT')]:
-                res = conn.execute(text(f"PRAGMA table_info(post_file)"))
-                cols = [row[1] for row in res]
-                if col not in cols:
-                    conn.execute(text(f"ALTER TABLE post_file ADD COLUMN {col} {col_type}"))
             for table, col, col_type in [('post_file', 'md5_hash', 'VARCHAR(32)'),
                                          ('post_file', 'file_size', 'INTEGER DEFAULT 0'),
-                                         ('post', 'ip_address', 'VARCHAR(45)')]:
+                                         ('post', 'ip_address', 'VARCHAR(45)'),
+                                         ('post_file', 'file_type', 'VARCHAR(20) DEFAULT "image"'),
+                                         ('post_file', 'duration', 'FLOAT')]:
                 res = conn.execute(text(f"PRAGMA table_info({table.split()[0]})"))
                 cols = [row[1] for row in res]
                 if col not in cols:
