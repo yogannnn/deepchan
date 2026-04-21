@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, abort, flash
 from flask import current_app
-from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting
+from models import db, Board, Thread, Post, PostFile, PostFTS, Ban, WordFilter, Setting, Report
 from sqlalchemy import func
 from datetime import datetime, timedelta, timezone
 import os
@@ -480,3 +480,31 @@ def admin_stats():
                            free_disk_gb=free_disk_gb,
                            recent_ips=recent_ips,
                            show_ips=show_ips)
+
+@admin_bp.route('/reports')
+@admin_required
+def admin_reports():
+    resolved = request.args.get('resolved', '0') == '1'
+    query = Report.query.filter_by(resolved=resolved).order_by(Report.created_at.desc())
+    reports = query.all()
+    return render_template('admin/reports.html', reports=reports, resolved=resolved)
+
+@admin_bp.route('/reports/resolve/<int:report_id>', methods=['POST'])
+@admin_required
+@csrf_protect('resolve_report')
+def admin_resolve_report(report_id):
+    report = Report.query.get_or_404(report_id)
+    report.resolved = True
+    db.session.commit()
+    flash('Жалоба отмечена как обработанная.', 'success')
+    return redirect(url_for('admin.admin_reports'))
+
+@admin_bp.route('/reports/delete/<int:report_id>', methods=['POST'])
+@admin_required
+@csrf_protect('delete_report')
+def admin_delete_report(report_id):
+    report = Report.query.get_or_404(report_id)
+    db.session.delete(report)
+    db.session.commit()
+    flash('Жалоба удалена.', 'success')
+    return redirect(url_for('admin.admin_reports'))

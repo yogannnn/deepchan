@@ -99,3 +99,13 @@ class RadioTrack(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # Связь с PostFile (опционально)
     post_file = db.relationship('PostFile', backref='radio_track', uselist=False, foreign_keys=[post_file_id])
+
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    reason = db.Column(db.String(100))
+    comment = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    resolved = db.Column(db.Boolean, default=False)
+
+    post = db.relationship('Post', backref=db.backref('reports', lazy='dynamic'))

@@ -57,7 +57,7 @@
         <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
         {% if post.subject %}<span class="subject">{{ post.subject|e }}</span>{% endif %}
         {% if post.sage %}<span class="sage">SAGE</span>{% endif %}
-        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a></span>
+        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a> <a href="{{ url_for('board.report_post', board_name=board.short_name, post_id=post.id) }}" class="report-link" title="Пожаловаться">⚠️</a></span>
 
         {% if post.password_hash %}
         <div class="post-delete">
@@ -103,7 +103,7 @@
     {% if pagination.has_prev %}
         <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
-    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    <span>Стр. {{ pagination.page }} из {{ pagination.pages }} <a href="{{ url_for('board.report_post', board_name=board.short_name, post_id=post.id) }}" class="report-link" title="Пожаловаться">⚠️</a></span>
     {% if pagination.has_next %}
         <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}

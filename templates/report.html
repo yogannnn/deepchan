@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Жалоба на пост №{{ post.id }}{% endblock %}
+{% block content %}
+<h2>Жалоба на пост №{{ post.id }}</h2>
+<p>Вы жалуетесь на пост в треде <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=post.thread_id) }}">{{ post.thread.posts.first().subject or 'Без темы' }}</a></p>
+
+<form method="post">
+    {% set csrf = csrf_token('report') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+    
+    <label>Причина:
+        <select name="reason" required>
+            <option value="">-- Выберите --</option>
+            <option value="spam">Спам</option>
+            <option value="illegal">Противозаконный контент</option>
+            <option value="rules">Нарушение правил доски</option>
+            <option value="other">Другое</option>
+        </select>
+    </label>
+    
+    <label>Комментарий (необязательно):
+        <textarea name="comment" rows="4"></textarea>
+    </label>
+    
+    <div class="captcha-block">
+        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
+        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+    </div>
+    
+    <button type="submit">Отправить жалобу</button>
+</form>
+{% endblock %}

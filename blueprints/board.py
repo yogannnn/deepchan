@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, request, abort, make_response, flash, current_app
-from models import db, Board, Thread, Post, PostFile, PostFTS, RadioTrack, hash_password, check_password
+from flask import session
+from flask import Blueprint, render_template, redirect, url_for, request, abort, make_response, flash, current_app, session
+from models import db, Board, Thread, Post, PostFile, PostFTS, RadioTrack, Report, hash_password, check_password
 from forms import PostForm
 from utils import (
     save_files, check_rate_limit, process_comment, check_ban, apply_word_filters,
@@ -241,3 +242,35 @@ def hide_thread(board_name, thread_id):
         hidden.append(str(thread_id))
     resp.set_cookie('hidden_threads', ','.join(hidden), max_age=30*24*3600)
     return resp
+
+@board_bp.route('/<string:board_name>/report/<int:post_id>', methods=['GET', 'POST'])
+@csrf_protect('report')
+def report_post(board_name, post_id):
+    board = Board.query.filter_by(short_name=board_name).first_or_404()
+    post = Post.query.get_or_404(post_id)
+    
+    if request.method == 'POST':
+        # Проверяем капчу (обязательно, даже если глобально выключена)
+        from utils import generate_captcha
+        captcha_answer = request.form.get('captcha_answer', '')
+        if captcha_answer != session.get('captcha_text', ''):
+            flash('Неверный код с картинки.', 'error')
+            return redirect(url_for('board.report_post', board_name=board_name, post_id=post_id))
+        
+        reason = request.form.get('reason', '')
+        comment = request.form.get('comment', '')
+        if not reason:
+            flash('Выберите причину.', 'error')
+            return redirect(url_for('board.report_post', board_name=board_name, post_id=post_id))
+        
+        report = Report(
+            post_id=post.id,
+            reason=reason,
+            comment=comment
+        )
+        db.session.add(report)
+        db.session.commit()
+        flash('Жалоба отправлена. Спасибо.', 'success')
+        return redirect(url_for('board.thread', board_name=board_name, thread_id=post.thread_id))
+    
+    return render_template('report.html', board=board, post=post)
