@@ -41,6 +41,8 @@ ENV
 fi
 
 # 6. Создаём папки и права
+mkdir -p logs
+chown deepchan:deepchan logs
 mkdir -p static/{uploads,radio/playlist} instance
 chown -R deepchan:deepchan "$PROJECT_DIR"
 chmod 755 static/{uploads,radio}

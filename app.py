@@ -21,7 +21,7 @@ app.secret_key = app.config['SECRET_KEY']
 app.jinja_env.filters['process_comment'] = process_comment
 
 if not app.debug:
-    handler = RotatingFileHandler('board.log', maxBytes=10000, backupCount=3)
+    handler = RotatingFileHandler('logs/board.log', maxBytes=10000, backupCount=3)
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
 
