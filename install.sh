@@ -50,6 +50,7 @@ chown -R deepchan:deepchan "$PROJECT_DIR"
 chmod 755 static/{uploads,radio}
 
 # 7. Инициализируем БД и дефолтные настройки
+chown -R deepchan:deepchan instance
 source .venv/bin/activate
 python << 'PYTHON_SCRIPT'
 from app import app, db
