@@ -43,6 +43,8 @@ fi
 # 6. Создаём папки и права
 mkdir -p logs
 chown deepchan:deepchan logs
+touch logs/board.log
+chown deepchan:deepchan logs/board.log
 mkdir -p static/{uploads,radio/playlist} instance
 chown -R deepchan:deepchan "$PROJECT_DIR"
 chmod 755 static/{uploads,radio}
