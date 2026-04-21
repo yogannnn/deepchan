@@ -23,20 +23,12 @@
     <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    <input type="submit" value="Ответить">
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
+    <input type="submit" value="Ответить">
 </form>
 <hr>
 {% endif %}
@@ -57,7 +49,11 @@
 {% for post in posts %}
 <div class="post" id="post{{ post.id }}">
     <div class="post-header">
-        <span class="name">{{ post.name|e }}</span>
+        <span class="post-author">
+            <span class="name">{{ post.name|e }}</span>
+            {% if post.is_admin_post %}<span class="admin-badge">Adm</span>{% endif %}
+            {% if post.tripcode %}<span class="tripcode">{{ post.tripcode }}</span>{% endif %}
+        </span>
         <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
         {% if post.subject %}<span class="subject">{{ post.subject|e }}</span>{% endif %}
         {% if post.sage %}<span class="sage">SAGE</span>{% endif %}
@@ -73,18 +69,6 @@
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     <input type="password" name="password" placeholder="Пароль" size="12">
                     <button type="submit">Удалить</button>
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    <div class="captcha-block">
-        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
-        <label>Введите код: <input type="text" name="captcha_answer" required></label>
-    </div>
-    {% endif %}
                 </form>
             </details>
         </div>

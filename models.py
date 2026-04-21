@@ -30,6 +30,8 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     password_hash = db.Column(db.String(256))
     sage = db.Column(db.Boolean, default=False)
+    tripcode = db.Column(db.String(32))
+    is_admin_post = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45))
     search_text = db.Column(db.Text)   # новое поле для поиска
     files = db.relationship('PostFile', backref='post', lazy='dynamic', cascade='all, delete-orphan')

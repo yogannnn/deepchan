@@ -757,3 +757,38 @@ textarea {
     min-height: 200px;
     resize: vertical;
 }
+
+.tripcode {
+    color: #66ff66;
+    font-weight: normal;
+    margin-left: 4px;
+}
+
+.post-author {
+    display: inline;
+    white-space: nowrap;
+}
+
+.post-author {
+    display: inline;
+    white-space: nowrap;
+}
+.admin-badge {
+    display: inline-block;
+    background-color: #cc0000;
+    color: #aaccff;
+    font-size: 0.65rem;
+    font-weight: bold;
+    padding: 1px 4px;
+    margin-left: 4px;
+    border-radius: 3px;
+    vertical-align: super;
+    line-height: 1.2;
+    text-decoration: none;
+    border: none;
+}
+.tripcode {
+    color: #66ff66;
+    font-weight: normal;
+    margin-left: 4px;
+}

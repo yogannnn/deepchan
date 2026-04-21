@@ -1,3 +1,4 @@
+import base64
 import os
 import secrets
 import re
@@ -397,3 +398,12 @@ def is_icecast_running():
     import subprocess
     result = subprocess.run(['pgrep', '-f', 'icecast2'], capture_output=True)
     return result.returncode == 0
+
+import base64
+def generate_tripcode(password, secret_key):
+    """Возвращает защищённый трипкод (10 символов)."""
+    if not password:
+        return None
+    signature = hmac.new(secret_key.encode(), password.encode(), hashlib.sha256).digest()
+    trip = base64.b64encode(signature, altchars=b'..').decode()[:10]
+    return f"◆{trip}"

@@ -35,3 +35,4 @@ zzz.sh
 *.patch
 fix_*.sh
 check_*.sh
+__pycache__/

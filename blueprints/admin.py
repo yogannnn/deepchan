@@ -388,12 +388,14 @@ def admin_settings():
         save_setting('MAX_AUDIO_SIZE', int(request.form.get('max_audio_size', 30)) * 1024 * 1024)
         save_setting('WEBP_CONVERT_ENABLED', 'webp_convert_enabled' in request.form)
         save_setting('STEALTH_TRIM', 'stealth_trim' in request.form)
+        save_setting("ADMIN_TRIP_SECRET", request.form.get("admin_trip_secret", ""))
         save_setting('RADIO_ENABLED', 'radio_enabled' in request.form)
         save_setting('RADIO_BITRATE', request.form.get('radio_bitrate', '128k'))
         flash('Настройки сохранены', 'success')
         return redirect(url_for('admin.admin_settings'))
 
     ctx = {
+        'admin_trip_secret': current_app.config.get('ADMIN_TRIP_SECRET', ''),
         'captcha_enabled': current_app.config.get('CAPTCHA_ENABLED', False),
         'stats_show_ips': current_app.config.get('STATS_SHOW_IPS', False),
         'board_closed': current_app.config.get('BOARD_CLOSED', False),
