@@ -110,7 +110,8 @@ def add_cache_headers(response):
         response.cache_control.no_cache = False
         response.cache_control.no_store = False
         if request.path.endswith('.css') or '/fonts/' in request.path:
-            response.cache_control.max_age = 604800
+            response.cache_control.max_age = 31536000
+            response.cache_control.immutable = True
             response.cache_control.public = True
         elif request.path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
             response.cache_control.max_age = 86400

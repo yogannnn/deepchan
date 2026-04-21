@@ -1,0 +1,18 @@
+:root{--bg:#0a0f0a;--text:#b3ffb3;--accent:#33cc33;--link:#66ff66}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Courier New",Courier,monospace;line-height:1.5;font-size:14px;padding:10px;margin:0}
+.container{max-width:1200px;margin:0 auto}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+header,footer{text-align:center;padding:15px 0;border-bottom:1px solid #1e3b1e;border-top:1px solid #1e3b1e;margin-bottom:20px}
+h1,h2,h3{color:#66ff66;font-weight:400;border-bottom:1px dashed #1e3b1e;padding-bottom:8px;margin-bottom:15px}
+hr{border:none;border-top:1px solid #1e3b1e;margin:20px 0}
+input,textarea,button,select{background:#050805;border:1px solid #1e3b1e;color:var(--text);padding:10px 12px;font-family:inherit;font-size:14px;border-radius:6px}
+button,input[type=submit]{background:#1a2a1a;color:var(--text);font-weight:700;cursor:pointer;border:1px solid #2a6e2a}
+.post,.thread{background:#0d140d;border:1px solid #1e3b1e;border-radius:12px;padding:18px;margin-bottom:20px}
+.post-header{display:flex;flex-wrap:wrap;gap:15px;margin-bottom:15px;padding-bottom:10px;border-bottom:1px dashed #1e3b1e}
+.name{color:#33cc33;font-weight:700}
+.subject{color:#66ff66;font-weight:700}
+.sage{color:#aa5555;font-weight:700}
+.admin-badge{background:#c00;color:#aaccff;font-size:.65rem;padding:1px 4px;border-radius:3px;vertical-align:super}
+.tripcode{color:#66ff66;margin-left:4px}
+@media (max-width:768px){body{font-size:16px}.post-header{flex-direction:column;gap:6px}}
