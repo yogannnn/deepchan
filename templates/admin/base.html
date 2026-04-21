@@ -2,16 +2,16 @@
 {% block title %}Админка{% endblock %}
 {% block content %}
 <div class="admin-nav">
-    <a href="{{ url_for('admin_index') }}">🏠 Главная</a> |
-    <a href="{{ url_for('admin_boards') }}">📋 Доски</a> |
-    <a href="{{ url_for('admin_threads') }}">🧵 Треды</a> |
-    <a href="{{ url_for('admin_files') }}">🖼️ Файлы</a> |
-    <a href="{{ url_for('admin_bans') }}">🚫 Баны</a> |
-    <a href="{{ url_for('admin_filters') }}">🔍 Фильтры</a> |
-    <a href="{{ url_for("admin_stats") }}">📊 Статистика</a> |
-    <a href="{{ url_for('admin_radio') }}">📻 Радио</a> |
-    <a href="{{ url_for('admin_settings') }}">⚙️ Настройки</a> |
-    <a href="{{ url_for('index') }}">← На сайт</a>
+    <a href="{{ url_for('admin.admin_index') }}">🏠 Главная</a> |
+    <a href="{{ url_for('admin.admin_boards') }}">📋 Доски</a> |
+    <a href="{{ url_for('admin.admin_threads') }}">🧵 Треды</a> |
+    <a href="{{ url_for('admin.admin_files') }}">🖼️ Файлы</a> |
+    <a href="{{ url_for('admin.admin_bans') }}">🚫 Баны</a> |
+    <a href="{{ url_for('admin.admin_filters') }}">🔍 Фильтры</a> |
+    <a href="{{ url_for("admin.admin_stats") }}">📊 Статистика</a> |
+    <a href="{{ '/admin/radio' }}">📻 Радио</a> |
+    <a href="{{ url_for('admin.admin_settings') }}">⚙️ Настройки</a> |
+    <a href="{{ url_for('main.index') }}">← На сайт</a>
 </div>
 <hr>
 {% with messages = get_flashed_messages() %}

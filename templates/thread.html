@@ -3,8 +3,8 @@
 {% block title %}{{ thread.posts.first().subject|e if thread.posts.first().subject else 'Тред' }} — /{{ board.short_name }}/{% endblock %}
 {% block content %}
 <p>
-    <a href="{{ url_for('board', board_name=board.short_name) }}">← К списку тредов</a> |
-    <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">Обновить</a>
+    <a href="{{ url_for('board.board', board_name=board.short_name) }}">← К списку тредов</a> |
+    <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">Обновить</a>
     | <span>Пост {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
     {% if thread.is_pinned %}📌{% endif %}
     {% if thread.is_locked %}🔒{% endif %}
@@ -13,7 +13,7 @@
 
 {% if not thread.is_locked %}
 <h3>Ответить</h3>
-<form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name, thread_id=thread.id) }}">
+<form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name, thread_id=thread.id) }}">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
@@ -23,13 +23,20 @@
     <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    <input type="submit" value="Ответить">
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
-        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" loading="lazy" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
-        <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
+        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
-    <input type="submit" value="Ответить">
 </form>
 <hr>
 {% endif %}
@@ -37,11 +44,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
     <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}
 </div>
 <hr>
@@ -60,11 +67,24 @@
         <div class="post-delete">
             <details>
                 <summary>🗑️</summary>
-                <form method="post" action="{{ url_for('delete_post', board_name=board.short_name, post_id=post.id) }}" class="delete-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token('delete_post').token }}">
-                    <input type="hidden" name="csrf_timestamp" value="{{ csrf_token('delete_post').timestamp }}">
+                <form method="post" action="{{ url_for('board.delete_post', board_name=board.short_name, post_id=post.id) }}" class="delete-form">
+                    {% set csrf = csrf_token('delete_post') %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     <input type="password" name="password" placeholder="Пароль" size="12">
                     <button type="submit">Удалить</button>
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    <div class="captcha-block">
+        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
+        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+    </div>
+    {% endif %}
                 </form>
             </details>
         </div>
@@ -97,11 +117,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
     <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}
 </div>
 {% endif %}

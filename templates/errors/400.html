@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}400 — Неверный запрос{% endblock %}
 {% block content %}
-<h2>400 — Неверный запрос</h2>
-<p>Сервер не может обработать ваш запрос. Проверьте данные и попробуйте снова.</p>
-<p><a href="{{ url_for('index') }}">← На главную</a></p>
+<div style="text-align: center; margin-top: 50px;">
+    <h2 style="color: var(--error);">⚠️ 400 — Неверный запрос</h2>
+    <p style="color: var(--text-dim);">{{ description or 'Сервер не может обработать ваш запрос.' }}</p>
+    <p><a href="{{ url_for('main.index') }}" style="color: var(--accent);">← На главную</a></p>
+</div>
 {% endblock %}

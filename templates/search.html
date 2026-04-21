@@ -12,7 +12,7 @@
         {% for post in results %}
         <div class="post">
             <div class="post-header">
-                <a href="{{ url_for('thread', board_name=board.short_name, thread_id=post.thread_id) }}#post{{ post.id }}">Пост №{{ post.id }}</a>
+                <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=post.thread_id) }}#post{{ post.id }}">Пост №{{ post.id }}</a>
                 <span>{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
             </div>
             <blockquote>{{ post.comment|truncate(200) }}</blockquote>

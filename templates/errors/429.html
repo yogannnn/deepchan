@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}429 — Слишком много запросов{% endblock %}
 {% block content %}
-<h2>429 — Слишком много запросов</h2>
-<p>Вы отправляете запросы слишком часто. Пожалуйста, подождите {{ description.split()[-1] if description and description.split()[-1].isdigit() else 'некоторое время' }}.</p>
-<p><a href="{{ url_for('index') }}">← На главную</a></p>
+<div style="text-align: center; margin-top: 50px;">
+    <h2 style="color: var(--error);">⏳ 429 — Слишком много запросов</h2>
+    <p style="color: var(--text-dim);">{{ description or 'Вы отправляете запросы слишком часто. Пожалуйста, подождите.' }}</p>
+    <p><a href="{{ url_for('main.index') }}" style="color: var(--accent);">← На главную</a></p>
+</div>
 {% endblock %}

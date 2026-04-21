@@ -3,7 +3,7 @@
 {% block content %}
 <h2>🖼️ Глобальный каталог</h2>
 
-<form method="get" action="{{ url_for('global_catalog') }}" class="filter-form">
+<form method="get" action="{{ url_for('main.global_catalog') }}" class="filter-form">
     <label>Доска:
         <select name="board_id">
             <option value="">Все доски</option>
@@ -22,7 +22,7 @@
         {% set op = thread.posts.first() %}
         {% if op %}
         <div class="catalog-item">
-            <a href="{{ url_for('thread', board_name=thread.board.short_name, thread_id=thread.id) }}">
+            <a href="{{ url_for('board.thread', board_name=thread.board.short_name, thread_id=thread.id) }}">
                 {% if op.files.first() %}
                     <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
                 {% else %}

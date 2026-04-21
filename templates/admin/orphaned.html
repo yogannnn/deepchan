@@ -4,7 +4,7 @@
 <p>Файлы, которые есть на диске, но отсутствуют в базе данных.</p>
 
 {% if orphaned %}
-<form method="post" action="{{ url_for('admin_cleanup_files') }}">
+<form method="post" action="{{ url_for('admin.admin_cleanup_files') }}">
     <input type="hidden" name="action" value="orphaned">
     <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить все осиротевшие файлы?');">🗑️ Удалить все ({{ orphaned|length }})</button>
     {% set csrf = csrf_token('cleanup_files') %}

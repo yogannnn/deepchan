@@ -334,7 +334,7 @@ def process_comment(text, board_name, thread_id):
 def generate_captcha():
     from captcha.image import ImageCaptcha
     image = ImageCaptcha(width=280, height=90)
-    captcha_text = ''.join(random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=5))
+    captcha_text = ''.join(random.choices('0123456789', k=6))
     data = image.generate(captcha_text)
     return data, captcha_text
 
@@ -392,7 +392,7 @@ def update_icecast_playlist(playlist_file, tracks):
                 f.write(rel_path + "\n")
     # Перезагружаем Icecast
     import subprocess
-    subprocess.run(["/root/deepchan/radio_control.sh", "reload"], capture_output=True)
+    subprocess.run(["/opt/deepchan/radio_control.sh", "reload"], capture_output=True)
 def is_icecast_running():
     import subprocess
     result = subprocess.run(['pgrep', '-f', 'icecast2'], capture_output=True)

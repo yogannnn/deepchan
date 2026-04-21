@@ -2,8 +2,8 @@
 {% block admin_content %}
 <h2>Просмотр треда #{{ thread.id }}</h2>
 <p>
-    Доска: <a href="{{ url_for('board', board_name=thread.board.short_name) }}">/{{ thread.board.short_name }}/</a>
-    | <a href="{{ url_for('thread', board_name=thread.board.short_name, thread_id=thread.id) }}">Смотреть на сайте</a>
+    Доска: <a href="{{ url_for('board.board', board_name=thread.board.short_name) }}">/{{ thread.board.short_name }}/</a>
+    | <a href="{{ url_for('board.thread', board_name=thread.board.short_name, thread_id=thread.id) }}">Смотреть на сайте</a>
 </p>
 
 <div class="admin-posts">
@@ -26,7 +26,7 @@
         {% endif %}
         <blockquote>{{ post.comment | process_comment(thread.board.short_name, thread.id) | safe }}</blockquote>
         <div class="admin-post-actions">
-            <form method="post" action="{{ url_for('admin_delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост #{{ post.id }}?');">
+            <form method="post" action="{{ url_for('admin.admin_delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост #{{ post.id }}?');">
                 <button type="submit" class="action-icon">🗑️ Удалить пост</button>
     {% set csrf = csrf_token('delete_post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">

@@ -3,12 +3,12 @@
 <h2>Административная панель</h2>
 <p>Добро пожаловать. Выберите раздел:</p>
 <ul>
-    <li><a href="{{ url_for('admin_boards') }}">📋 Доски</a></li>
-    <li><a href="{{ url_for('admin_threads') }}">🧵 Треды</a></li>
-    <li><a href="{{ url_for('admin_files') }}">🖼️ Файлы</a></li>
-    <li><a href="{{ url_for('admin_bans') }}">🚫 Баны</a></li>
-    <li><a href="{{ url_for('admin_filters') }}">🔍 Вордфильтр</a></li>
-    <li><a href="{{ url_for('admin_stats') }}">📊 Статистика</a></li>
-    <li><a href="{{ url_for('admin_settings') }}">⚙️ Настройки</a></li>
+    <li><a href="{{ url_for('admin.admin_boards') }}">📋 Доски</a></li>
+    <li><a href="{{ url_for('admin.admin_threads') }}">🧵 Треды</a></li>
+    <li><a href="{{ url_for('admin.admin_files') }}">🖼️ Файлы</a></li>
+    <li><a href="{{ url_for('admin.admin_bans') }}">🚫 Баны</a></li>
+    <li><a href="{{ url_for('admin.admin_filters') }}">🔍 Вордфильтр</a></li>
+    <li><a href="{{ url_for('admin.admin_stats') }}">📊 Статистика</a></li>
+    <li><a href="{{ url_for('admin.admin_settings') }}">⚙️ Настройки</a></li>
 </ul>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
 <h2>Управление досками</h2>
-<a href="{{ url_for('admin_create_board') }}" class="btn">➕ Создать доску</a>
+<a href="{{ url_for('admin.admin_create_board') }}" class="btn">➕ Создать доску</a>
 <hr>
 <table class="admin-table">
     <thead>
@@ -21,8 +21,8 @@
             <td>{{ board.name }}</td>
             <td>{{ board.description }}</td>
             <td class="actions">
-                <a href="{{ url_for('admin_edit_board', board_id=board.id) }}" class="action-icon">✏️</a>
-                <form method="post" action="{{ url_for('admin_delete_board', board_id=board.id) }}" class="inline-form" onsubmit="return confirm('Удалить доску {{ board.short_name }}?');">
+                <a href="{{ url_for('admin.admin_edit_board', board_id=board.id) }}" class="action-icon">✏️</a>
+                <form method="post" action="{{ url_for('admin.admin_delete_board', board_id=board.id) }}" class="inline-form" onsubmit="return confirm('Удалить доску {{ board.short_name }}?');">
                     <button type="submit" class="action-icon">🗑️</button>
     {% set csrf = csrf_token('delete_board') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">

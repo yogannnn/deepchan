@@ -2,8 +2,10 @@
 {% block title %}Радио DeepChan{% endblock %}
 {% block content %}
 <h2>📻 Радио DeepChan</h2>
+<p style="margin-top: 10px; color: var(--text-dim); font-style: italic;">🎵 Сюда попадают треки из постов, которые одобрил модератор. Загружай аудио в треды, и, возможно, твой трек зазвучит в эфире!</p>
 <audio controls autoplay style="width:100%;">
-    <source src="{{ url_for('radio_stream') }}" type="audio/mpeg">
+<p style="margin-top: 10px; color: var(--text-dim); font-style: italic;">🎵 Сюда попадают треки из постов, которые одобрил модератор. Загружай аудио в треды, и, возможно, твой трек зазвучит в эфире!</p>
+    <source src="{{ url_for('radio.radio_stream') }}" type="audio/mpeg">
     Ваш браузер не поддерживает аудио.
 </audio>
 <hr>

@@ -4,13 +4,13 @@
 <h2>/{{ board.short_name }}/ - {{ board.name }}</h2>
 <p>{{ board.description }}</p>
 <hr>
-<a href="{{ url_for('board_catalog', board_name=board.short_name) }}">Каталог</a> |
-<a href="{{ url_for('board', board_name=board.short_name) }}">Обновить</a> |
-<a href="{{ url_for('board_search', board_name=board.short_name) }}">Поиск</a>
+<a href="{{ url_for('board.board_catalog', board_name=board.short_name) }}">Каталог</a> |
+<a href="{{ url_for('board.board', board_name=board.short_name) }}">Обновить</a> |
+<a href="{{ url_for('board.board_search', board_name=board.short_name) }}">Поиск</a>
 <hr>
 
 <h3>Создать тред</h3>
-<form method="post" enctype="multipart/form-data" action="{{ url_for('create_post', board_name=board.short_name) }}">
+<form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name) }}">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
@@ -20,24 +20,31 @@
     <label>Файлы: <input type="file" name="files" multiple accept="*/*"></label><br>
     <label>Пароль: <input type="password" name="password"></label><br>
     {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    <input type="submit" value="Создать">
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
+    {% endif %}
+    {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
-        <img src="{{ url_for('captcha_route') }}" alt="captcha" class="captcha-img" loading="lazy" onclick="this.src='{{ url_for('captcha_route') }}?'+Math.random();">
-        <noscript><br><form method="get" style="display:inline;"><button type="submit" class="btn-link">Обновить код</button></form></noscript>
+        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
-    <input type="submit" value="Создать">
 </form>
 <hr>
 
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board', board_name=board.short_name, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
     <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board', board_name=board.short_name, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}
 </div>
 <hr>
@@ -49,13 +56,13 @@
     <div class="thread" id="thread{{ thread.id }}">
         {% set op = thread.posts.first() %}
         {% if op and op.files.first() %}
-        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
-            <img src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb" loading="lazy">
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
+            <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
         </a>
         {% endif %}
         <div class="thread-info">
             <div class="thread-title">
-                <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
+                <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
                     {{ op.subject|e if op and op.subject else 'Без темы' }}
                 </a>
                 <span class="thread-badges">
@@ -70,7 +77,7 @@
             </div>
         </div>
         <div class="thread-actions">
-            <a href="{{ url_for('hide_thread', board_name=board.short_name, thread_id=thread.id) }}">Скрыть</a>
+            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">Скрыть</a>
         </div>
     </div>
     <hr>
@@ -82,11 +89,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board', board_name=board.short_name, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">← Назад</a>
     {% endif %}
     <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board', board_name=board.short_name, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">Вперёд →</a>
     {% endif %}
 </div>
 {% endif %}

@@ -7,6 +7,6 @@
     <label>Исполнитель: <input type="text" name="artist" value="{{ track.artist or '' }}"></label>
     <label>Название: <input type="text" name="title" value="{{ track.title or '' }}"></label>
     <button type="submit" class="btn">Сохранить</button>
-    <a href="{{ url_for('admin_radio') }}" class="btn">Отмена</a>
+    <a href="{{ '/admin/radio' }}" class="btn">Отмена</a>
 </form>
 {% endblock %}

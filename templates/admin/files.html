@@ -12,7 +12,7 @@
         </select>
     </label>
     <label>
-        <a href="{{ url_for('admin_files', board_id=selected_board, show_dupes=1) }}">🔍 Показать дубликаты</a>
+        <a href="{{ url_for('admin.admin_files', board_id=selected_board, show_dupes=1) }}">🔍 Показать дубликаты</a>
     </label>
     <noscript><input type="submit" value="Применить"></noscript>
     {% set csrf = csrf_token('delete_file') %}
@@ -21,7 +21,7 @@
 </form>
 
 <div class="admin-actions">
-    <a href="{{ url_for('admin_orphaned_files') }}" class="btn">🧹 Найти осиротевшие файлы</a>
+    <a href="{{ url_for('admin.admin_orphaned_files') }}" class="btn">🧹 Найти осиротевшие файлы</a>
 </div>
 
 {% if show_dupes %}
@@ -34,7 +34,7 @@
             <li>
                 <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">{{ pf.file_path }}</a>
                 (пост #{{ pf.post_id }}, доска /{{ pf.post.thread.board.short_name }}/)
-                <form method="post" action="{{ url_for('admin_delete_file', file_id=pf.id, board_id=selected_board) }}" style="display:inline;" onsubmit="return confirm('Удалить файл?');">
+                <form method="post" action="{{ url_for('admin.admin_delete_file', file_id=pf.id, board_id=selected_board) }}" style="display:inline;" onsubmit="return confirm('Удалить файл?');">
                     <button type="submit" class="action-icon">🗑️</button>
     {% set csrf = csrf_token('delete_file') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
@@ -74,13 +74,13 @@
             <td>{{ (pf.file_size / 1024) | round(1) }}</td>
             <td>/{{ pf.post.thread.board.short_name }}/</td>
             <td>
-                <a href="{{ url_for('admin_thread_detail', thread_id=pf.post.thread.id) }}#post{{ pf.post.id }}">
+                <a href="{{ url_for('admin.admin_thread_detail', thread_id=pf.post.thread.id) }}#post{{ pf.post.id }}">
                     #{{ pf.post.id }}
                 </a>
             </td>
             <td><code>{{ pf.md5_hash[:8] if pf.md5_hash else "—" }}...</code></td>
             <td class="actions">
-                <form method="post" action="{{ url_for('admin_delete_file', file_id=pf.id, board_id=selected_board) }}" onsubmit="return confirm('Удалить файл?');">
+                <form method="post" action="{{ url_for('admin.admin_delete_file', file_id=pf.id, board_id=selected_board) }}" onsubmit="return confirm('Удалить файл?');">
                     <button type="submit" class="action-icon">🗑️</button>
     {% set csrf = csrf_token('delete_file') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
@@ -96,7 +96,7 @@
 
 <hr>
 <h3>Очистка</h3>
-<form method="post" action="{{ url_for('admin_cleanup_files') }}" onsubmit="return confirm('Удалить треды старше 30 дней?');">
+<form method="post" action="{{ url_for('admin.admin_cleanup_files') }}" onsubmit="return confirm('Удалить треды старше 30 дней?');">
     <input type="hidden" name="action" value="old_threads">
     <button type="submit" class="btn btn-danger">🧹 Удалить старые треды (старше 30 дней)</button>
     {% set csrf = csrf_token('delete_file') %}

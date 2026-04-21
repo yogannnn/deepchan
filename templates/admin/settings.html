@@ -128,5 +128,8 @@
     </div>
 
     <button type="submit" class="btn">Сохранить</button>
+    {% set csrf = csrf_token("save_settings") %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
 </form>
 {% endblock %}

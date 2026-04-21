@@ -2,7 +2,7 @@
 {% block title %}Глобальный поиск{% endblock %}
 {% block content %}
 <h2>🔍 Глобальный поиск</h2>
-<form method="get" action="{{ url_for('global_search') }}">
+<form method="get" action="{{ url_for('main.global_search') }}">
     <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
     <select name="board_id">
         <option value="">Все доски</option>
@@ -20,7 +20,7 @@
         {% for post in results %}
         <div class="post">
             <div class="post-header">
-                <a href="{{ url_for('thread', board_name=post.thread.board.short_name, thread_id=post.thread.id) }}#post{{ post.id }}">
+                <a href="{{ url_for('board.thread', board_name=post.thread.board.short_name, thread_id=post.thread.id) }}#post{{ post.id }}">
                     /{{ post.thread.board.short_name }}/ #{{ post.id }}
                 </a>
                 <span>{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>

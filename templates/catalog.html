@@ -2,14 +2,14 @@
 {% block title %}/{{ board.short_name }}/ - Каталог{% endblock %}
 {% block content %}
 <h2>/{{ board.short_name }}/ - Каталог</h2>
-<a href="{{ url_for('board', board_name=board.short_name) }}">← К доске</a>
+<a href="{{ url_for('board.board', board_name=board.short_name) }}">← К доске</a>
 <hr>
 <div class="catalog">
 {% for thread in threads %}
     {% set op = thread.posts.first() %}
     {% if op %}
     <div class="catalog-item">
-        <a href="{{ url_for('thread', board_name=board.short_name, thread_id=thread.id) }}">
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
             {% if op.files.first() %}
                 <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
             {% else %}

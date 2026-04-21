@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
 <h2>Управление банами</h2>
-<form method="post" action="{{ url_for('admin_add_ban') }}" class="filter-form">
+<form method="post" action="{{ url_for('admin.admin_add_ban') }}" class="filter-form">
     <label>IP: <input type="text" name="ip_pattern" required placeholder="127.0.0.1"></label>
     <label>Причина: <input type="text" name="reason"></label>
     <label>Срок (дней, пусто — навсегда): <input type="number" name="expires_days" min="1"></label>
@@ -24,13 +24,13 @@
             <td>{{ ban.expires_at.strftime('%d.%m.%y %H:%M') if ban.expires_at else 'Никогда' }}</td>
             <td>{{ '✅' if ban.active else '❌' }}</td>
             <td class="actions">
-                <form method="post" action="{{ url_for('admin_toggle_ban', ban_id=ban.id) }}" style="display:inline;">
+                <form method="post" action="{{ url_for('admin.admin_toggle_ban', ban_id=ban.id) }}" style="display:inline;">
                     <button type="submit" class="action-icon">🔄</button>
     {% set csrf = csrf_token('add_ban') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
-                <form method="post" action="{{ url_for('admin_delete_ban', ban_id=ban.id) }}" style="display:inline;" onsubmit="return confirm('Снять бан?');">
+                <form method="post" action="{{ url_for('admin.admin_delete_ban', ban_id=ban.id) }}" style="display:inline;" onsubmit="return confirm('Снять бан?');">
                     <button type="submit" class="action-icon">🗑️</button>
     {% set csrf = csrf_token('add_ban') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">

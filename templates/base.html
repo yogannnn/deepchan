@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABgElEQVR42mNgoBFgQhUwFjAwMPxngAJmFDEgBAsg2fD/A4gyQIkLUpR8QMpBl7QCoFoY/jMwMDAxMDFA5f8z/P8P0gdlMzCAaAYGkDwb1BCgHCuS4RCNQAOeA1UzgNVCdIINh7L/Q8yB8kHyjGAdQHf8R1EF9BkDgqDQA6lD1gS2AixmYgAaihQZoOiD+ARMAzKDET0QkGMExes/kCyDHpwIw1ADGEEcZgZGRkgU/YeIAxkMmMD8j5QoAFlAdgWQZkKxgBHZBcgqgFoZgWpAjv0PjP7/IJ2QoAdx0c0FKYaY8h9iB9gFqIoY/4M4CMMhxvwHhicoAwL5IF04bQAFCiR0gSIIFiBeB2xWg6gD8sH2A11BsAcgIQsKZ0j6AAUPMuM/JOmgZ1t0PogGc9HVgDSgGgAJGUZ0y6GqkF2EFhfITFQLkAUZcUYFkMtAQLQYQ1QM/RsDAuB0A1QNZEHMQlL5DyQJkgTKg/0P4sD0g1RAfAVkA9X8B3kf6DrG/zAXg9yBIjAW4Yf/fwgAANIeW53oY8/YAAAAAElFTkSuQmCC">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <title>{% block title %}i2p imageboard{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% if auto_refresh %}
@@ -20,7 +20,7 @@
         document.getElementById("js-warning").style.display = "block";
     </script>
     <header>
-        <h1><a href="{{ url_for('index') }}">{{ config.SITE_TITLE or 'Имиджборда' }}</a></h1>
+        <h1><a href="{{ url_for('main.index') }}">{{ config.SITE_TITLE or 'Имиджборда' }}</a></h1>
     </header>
     <main>
         <div class="container">
