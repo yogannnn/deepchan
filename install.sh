@@ -46,8 +46,9 @@ chown deepchan:deepchan logs
 touch logs/board.log
 chown deepchan:deepchan logs/board.log
 mkdir -p static/{uploads,radio/playlist} instance
+mkdir -p static/uploads/thumbs
 chown -R deepchan:deepchan "$PROJECT_DIR"
-chmod 755 static/{uploads,radio}
+chmod -R 755 static/uploads static/radio
 
 # 7. Инициализируем БД и дефолтные настройки
 chown -R deepchan:deepchan instance

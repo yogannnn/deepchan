@@ -20,20 +20,12 @@
     <label>Файлы: <input type="file" name="files" multiple accept="*/*"></label><br>
     <label>Пароль: <input type="password" name="password"></label><br>
     {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    <input type="submit" value="Создать">
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
-    {% endif %}
-    {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
+    <input type="submit" value="Создать">
 </form>
 <hr>
 
