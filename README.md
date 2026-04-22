@@ -31,8 +31,11 @@
 Выполните в терминале:
 
   git clone https://github.com/yogannnn/deepchan.git /opt/deepchan
+
   cd /opt/deepchan
+
   chmod +x install.sh
+
   sudo ./install.sh
 
 После выполнения скрипта:
