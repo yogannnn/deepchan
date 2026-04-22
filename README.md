@@ -45,8 +45,11 @@
 Для работы в i2p добавьте туннель типа http на порт 5000 в конфигурации вашего i2pd/роутера.
 
 Управление сервисом:
+
   systemctl status deepchan   # состояние
+
   systemctl restart deepchan  # перезапуск
+
   journalctl -u deepchan -f   # логи
 
 ---
