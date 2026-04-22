@@ -10,6 +10,7 @@
             <th>Короткое имя</th>
             <th>Название</th>
             <th>Описание</th>
+            <th>Порядок</th>
             <th>Действия</th>
         </tr>
     </thead>
@@ -20,13 +21,27 @@
             <td>/{{ board.short_name }}/</td>
             <td>{{ board.name }}</td>
             <td>{{ board.description }}</td>
+            <td>
+                <form method="post" action="{{ url_for('admin.admin_move_board_up', board_id=board.id) }}" style="display:inline;">
+                    {% set csrf = csrf_token('move_board') %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+                    <button type="submit" class="action-icon" title="Переместить вверх" {% if loop.first %}disabled{% endif %}>⬆️</button>
+                </form>
+                <form method="post" action="{{ url_for('admin.admin_move_board_down', board_id=board.id) }}" style="display:inline;">
+                    {% set csrf = csrf_token('move_board') %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+                    <button type="submit" class="action-icon" title="Переместить вниз" {% if loop.last %}disabled{% endif %}>⬇️</button>
+                </form>
+            </td>
             <td class="actions">
                 <a href="{{ url_for('admin.admin_edit_board', board_id=board.id) }}" class="action-icon">✏️</a>
                 <form method="post" action="{{ url_for('admin.admin_delete_board', board_id=board.id) }}" class="inline-form" onsubmit="return confirm('Удалить доску {{ board.short_name }}?');">
+                    {% set csrf = csrf_token('delete_board') %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     <button type="submit" class="action-icon">🗑️</button>
-    {% set csrf = csrf_token('delete_board') %}
-    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
-    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                 </form>
             </td>
         </tr>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>/{{ board.short_name }}/ - Тред #{{ thread.id }}</title>
+    <description>{{ thread.posts.first().subject|e or 'Без темы' }}</description>
+    <link>{{ site_url }}/{{ board.short_name }}/thread/{{ thread.id }}</link>
+    <atom:link href="{{ site_url }}/{{ board.short_name }}/thread/{{ thread.id }}/rss" rel="self" type="application/rss+xml"/>
+    {% for post in posts %}
+    <item>
+        <title>{{ post.name|e }} {% if post.subject %}- {{ post.subject|e }}{% endif %}</title>
+        <link>{{ site_url }}/{{ board.short_name }}/thread/{{ thread.id }}#post{{ post.id }}</link>
+        <guid isPermaLink="true">{{ site_url }}/{{ board.short_name }}/thread/{{ thread.id }}#post{{ post.id }}</guid>
+        <pubDate>{{ post.created_at.strftime('%a, %d %b %Y %H:%M:%S GMT') }}</pubDate>
+        <description><![CDATA[{{ post.comment|e }}]]></description>
+    </item>
+    {% endfor %}
+</channel>
+</rss>

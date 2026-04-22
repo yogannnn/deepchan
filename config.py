@@ -38,3 +38,4 @@ SQLALCHEMY_ENGINE_OPTIONS = {
     }
 }
 RADIO_FOLDER = os.path.join(basedir, 'static', 'radio')
+SITE_URL = os.environ.get('SITE_URL', 'http://deepchan.i2p')

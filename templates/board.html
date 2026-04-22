@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block rss %}
+<link rel="alternate" type="application/rss+xml" title="RSS /{{ board.short_name }}/" href="{{ url_for('board.board_rss', board_name=board.short_name) }}">
+{% endblock %}
 {% block title %}/{{ board.short_name }}/ - {{ board.name }}{% endblock %}
 {% block content %}
 <h2>/{{ board.short_name }}/ - {{ board.name }}</h2>
@@ -6,7 +9,8 @@
 <hr>
 <a href="{{ url_for('board.board_catalog', board_name=board.short_name) }}">Каталог</a> |
 <a href="{{ url_for('board.board', board_name=board.short_name) }}">Обновить</a> |
-<a href="{{ url_for('board.board_search', board_name=board.short_name) }}">Поиск</a>
+<a href="{{ url_for('board.board_search', board_name=board.short_name) }}">Поиск</a> |
+<a href="{{ url_for('board.board_rss', board_name=board.short_name) }}">📡 RSS</a>
 <hr>
 
 <h3>Создать тред</h3>

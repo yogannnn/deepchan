@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <title>{% block title %}i2p imageboard{% endblock %}</title>
+    {% block rss %}{% endblock %}
     <!-- Критические стили для мгновенной отрисовки -->
     <style>
         :root{--bg:#0a0f0a;--text:#b3ffb3;--accent:#33cc33;--link:#66ff66;--border:#1e3b1e}

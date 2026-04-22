@@ -213,6 +213,10 @@ label {
     border-bottom: 1px dashed var(--border);
     color: var(--text-dim);
 }
+.post-author {
+    display: inline;
+    white-space: nowrap;
+}
 .name { color: var(--accent); font-weight: bold; }
 .subject { color: var(--accent-glow); font-weight: bold; }
 .post-id a { color: var(--text-dim); }
@@ -272,6 +276,11 @@ blockquote {
     color: var(--text);
     font-weight: bold;
 }
+.catalog-item-board {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin: 5px 0;
+}
 
 /* Пагинация */
 .pagination {
@@ -297,19 +306,6 @@ blockquote {
 
 /* Поиск */
 .search-highlight { background: #2a4a2a; }
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    body { font-size: 16px; }
-    .catalog { grid-template-columns: repeat(2, 1fr); }
-    .thread { flex-direction: column; }
-    .thread-actions { align-self: flex-end; }
-    .post-header { flex-direction: column; align-items: flex-start; gap: 6px; }
-    button, input[type="submit"] { width: 100%; }
-}
-@media (max-width: 480px) {
-    .catalog { grid-template-columns: 1fr; }
-}
 
 /* Компактное удаление */
 .post-delete {
@@ -360,33 +356,6 @@ blockquote {
     position: relative;
 }
 
-/* Адаптив для кнопки удаления на мобильных */
-@media (max-width: 768px) {
-    .post-delete details {
-        font-size: 1rem;
-    }
-    .post-delete .delete-form {
-        position: static;
-        margin-top: 10px;
-        width: 100%;
-    }
-    .post-delete .delete-form input {
-        width: 100%;
-        margin-bottom: 5px;
-    }
-    .post-delete .delete-form button {
-        width: 100%;
-    }
-    .post-header {
-        flex-wrap: wrap;
-    }
-    .post-delete {
-        margin-left: 0;
-        width: 100%;
-        text-align: right;
-    }
-}
-
 /* Стили админки */
 .admin-nav {
     margin-bottom: 20px;
@@ -403,44 +372,41 @@ blockquote {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid var(--border);
+    vertical-align: middle;
 }
 .admin-table th {
     background: var(--surface-light);
     color: var(--accent);
 }
-.link-btn {
-    background: none;
-    border: none;
-    color: var(--link);
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0 5px;
-}
-.link-btn:hover {
-    color: var(--link-hover);
-}
 
-/* Стили для иконок действий в админке */
-.actions {
-    white-space: nowrap;
-}
-.action-icon {
-    background: none !important;
+/* Иконки действий в админке */
+.admin-table .action-icon,
+.admin-table form .action-icon {
+    background: transparent !important;
     border: none !important;
-    color: var(--link) !important;
+    box-shadow: none !important;
+    color: #66ff66 !important;
     font-size: 1.2rem;
     padding: 0 5px !important;
     margin: 0 !important;
-    box-shadow: none !important;
-    text-decoration: none;
     cursor: pointer;
+    text-decoration: none;
     display: inline-block;
     vertical-align: middle;
 }
-.action-icon:hover {
-    color: var(--link-hover) !important;
-    background: none !important;
+.admin-table .action-icon:hover {
+    color: #99ff99 !important;
+    background: transparent !important;
     transform: none !important;
+}
+.admin-table .action-icon:focus {
+    outline: none !important;
+}
+.admin-table .action-icon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: transparent !important;
+    border: none !important;
 }
 .inline-form {
     display: inline;
@@ -472,74 +438,6 @@ blockquote {
 .bulk-actions select {
     width: auto;
 }
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-.admin-table th, .admin-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-}
-.admin-table th {
-    background: var(--surface-light);
-    color: var(--accent);
-}
-.admin-posts .post {
-    position: relative;
-}
-.admin-post-actions {
-    margin-top: 15px;
-    text-align: right;
-}
-
-/* Админка: файлы */
-.flash {
-    padding: 10px;
-    background: #1a2a1a;
-    border: 1px solid #33cc33;
-    margin-bottom: 20px;
-    border-radius: 6px;
-}
-code {
-    background: #050805;
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-family: monospace;
-}
-.btn-danger {
-    background: #4a1a1a !important;
-    border-color: #aa5555 !important;
-}
-.btn-danger:hover {
-    background: #6e2a2a !important;
-}
-
-/* Админка: файлы */
-.flash {
-    padding: 10px;
-    background: #1a2a1a;
-    border: 1px solid #33cc33;
-    margin-bottom: 20px;
-    border-radius: 6px;
-}
-code {
-    background: #050805;
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-family: monospace;
-}
-.btn-danger {
-    background: #4a1a1a !important;
-    border-color: #aa5555 !important;
-}
-.btn-danger:hover {
-    background: #6e2a2a !important;
-}
-
-/* Админка: файлы */
 .flash {
     padding: 10px;
     background: #1a2a1a;
@@ -577,7 +475,6 @@ code {
 .captcha-img:hover {
     border-color: var(--accent);
 }
-
 .btn-link {
     background: none !important;
     border: none !important;
@@ -658,12 +555,6 @@ footer small a {
     text-decoration: none;
 }
 
-.catalog-item-board {
-    font-size: 0.8rem;
-    color: var(--accent);
-    margin: 5px 0;
-}
-
 .inline-quote {
     margin: 10px 0 10px 20px;
     padding: 8px 15px;
@@ -671,12 +562,6 @@ footer small a {
     background: #0d140d;
     color: #9acc9a;
     font-style: italic;
-}
-
-.clearnet-warning {
-    color: #ff6666;
-    font-weight: bold;
-    margin-left: 4px;
 }
 
 /* BB-коды */
@@ -702,10 +587,6 @@ pre {
     padding: 10px;
     overflow-x: auto;
 }
-code {
-    font-family: 'Courier New', monospace;
-    color: #b3ffb3;
-}
 
 .announcement {
     margin-top: 30px;
@@ -717,26 +598,6 @@ code {
 }
 
 /* Обновлённый стиль предупреждения о клирнете */
-.clearnet-warning {
-    display: inline-block;
-    background-color: #cc0000;
-    color: #aaccff;          /* мягкий синий */
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 2px 5px;
-    margin-left: 5px;
-    border-radius: 4px;
-    vertical-align: super;
-    line-height: 1;
-    text-decoration: none;
-    border: 1px solid #ff6666;
-}
-.clearnet-warning:hover {
-    background-color: #ff2222;
-    color: #ffffff;
-}
-
-/* Компактная метка ClearNet */
 .clearnet-warning {
     display: inline-block;
     background-color: #cc0000;
@@ -758,20 +619,11 @@ textarea {
     resize: vertical;
 }
 
+/* Трипкоды и админская плашка */
 .tripcode {
     color: #66ff66;
     font-weight: normal;
     margin-left: 4px;
-}
-
-.post-author {
-    display: inline;
-    white-space: nowrap;
-}
-
-.post-author {
-    display: inline;
-    white-space: nowrap;
 }
 .admin-badge {
     display: inline-block;
@@ -787,8 +639,39 @@ textarea {
     text-decoration: none;
     border: none;
 }
-.tripcode {
-    color: #66ff66;
-    font-weight: normal;
-    margin-left: 4px;
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    body { font-size: 16px; }
+    .catalog { grid-template-columns: repeat(2, 1fr); }
+    .thread { flex-direction: column; }
+    .thread-actions { align-self: flex-end; }
+    .post-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+    button, input[type="submit"] { width: 100%; }
+    .post-delete details {
+        font-size: 1rem;
+    }
+    .post-delete .delete-form {
+        position: static;
+        margin-top: 10px;
+        width: 100%;
+    }
+    .post-delete .delete-form input {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    .post-delete .delete-form button {
+        width: 100%;
+    }
+    .post-header {
+        flex-wrap: wrap;
+    }
+    .post-delete {
+        margin-left: 0;
+        width: 100%;
+        text-align: right;
+    }
+}
+@media (max-width: 480px) {
+    .catalog { grid-template-columns: 1fr; }
 }

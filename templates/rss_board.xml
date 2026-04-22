@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>/{{ board.short_name }}/ - {{ board.name }}</title>
+    <description>{{ board.description or 'DeepChan Board' }}</description>
+    <link>{{ site_url }}/{{ board.short_name }}/</link>
+    <atom:link href="{{ site_url }}/{{ board.short_name }}/rss" rel="self" type="application/rss+xml"/>
+    {% for thread in threads %}
+    {% set op = thread.posts.first() %}
+    <item>
+        <title>{% if op.subject %}{{ op.subject|e }}{% else %}Без темы{% endif %}</title>
+        <link>{{ site_url }}/{{ board.short_name }}/thread/{{ thread.id }}</link>
+        <guid isPermaLink="true">{{ site_url }}/{{ board.short_name }}/thread/{{ thread.id }}</guid>
+        <pubDate>{{ thread.created_at.strftime('%a, %d %b %Y %H:%M:%S GMT') }}</pubDate>
+        <description><![CDATA[{{ op.comment|e if op else '' }}]]></description>
+    </item>
+    {% endfor %}
+</channel>
+</rss>

@@ -274,3 +274,25 @@ def report_post(board_name, post_id):
         return redirect(url_for('board.thread', board_name=board_name, thread_id=post.thread_id))
     
     return render_template('report.html', board=board, post=post)
+
+# ===== RSS =====
+from flask import Response
+
+def render_rss(template, **context):
+    xml = render_template(template, **context)
+    return Response(xml, mimetype='application/rss+xml')
+
+@board_bp.route('/<string:board_name>/rss')
+def board_rss(board_name):
+    board = Board.query.filter_by(short_name=board_name).first_or_404()
+    threads = board.threads.filter(Thread.posts.any()).order_by(Thread.created_at.desc()).limit(20).all()
+    site_url = current_app.config.get('SITE_URL', 'http://deepchan.i2p')
+    return render_rss('rss_board.xml', board=board, threads=threads, site_url=site_url)
+
+@board_bp.route('/<string:board_name>/thread/<int:thread_id>/rss')
+def thread_rss(board_name, thread_id):
+    board = Board.query.filter_by(short_name=board_name).first_or_404()
+    thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
+    posts = thread.posts.order_by(Post.created_at.desc()).limit(50).all()
+    site_url = current_app.config.get('SITE_URL', 'http://deepchan.i2p')
+    return render_rss('rss_thread.xml', board=board, thread=thread, posts=posts, site_url=site_url)

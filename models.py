@@ -10,6 +10,7 @@ class Board(db.Model):
     short_name = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text)
+    position = db.Column(db.Integer, default=0)  # новое поле для сортировки
     threads = db.relationship('Thread', backref='board', lazy='dynamic', cascade='all, delete-orphan')
 
 class Thread(db.Model):

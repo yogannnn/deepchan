@@ -54,7 +54,7 @@ def admin_index():
 @admin_bp.route('/boards')
 @admin_required
 def admin_boards():
-    boards = Board.query.all()
+    boards = Board.query.order_by(Board.position).all()
     return render_template('admin/boards.html', boards=boards)
 
 @admin_bp.route('/boards/create', methods=['GET', 'POST'])
@@ -102,7 +102,7 @@ def admin_threads():
     if board_id:
         query = query.filter(Thread.board_id == board_id)
     threads = query.order_by(Thread.bumped_at.desc()).all()
-    boards = Board.query.all()
+    boards = Board.query.order_by(Board.position).all()
     return render_template('admin/threads.html', threads=threads, boards=boards, selected_board=board_id)
 
 @admin_bp.route('/threads/toggle_pin/<int:thread_id>', methods=['POST'])
@@ -203,7 +203,7 @@ def admin_files():
     if board_id:
         query = query.filter(Board.id == board_id)
     files = query.order_by(PostFile.id.desc()).limit(500).all()
-    boards = Board.query.all()
+    boards = Board.query.order_by(Board.position).all()
     duplicates = []
     show_dupes = request.args.get('show_dupes') == '1'
     if show_dupes:
@@ -508,3 +508,26 @@ def admin_delete_report(report_id):
     db.session.commit()
     flash('Жалоба удалена.', 'success')
     return redirect(url_for('admin.admin_reports'))
+
+@admin_bp.route('/boards/move/<int:board_id>/up', methods=['POST'])
+@admin_required
+@csrf_protect('move_board')
+def admin_move_board_up(board_id):
+    board = Board.query.get_or_404(board_id)
+    if board.position > 0:
+        prev_board = Board.query.filter(Board.position < board.position).order_by(Board.position.desc()).first()
+        if prev_board:
+            board.position, prev_board.position = prev_board.position, board.position
+            db.session.commit()
+    return redirect(url_for('admin.admin_boards'))
+
+@admin_bp.route('/boards/move/<int:board_id>/down', methods=['POST'])
+@admin_required
+@csrf_protect('move_board')
+def admin_move_board_down(board_id):
+    board = Board.query.get_or_404(board_id)
+    next_board = Board.query.filter(Board.position > board.position).order_by(Board.position).first()
+    if next_board:
+        board.position, next_board.position = next_board.position, board.position
+        db.session.commit()
+    return redirect(url_for('admin.admin_boards'))
