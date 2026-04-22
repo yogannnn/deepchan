@@ -7,26 +7,29 @@
     <title>{% block title %}i2p imageboard{% endblock %}</title>
     <!-- Критические стили для мгновенной отрисовки -->
     <style>
-        :root{--bg:#0a0f0a;--text:#b3ffb3;--accent:#33cc33;--link:#66ff66}
+        :root{--bg:#0a0f0a;--text:#b3ffb3;--accent:#33cc33;--link:#66ff66;--border:#1e3b1e}
         *{box-sizing:border-box;margin:0;padding:0}
         body{background:var(--bg);color:var(--text);font-family:"Courier New",Courier,monospace;line-height:1.5;font-size:14px;padding:10px;margin:0}
         .container{max-width:1200px;margin:0 auto}
         a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
-        header,footer{text-align:center;padding:15px 0;border-bottom:1px solid #1e3b1e;border-top:1px solid #1e3b1e;margin-bottom:20px}
-        h1,h2,h3{color:#66ff66;font-weight:400;border-bottom:1px dashed #1e3b1e;padding-bottom:8px;margin-bottom:15px}
-        hr{border:none;border-top:1px solid #1e3b1e;margin:20px 0}
-        input,textarea,button,select{background:#050805;border:1px solid #1e3b1e;color:var(--text);padding:10px 12px;font-family:inherit;font-size:14px;border-radius:6px}
+        header,footer{text-align:center;padding:15px 0;border-bottom:1px solid var(--border);border-top:1px solid var(--border);margin-bottom:20px}
+        h1,h2,h3{color:#66ff66;font-weight:400;border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:15px}
+        hr{border:none;border-top:1px solid var(--border);margin:20px 0}
+        input,textarea,button,select{background:#050805;border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:inherit;font-size:14px;border-radius:6px}
         button,input[type=submit]{background:#1a2a1a;color:var(--text);font-weight:700;cursor:pointer;border:1px solid #2a6e2a}
-        .post,.thread{background:#0d140d;border:1px solid #1e3b1e;border-radius:12px;padding:18px;margin-bottom:20px}
-        .post-header{display:flex;flex-wrap:wrap;gap:15px;margin-bottom:15px;padding-bottom:10px;border-bottom:1px dashed #1e3b1e}
+        .thread,.post{background:#0d140d;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px}
+        .catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin-top:25px}
+        .catalog-item{background:#0d140d;border:1px solid var(--border);border-radius:12px;padding:15px;text-align:center}
+        .post-header{display:flex;flex-wrap:wrap;gap:15px;margin-bottom:15px;padding-bottom:10px;border-bottom:1px dashed var(--border)}
         .name{color:#33cc33;font-weight:700}
         .subject{color:#66ff66;font-weight:700}
         .sage{color:#aa5555;font-weight:700}
         .admin-badge{background:#c00;color:#aaccff;font-size:.65rem;padding:1px 4px;border-radius:3px;vertical-align:super}
         .tripcode{color:#66ff66;margin-left:4px}
-        @media (max-width:768px){body{font-size:16px}.post-header{flex-direction:column;gap:6px}}
+        @media (max-width:768px){body{font-size:16px}.post-header{flex-direction:column;gap:6px}.catalog{grid-template-columns:repeat(2,1fr)}}
+        @media (max-width:480px){.catalog{grid-template-columns:1fr}}
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=aac3bc36">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ config.STYLE_VERSION or '1' }}">
     {% if auto_refresh %}
     <meta http-equiv="refresh" content="{{ auto_refresh }}">
     {% endif %}
