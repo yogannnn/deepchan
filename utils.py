@@ -69,7 +69,7 @@ def add_watermark(img, text, position=(5, 5)):
 def get_media_duration(filepath):
     try:
         result = subprocess.run(
-            ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
+            ['/usr/bin/ffprobe', '-v', 'error', '-show_entries', 'format=duration',
              '-of', 'json', filepath],
             capture_output=True, text=True, timeout=10
         )
@@ -84,7 +84,7 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
     try:
         tmp_thumb = thumb_path + ".tmp.webp"
         subprocess.run(
-            ['ffmpeg', '-i', video_path, '-ss', '00:00:01', '-vframes', '1',
+            ['/usr/bin/ffmpeg', '-i', video_path, '-ss', '00:00:01', '-vframes', '1',
              '-vf', f'scale={width}:-1', '-y', tmp_thumb],
             capture_output=True, timeout=15, check=True
         )
@@ -99,7 +99,7 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
 def clean_media_metadata(input_path, output_path, is_audio=False):
     try:
         subprocess.run(
-            ['ffmpeg', '-i', input_path, '-map_metadata', '-1', '-c', 'copy', '-y', output_path],
+            ['/usr/bin/ffmpeg', '-i', input_path, '-map_metadata', '-1', '-c', 'copy', '-y', output_path],
             capture_output=True, timeout=30, check=True
         )
         return True
@@ -364,14 +364,14 @@ def get_file_hash(filepath):
 def convert_for_radio(input_path, output_path, artist=None, title=None, bitrate='128k'):
     tmp_path = output_path + '.tmp.mp3'
     cmd = [
-        'ffmpeg', '-i', input_path,
+        '/usr/bin/ffmpeg', '-i', input_path,
         '-b:a', bitrate,
         '-map_metadata', '-1',
         '-y', tmp_path
     ]
     subprocess.run(cmd, capture_output=True, timeout=60, check=True)
     if artist or title:
-        cmd2 = ['ffmpeg', '-i', tmp_path, '-c', 'copy']
+        cmd2 = ['/usr/bin/ffmpeg', '-i', tmp_path, '-c', 'copy']
         if artist:
             cmd2 += ['-metadata', f'artist={artist}']
         if title:
