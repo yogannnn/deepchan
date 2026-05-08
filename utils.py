@@ -127,7 +127,7 @@ def save_files(files):
     if not files:
         return saved
 
-    max_files = current_app.config.get('MAX_FILES', 4)
+    max_files = int(current_app.config.get('MAX_FILES', 4))
     if len(files) > max_files:
         abort(400, description=f"Слишком много файлов (максимум {max_files})")
 
