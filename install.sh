@@ -45,8 +45,7 @@ mkdir -p logs
 chown deepchan:deepchan logs
 touch logs/board.log
 chown deepchan:deepchan logs/board.log
-mkdir -p static/{uploads,radio/playlist} instance
-mkdir -p static/uploads/thumbs
+mkdir -p static/{uploads,radio/playlist,uploads/thumbs} instance
 chown -R deepchan:deepchan "$PROJECT_DIR"
 chmod -R 755 static/uploads static/radio
 
@@ -55,11 +54,35 @@ chown -R deepchan:deepchan instance
 source .venv/bin/activate
 python << 'PYTHON_SCRIPT'
 from app import app, db
-from models import Setting, Board
+from models import Setting, Board, Report
+from sqlalchemy import inspect, text
 
 with app.app_context():
     db.create_all()
-    
+
+    # Миграция: добавляем position, если нет
+    with db.engine.connect() as conn:
+        res = conn.execute(text("PRAGMA table_info(board)"))
+        cols = [row[1] for row in res]
+        if 'position' not in cols:
+            conn.execute(text("ALTER TABLE board ADD COLUMN position INTEGER DEFAULT 0"))
+            conn.execute(text("UPDATE board SET position = id WHERE position = 0"))
+            conn.commit()
+
+    # Миграция: tripcode и is_admin_post
+    with db.engine.connect() as conn:
+        res = conn.execute(text("PRAGMA table_info(post)"))
+        cols = [row[1] for row in res]
+        if 'tripcode' not in cols:
+            conn.execute(text("ALTER TABLE post ADD COLUMN tripcode VARCHAR(32)"))
+        if 'is_admin_post' not in cols:
+            conn.execute(text("ALTER TABLE post ADD COLUMN is_admin_post BOOLEAN DEFAULT 0"))
+        conn.commit()
+
+    # Таблица report
+    if not inspect(db.engine).has_table('report'):
+        Report.__table__.create(db.engine)
+
     defaults = {
         'SITE_TITLE': 'DeepChan',
         'THREADS_PER_PAGE': '30',
@@ -122,10 +145,10 @@ with app.app_context():
     for key, value in defaults.items():
         if not Setting.query.get(key):
             db.session.add(Setting(key=key, value=value))
-    
+
     if not Board.query.filter_by(short_name='b').first():
         db.session.add(Board(short_name='b', name='Бред', description='Общий раздел'))
-    
+
     db.session.commit()
     print("✅ Дефолтные настройки и доска /b/ созданы")
 PYTHON_SCRIPT
