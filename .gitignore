@@ -37,3 +37,4 @@ fix_*.sh
 check_*.sh
 __pycache__/
 logs/
+instance/board.db
