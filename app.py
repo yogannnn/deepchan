@@ -8,6 +8,7 @@ from flask import (
     url_for,
 )
 from flask_compress import Compress
+from core.middleware import ParanoidMiddleware
 from config import Config
 from models import db, Setting, RadioTrack, Post, Board, Thread, PostFTS
 from utils import generate_csrf_token, verify_csrf_token, process_comment
@@ -19,6 +20,7 @@ import time
 import random
 import subprocess
 from datetime import datetime, timezone
+from core.config import load_settings
 
 app = Flask(__name__)
 Compress(app)
@@ -35,63 +37,6 @@ if not app.debug:
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "thumbs"), exist_ok=True)
-
-
-def load_settings():
-    with app.app_context():
-        app.config["DEPLOY_MODE"] = os.environ.get("DEPLOY_MODE", "production")
-        if not inspect(db.engine).has_table("setting"):
-            return
-        settings = Setting.query.all()
-        for s in settings:
-            if s.key == "DEPLOY_MODE":
-                continue
-            if s.key in (
-                "CAPTCHA_ENABLED",
-                "STATS_SHOW_IPS",
-                "BOARD_CLOSED",
-                "AUTO_REFRESH_ENABLED",
-            ):
-                app.config[s.key] = s.value == "True"
-            elif s.key in (
-                "AUTO_REFRESH_INTERVAL",
-                "RATE_LIMIT_SECONDS",
-                "THREADS_PER_PAGE",
-                "POSTS_PER_PAGE",
-                "MAX_FILES",
-                "MAX_CONTENT_LENGTH",
-                "MAX_IMAGE_DIMENSION",
-                "MAX_VIDEO_DURATION",
-                "MAX_VIDEO_SIZE",
-                "MAX_AUDIO_DURATION",
-                "MAX_AUDIO_SIZE",
-            ):
-                app.config[s.key] = int(s.value) if s.value.isdigit() else 5000
-            elif s.key in ("HEADER_HTML", "FOOTER_HTML", "SITE_TITLE"):
-                app.config[s.key] = s.value
-            elif s.key == "ALLOWED_EXTENSIONS":
-                app.config["ALLOWED_EXTENSIONS"] = (
-                    [x.strip().lower() for x in s.value.split(",")]
-                    if s.value
-                    else ["jpg", "jpeg", "png", "gif"]
-                )
-            elif s.key == "WEBP_CONVERT_ENABLED":
-                app.config["WEBP_CONVERT_ENABLED"] = s.value == "True"
-            elif s.key == "STEALTH_TRIM":
-                app.config["STEALTH_TRIM"] = s.value == "True"
-            elif s.key == "RADIO_ENABLED":
-                app.config["RADIO_ENABLED"] = s.value == "True"
-            elif s.key == "RADIO_BITRATE":
-                app.config["RADIO_BITRATE"] = s.value
-            elif s.value == "True":
-                app.config[s.key] = True
-            elif s.value == "False":
-                app.config[s.key] = False
-            elif s.value.isdigit():
-                app.config[s.key] = int(s.value)
-            else:
-                app.config[s.key] = s.value
-
 
 from blueprints.main import main_bp
 from blueprints.board import board_bp
@@ -130,21 +75,6 @@ def check_board_closed():
 @app.route("/closed")
 def board_closed():
     return render_template("board_closed.html")
-
-
-class ParanoidMiddleware:
-    def __init__(self, app):
-        self.app = app
-
-    def __call__(self, environ, start_response):
-        def custom_start_response(status, headers, exc_info=None):
-            new_headers = [
-                (k, v) for k, v in headers if k not in ("Server", "X-Powered-By")
-            ]
-            return start_response(status, new_headers, exc_info)
-
-        time.sleep(random.uniform(0.005, 0.05))
-        return self.app(environ, custom_start_response)
 
 
 app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
