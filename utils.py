@@ -25,10 +25,5 @@ from services.csrf import generate_csrf_token, verify_csrf_token
 from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont
 from flask import current_app, request, abort
 from models import Post
-from services.radio import (
-    get_file_hash,
-    convert_for_radio,
-    update_icecast_playlist,
-    is_icecast_running,
-)
+from services.radio import get_file_hash, convert_for_radio
 from services.tripcodes import generate_tripcode

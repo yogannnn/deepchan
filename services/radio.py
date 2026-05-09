@@ -38,18 +38,3 @@ def convert_for_radio(input_path, output_path, artist=None, title=None, bitrate=
     else:
         os.rename(tmp_path, output_path)
     return True
-
-
-def update_icecast_playlist(playlist_file, tracks):
-    radio_folder = current_app.config.get("RADIO_FOLDER", "/root/deepchan/static/radio")
-    with open(playlist_file, "w") as f:
-        for track in tracks:
-            if track.file_path and os.path.exists(track.file_path):
-                rel_path = os.path.relpath(track.file_path, radio_folder)
-                f.write(rel_path + "\n")
-    subprocess.run(["/opt/deepchan/radio_control.sh", "reload"], capture_output=True)
-
-
-def is_icecast_running():
-    result = subprocess.run(["pgrep", "-f", "icecast2"], capture_output=True)
-    return result.returncode == 0
