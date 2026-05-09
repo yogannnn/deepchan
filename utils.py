@@ -10,6 +10,7 @@ import io
 import html
 import subprocess
 import json
+from services.captcha import generate_captcha
 from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont
 from flask import current_app, request, abort
 from models import Post
@@ -487,15 +488,6 @@ def process_comment(text, board_name, thread_id):
     text = parse_bbcode(text)
     text = process_urls(text)
     return text
-
-
-def generate_captcha():
-    from captcha.image import ImageCaptcha
-
-    image = ImageCaptcha(width=280, height=90)
-    captcha_text = "".join(random.choices("0123456789", k=6))
-    data = image.generate(captcha_text)
-    return data, captcha_text
 
 
 # ===== CSRF =====
