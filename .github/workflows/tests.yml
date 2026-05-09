@@ -13,8 +13,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
-      - name: Create logs directory
-        run: mkdir -p logs
+      - name: Create required directories
+        run: |
+          mkdir -p logs instance
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
