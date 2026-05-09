@@ -16,77 +16,118 @@ from models import Post
 
 _last_post_time = {}
 
+
 def check_rate_limit():
     ip = request.remote_addr
     now = time.time()
     if ip in _last_post_time:
         elapsed = now - _last_post_time[ip]
-        limit = int(current_app.config.get('RATE_LIMIT_SECONDS', 30))
+        limit = int(current_app.config.get("RATE_LIMIT_SECONDS", 30))
         if elapsed < limit:
-            abort(429, description=f"Слишком часто. Подождите {limit - int(elapsed)} сек.")
+            abort(
+                429, description=f"Слишком часто. Подождите {limit - int(elapsed)} сек."
+            )
     _last_post_time[ip] = now
+
 
 def check_ban(ip):
     from models import Ban
     from datetime import datetime, timezone
+
     now = datetime.now(timezone.utc)
     ban = Ban.query.filter(
         Ban.ip_pattern == ip,
         Ban.active == True,
-        (Ban.expires_at == None) | (Ban.expires_at > now)
+        (Ban.expires_at == None) | (Ban.expires_at > now),
     ).first()
     if ban:
         abort(403, description=f"Вы забанены. Причина: {ban.reason or 'не указана'}")
 
+
 def apply_word_filters(text):
     from models import WordFilter
+
     filters = WordFilter.query.filter_by(active=True).all()
     for f in filters:
         if f.is_regex:
             if re.search(f.pattern, text, re.IGNORECASE):
-                if f.action == 'block':
-                    abort(400, description=f"Сообщение содержит запрещённое выражение: {f.pattern}")
-                elif f.action == 'replace':
+                if f.action == "block":
+                    abort(
+                        400,
+                        description=f"Сообщение содержит запрещённое выражение: {f.pattern}",
+                    )
+                elif f.action == "replace":
                     text = re.sub(f.pattern, f.replacement, text, flags=re.IGNORECASE)
         else:
             if f.pattern.lower() in text.lower():
-                if f.action == 'block':
-                    abort(400, description=f"Сообщение содержит запрещённое слово: {f.pattern}")
-                elif f.action == 'replace':
+                if f.action == "block":
+                    abort(
+                        400,
+                        description=f"Сообщение содержит запрещённое слово: {f.pattern}",
+                    )
+                elif f.action == "replace":
                     text = text.replace(f.pattern, f.replacement)
     return text
+
 
 def add_watermark(img, text, position=(5, 5)):
     draw = ImageDraw.Draw(img)
     try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16)
+        font = ImageFont.truetype(
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16
+        )
     except:
         font = ImageFont.load_default()
-    draw.text((position[0]+1, position[1]+1), text, font=font, fill=(0,0,0))
-    draw.text(position, text, font=font, fill=(255,255,255))
+    draw.text((position[0] + 1, position[1] + 1), text, font=font, fill=(0, 0, 0))
+    draw.text(position, text, font=font, fill=(255, 255, 255))
     return img
+
 
 def get_media_duration(filepath):
     try:
         result = subprocess.run(
-            ['/usr/bin/ffprobe', '-v', 'error', '-show_entries', 'format=duration',
-             '-of', 'json', filepath],
-            capture_output=True, text=True, timeout=10
+            [
+                "/usr/bin/ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "json",
+                filepath,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         if result.returncode == 0:
             data = json.loads(result.stdout)
-            return float(data['format']['duration'])
+            return float(data["format"]["duration"])
     except Exception:
         pass
     return None
+
 
 def generate_video_thumbnail(video_path, thumb_path, width=200):
     try:
         tmp_thumb = thumb_path + ".tmp.webp"
         subprocess.run(
-            ['/usr/bin/ffmpeg', '-i', video_path, '-ss', '00:00:01', '-vframes', '1',
-             '-vf', f'scale={width}:-1', '-y', tmp_thumb],
-            capture_output=True, timeout=15, check=True
+            [
+                "/usr/bin/ffmpeg",
+                "-i",
+                video_path,
+                "-ss",
+                "00:00:01",
+                "-vframes",
+                "1",
+                "-vf",
+                f"scale={width}:-1",
+                "-y",
+                tmp_thumb,
+            ],
+            capture_output=True,
+            timeout=15,
+            check=True,
         )
         img = Image.open(tmp_thumb)
         img = add_watermark(img, "video")
@@ -96,21 +137,37 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
     except Exception:
         return False
 
+
 def clean_media_metadata(input_path, output_path, is_audio=False):
     try:
         subprocess.run(
-            ['/usr/bin/ffmpeg', '-i', input_path, '-map_metadata', '-1', '-c', 'copy', '-y', output_path],
-            capture_output=True, timeout=30, check=True
+            [
+                "/usr/bin/ffmpeg",
+                "-i",
+                input_path,
+                "-map_metadata",
+                "-1",
+                "-c",
+                "copy",
+                "-y",
+                output_path,
+            ],
+            capture_output=True,
+            timeout=30,
+            check=True,
         )
         return True
     except Exception:
         return False
 
+
 def generate_audio_thumbnail(text="AUDIO", width=200, height=200):
-    img = Image.new('RGB', (width, height), color='#0d140d')
+    img = Image.new("RGB", (width, height), color="#0d140d")
     draw = ImageDraw.Draw(img)
     try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+        font = ImageFont.truetype(
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24
+        )
     except:
         font = ImageFont.load_default()
     bbox = draw.textbbox((0, 0), text, font=font)
@@ -118,36 +175,61 @@ def generate_audio_thumbnail(text="AUDIO", width=200, height=200):
     text_height = bbox[3] - bbox[1]
     x = (width - text_width) // 2
     y = (height - text_height) // 2
-    draw.text((x+1, y+1), text, font=font, fill=(0,0,0))
-    draw.text((x, y), text, font=font, fill=(255,255,255))
+    draw.text((x + 1, y + 1), text, font=font, fill=(0, 0, 0))
+    draw.text((x, y), text, font=font, fill=(255, 255, 255))
     return img
+
 
 def save_files(files):
     saved = []
     if not files:
         return saved
 
-    max_files = int(current_app.config.get('MAX_FILES', 4))
+    max_files = int(current_app.config.get("MAX_FILES", 4))
     if len(files) > max_files:
         abort(400, description=f"Слишком много файлов (максимум {max_files})")
 
-    max_image_dimension = current_app.config.get('MAX_IMAGE_DIMENSION', 5000)
-    max_video_duration = current_app.config.get('MAX_VIDEO_DURATION', 180)
-    max_video_size = current_app.config.get('MAX_VIDEO_SIZE', 50 * 1024 * 1024)
-    max_audio_duration = current_app.config.get('MAX_AUDIO_DURATION', 600)
-    max_audio_size = current_app.config.get('MAX_AUDIO_SIZE', 30 * 1024 * 1024)
-    webp_enabled = current_app.config.get('WEBP_CONVERT_ENABLED', True)
-    stealth_trim = current_app.config.get('STEALTH_TRIM', True)
-    allowed_extensions = current_app.config.get('ALLOWED_EXTENSIONS', ['jpg','jpeg','png','gif','webp','mp4','webm','mov','mp3','ogg','flac','wav','m4a'])
+    max_image_dimension = int(current_app.config.get("MAX_IMAGE_DIMENSION", 5000))
+    max_video_duration = int(current_app.config.get("MAX_VIDEO_DURATION", 180))
+    max_video_size = int(current_app.config.get("MAX_VIDEO_SIZE", 50 * 1024 * 1024))
+    max_audio_duration = int(current_app.config.get("MAX_AUDIO_DURATION", 600))
+    max_audio_size = int(current_app.config.get("MAX_AUDIO_SIZE", 30 * 1024 * 1024))
+    webp_enabled = str(
+        current_app.config.get("WEBP_CONVERT_ENABLED", True)
+    ).lower() in ("1", "true", "yes", "on")
+    stealth_trim = str(current_app.config.get("STEALTH_TRIM", True)).lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+    allowed_extensions = current_app.config.get(
+        "ALLOWED_EXTENSIONS",
+        [
+            "jpg",
+            "jpeg",
+            "png",
+            "gif",
+            "webp",
+            "mp4",
+            "webm",
+            "mov",
+            "mp3",
+            "ogg",
+            "flac",
+            "wav",
+            "m4a",
+        ],
+    )
 
-    video_exts = {'mp4', 'webm', 'mov', 'avi', 'mkv'}
-    audio_exts = {'mp3', 'ogg', 'flac', 'wav', 'm4a'}
+    video_exts = {"mp4", "webm", "mov", "avi", "mkv"}
+    audio_exts = {"mp3", "ogg", "flac", "wav", "m4a"}
 
     for idx, f in enumerate(files):
-        if f.filename == '':
+        if f.filename == "":
             continue
 
-        ext = os.path.splitext(f.filename)[1].lower().lstrip('.')
+        ext = os.path.splitext(f.filename)[1].lower().lstrip(".")
         if ext not in allowed_extensions:
             abort(400, description=f"Недопустимый формат: {ext}")
 
@@ -160,48 +242,70 @@ def save_files(files):
 
         if is_video:
             if file_size > max_video_size:
-                abort(400, description=f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)")
-            video_tmp = os.path.join(current_app.config['UPLOAD_FOLDER'], secrets.token_hex(16) + '.' + ext)
+                abort(
+                    400,
+                    description=f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)",
+                )
+            video_tmp = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
+            )
             f.save(video_tmp)
             duration = get_media_duration(video_tmp)
             if duration is None or duration > max_video_duration:
                 os.remove(video_tmp)
-                abort(400, description=f"Видео слишком длинное (макс {max_video_duration} сек)")
+                abort(
+                    400,
+                    description=f"Видео слишком длинное (макс {max_video_duration} сек)",
+                )
             random_hex = secrets.token_hex(16)
-            picture_fn = random_hex + '.' + ext
-            picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
+            picture_fn = random_hex + "." + ext
+            picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
             if not clean_media_metadata(video_tmp, picture_path):
                 os.remove(video_tmp)
                 abort(400, description="Ошибка обработки видео")
             os.remove(video_tmp)
-            thumb_fn = random_hex + '_thumb.webp'
-            thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
+            thumb_fn = random_hex + "_thumb.webp"
+            thumb_path = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
+            )
             if not generate_video_thumbnail(picture_path, thumb_path):
                 thumb_fn = None
                 thumb_path = None
             f.stream.seek(0)
             file_data = f.read()
             sha256 = hashlib.sha256(file_data).hexdigest()
-            saved.append((picture_fn, thumb_fn, idx, file_size, sha256, 'video', duration))
+            saved.append(
+                (picture_fn, thumb_fn, idx, file_size, sha256, "video", duration)
+            )
 
         elif is_audio:
             if file_size > max_audio_size:
-                abort(400, description=f"Аудио слишком большое (макс {max_audio_size//1024//1024} МБ)")
-            audio_tmp = os.path.join(current_app.config['UPLOAD_FOLDER'], secrets.token_hex(16) + '.' + ext)
+                abort(
+                    400,
+                    description=f"Аудио слишком большое (макс {max_audio_size//1024//1024} МБ)",
+                )
+            audio_tmp = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
+            )
             f.save(audio_tmp)
             duration = get_media_duration(audio_tmp)
             if duration is None or duration > max_audio_duration:
                 os.remove(audio_tmp)
-                abort(400, description=f"Аудио слишком длинное (макс {max_audio_duration} сек)")
+                abort(
+                    400,
+                    description=f"Аудио слишком длинное (макс {max_audio_duration} сек)",
+                )
             random_hex = secrets.token_hex(16)
-            picture_fn = random_hex + '.' + ext
-            picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
+            picture_fn = random_hex + "." + ext
+            picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
             if not clean_media_metadata(audio_tmp, picture_path, is_audio=True):
                 os.remove(audio_tmp)
                 abort(400, description="Ошибка обработки аудио")
             os.remove(audio_tmp)
-            thumb_fn = random_hex + '_thumb.webp'
-            thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
+            thumb_fn = random_hex + "_thumb.webp"
+            thumb_path = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
+            )
             try:
                 thumb_img = generate_audio_thumbnail()
                 thumb_img.save(thumb_path, format="WEBP", quality=80)
@@ -210,7 +314,9 @@ def save_files(files):
             f.stream.seek(0)
             file_data = f.read()
             sha256 = hashlib.sha256(file_data).hexdigest()
-            saved.append((picture_fn, thumb_fn, idx, file_size, sha256, 'audio', duration))
+            saved.append(
+                (picture_fn, thumb_fn, idx, file_size, sha256, "audio", duration)
+            )
 
         else:
             # --- Обработка изображений ---
@@ -223,9 +329,12 @@ def save_files(files):
             f.stream.seek(0)
             img = Image.open(f.stream)
             if img.width > max_image_dimension or img.height > max_image_dimension:
-                abort(400, description=f"Разрешение превышает {max_image_dimension}x{max_image_dimension}")
+                abort(
+                    400,
+                    description=f"Разрешение превышает {max_image_dimension}x{max_image_dimension}",
+                )
             is_animated_gif = False
-            if img.format == 'GIF':
+            if img.format == "GIF":
                 try:
                     img.seek(1)
                     is_animated_gif = True
@@ -241,27 +350,39 @@ def save_files(files):
                     img = img.convert("RGB")
                 ext = ".webp"
                 picture_fn = random_hex + ext
-                picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
-                img.save(picture_path, format="WEBP", quality=85, method=6, save_all=False)
+                picture_path = os.path.join(
+                    current_app.config["UPLOAD_FOLDER"], picture_fn
+                )
+                img.save(
+                    picture_path, format="WEBP", quality=85, method=6, save_all=False
+                )
             else:
                 ext = os.path.splitext(f.filename)[1].lower()
-                if ext == '.jpg':
-                    ext = '.jpeg'
+                if ext == ".jpg":
+                    ext = ".jpeg"
                 elif is_animated_gif:
-                    ext = '.gif'
+                    ext = ".gif"
                 picture_fn = random_hex + ext
-                picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_fn)
-                if img.mode in ('RGBA', 'P') and not is_animated_gif:
-                    img = img.convert('RGB')
-                save_kwargs = {'optimize': True, 'quality': 85}
+                picture_path = os.path.join(
+                    current_app.config["UPLOAD_FOLDER"], picture_fn
+                )
+                if img.mode in ("RGBA", "P") and not is_animated_gif:
+                    img = img.convert("RGB")
+                save_kwargs = {"optimize": True, "quality": 85}
                 if not is_animated_gif:
-                    save_kwargs['exif'] = Image.Exif()
+                    save_kwargs["exif"] = Image.Exif()
                     img.save(picture_path, **save_kwargs)
                 else:
                     img.save(picture_path, save_all=True, loop=0, **save_kwargs)
-            file_size = os.path.getsize(picture_path)
-            thumb_fn = random_hex + "_thumb" + (".webp" if webp_enabled and not is_animated_gif else ext)
-            thumb_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'thumbs', thumb_fn)
+                    file_size = os.path.getsize(picture_path)
+            thumb_fn = (
+                random_hex
+                + "_thumb"
+                + (".webp" if webp_enabled and not is_animated_gif else ext)
+            )
+            thumb_path = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
+            )
             try:
                 thumb_img = Image.open(picture_path)
                 if thumb_img.mode not in ("RGB", "RGBA"):
@@ -277,45 +398,80 @@ def save_files(files):
             f.stream.seek(0)
             file_data = f.read()
             sha256 = hashlib.sha256(file_data).hexdigest()
-            saved.append((picture_fn, thumb_fn, idx, file_size, sha256, 'image', None))
+            saved.append((picture_fn, thumb_fn, idx, file_size, sha256, "image", None))
 
     return saved
 
+
 def parse_bbcode(text):
-    text = re.sub(r'\[b\](.*?)\[/b\]', r'<strong>\1</strong>', text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r'\[i\](.*?)\[/i\]', r'<em>\1</em>', text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r'\[u\](.*?)\[/u\]', r'<u>\1</u>', text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r'\[s\](.*?)\[/s\]', r'<del>\1</del>', text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r'\[spoiler\](.*?)\[/spoiler\]', r'<details class="spoiler"><summary>Спойлер</summary>\1</details>', text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r'\[code\](.*?)\[/code\]', r'<pre><code>\1</code></pre>', text, flags=re.IGNORECASE|re.DOTALL)
+    text = re.sub(
+        r"\[b\](.*?)\[/b\]",
+        r"<strong>\1</strong>",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    text = re.sub(
+        r"\[i\](.*?)\[/i\]", r"<em>\1</em>", text, flags=re.IGNORECASE | re.DOTALL
+    )
+    text = re.sub(
+        r"\[u\](.*?)\[/u\]", r"<u>\1</u>", text, flags=re.IGNORECASE | re.DOTALL
+    )
+    text = re.sub(
+        r"\[s\](.*?)\[/s\]", r"<del>\1</del>", text, flags=re.IGNORECASE | re.DOTALL
+    )
+    text = re.sub(
+        r"\[spoiler\](.*?)\[/spoiler\]",
+        r'<details class="spoiler"><summary>Спойлер</summary>\1</details>',
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    text = re.sub(
+        r"\[code\](.*?)\[/code\]",
+        r"<pre><code>\1</code></pre>",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
     return text
+
 
 def process_urls(text):
     def magnet_replace(match):
         url = match.group(0)
         return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
+
     text = re.sub(r'magnet:\?[^\s<>"\']+', magnet_replace, text, flags=re.IGNORECASE)
 
     def url_replace(match):
         url = match.group(0)
-        if re.search(r'^(https?://)?(127\.0\.0\.1|\[::1\]|::1)([/:]|$)', url, re.IGNORECASE):
-            if not url.startswith('http://') and not url.startswith('https://'):
-                url = 'http://' + url
+        if re.search(
+            r"^(https?://)?(127\.0\.0\.1|\[::1\]|::1)([/:]|$)", url, re.IGNORECASE
+        ):
+            if not url.startswith("http://") and not url.startswith("https://"):
+                url = "http://" + url
             return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{match.group(0)}</a>'
-        if re.search(r'\.(i2p|onion)(/|$)', url, re.IGNORECASE):
-            if not url.startswith('http://') and not url.startswith('https://'):
-                url = 'http://' + url
+        if re.search(r"\.(i2p|onion)(/|$)", url, re.IGNORECASE):
+            if not url.startswith("http://") and not url.startswith("https://"):
+                url = "http://" + url
             return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{match.group(0)}</a>'
         return f'{match.group(0)}<span class="clearnet-warning">ClearNet</span>'
 
-    text = re.sub(r'''(?i)\b((?:https?://|ftp://)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}|i2p|onion)(?:/[^\s<>"']*)?)\b''', url_replace, text)
-    text = re.sub(r'''(?i)\b((?:https?://|ftp://)?(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?::[0-9]+)?(?:/[^\s<>"']*)?\b''', url_replace, text)
+    text = re.sub(
+        r"""(?i)\b((?:https?://|ftp://)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}|i2p|onion)(?:/[^\s<>"']*)?)\b""",
+        url_replace,
+        text,
+    )
+    text = re.sub(
+        r"""(?i)\b((?:https?://|ftp://)?(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?::[0-9]+)?(?:/[^\s<>"']*)?\b""",
+        url_replace,
+        text,
+    )
     return text
+
 
 def process_comment(text, board_name, thread_id):
     text = html.escape(text)
-    text = text.replace('&gt;&gt;', '>>')
-    text = text.replace('&#91;', '[').replace('&#93;', ']')
+    text = text.replace("&gt;&gt;", ">>")
+    text = text.replace("&#91;", "[").replace("&#93;", "]")
 
     def replace_quote(match):
         num = match.group(1)
@@ -327,17 +483,20 @@ def process_comment(text, board_name, thread_id):
             return f'<blockquote class="inline-quote"><a href="{current_app.url_for("thread", board_name=board_name, thread_id=thread_id)}#post{num}">&gt;&gt;{num}</a> {quote_text}</blockquote>'
         return match.group(0)
 
-    text = re.sub(r'>>(\d+)', replace_quote, text)
+    text = re.sub(r">>(\d+)", replace_quote, text)
     text = parse_bbcode(text)
     text = process_urls(text)
     return text
 
+
 def generate_captcha():
     from captcha.image import ImageCaptcha
+
     image = ImageCaptcha(width=280, height=90)
-    captcha_text = ''.join(random.choices('0123456789', k=6))
+    captcha_text = "".join(random.choices("0123456789", k=6))
     data = image.generate(captcha_text)
     return data, captcha_text
+
 
 # ===== CSRF =====
 def generate_csrf_token(user_id, action, secret_key, timestamp=None):
@@ -347,44 +506,54 @@ def generate_csrf_token(user_id, action, secret_key, timestamp=None):
     token = hmac.new(secret_key.encode(), message.encode(), hashlib.sha256).hexdigest()
     return token, timestamp
 
+
 def verify_csrf_token(user_id, action, token, timestamp, secret_key, max_age=600):
     if int(time.time()) - int(timestamp) > max_age:
         return False
     expected_token, _ = generate_csrf_token(user_id, action, secret_key, timestamp)
     return hmac.compare_digest(expected_token, token)
 
+
 # ===== Утилиты для радио =====
 def get_file_hash(filepath):
     hasher = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(65536), b''):
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
             hasher.update(chunk)
     return hasher.hexdigest()
 
-def convert_for_radio(input_path, output_path, artist=None, title=None, bitrate='128k'):
-    tmp_path = output_path + '.tmp.mp3'
+
+def convert_for_radio(input_path, output_path, artist=None, title=None, bitrate="128k"):
+    tmp_path = output_path + ".tmp.mp3"
     cmd = [
-        '/usr/bin/ffmpeg', '-i', input_path,
-        '-b:a', bitrate,
-        '-map_metadata', '-1',
-        '-y', tmp_path
+        "/usr/bin/ffmpeg",
+        "-i",
+        input_path,
+        "-b:a",
+        bitrate,
+        "-map_metadata",
+        "-1",
+        "-y",
+        tmp_path,
     ]
     subprocess.run(cmd, capture_output=True, timeout=60, check=True)
     if artist or title:
-        cmd2 = ['/usr/bin/ffmpeg', '-i', tmp_path, '-c', 'copy']
+        cmd2 = ["/usr/bin/ffmpeg", "-i", tmp_path, "-c", "copy"]
         if artist:
-            cmd2 += ['-metadata', f'artist={artist}']
+            cmd2 += ["-metadata", f"artist={artist}"]
         if title:
-            cmd2 += ['-metadata', f'title={title}']
-        cmd2 += ['-y', output_path]
+            cmd2 += ["-metadata", f"title={title}"]
+        cmd2 += ["-y", output_path]
         subprocess.run(cmd2, capture_output=True, timeout=30, check=True)
         os.remove(tmp_path)
     else:
         os.rename(tmp_path, output_path)
     return True
 
+
 def update_icecast_playlist(playlist_file, tracks):
     import os
+
     radio_folder = current_app.config.get("RADIO_FOLDER", "/root/deepchan/static/radio")
     with open(playlist_file, "w") as f:
         for track in tracks:
@@ -393,17 +562,26 @@ def update_icecast_playlist(playlist_file, tracks):
                 f.write(rel_path + "\n")
     # Перезагружаем Icecast
     import subprocess
+
     subprocess.run(["/opt/deepchan/radio_control.sh", "reload"], capture_output=True)
+
+
 def is_icecast_running():
     import subprocess
-    result = subprocess.run(['pgrep', '-f', 'icecast2'], capture_output=True)
+
+    result = subprocess.run(["pgrep", "-f", "icecast2"], capture_output=True)
     return result.returncode == 0
 
+
 import base64
+
+
 def generate_tripcode(password, secret_key):
     """Возвращает защищённый трипкод (10 символов)."""
     if not password:
         return None
-    signature = hmac.new(secret_key.encode(), password.encode(), hashlib.sha256).digest()
-    trip = base64.b64encode(signature, altchars=b'..').decode()[:10]
+    signature = hmac.new(
+        secret_key.encode(), password.encode(), hashlib.sha256
+    ).digest()
+    trip = base64.b64encode(signature, altchars=b"..").decode()[:10]
     return f"◆{trip}"

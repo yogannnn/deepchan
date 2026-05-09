@@ -5,27 +5,34 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
+
 class Board(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     short_name = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text)
     position = db.Column(db.Integer, default=0)  # новое поле для сортировки
-    threads = db.relationship('Thread', backref='board', lazy='dynamic', cascade='all, delete-orphan')
+    threads = db.relationship(
+        "Thread", backref="board", lazy="dynamic", cascade="all, delete-orphan"
+    )
+
 
 class Thread(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    board_id = db.Column(db.Integer, db.ForeignKey('board.id'), nullable=False)
+    board_id = db.Column(db.Integer, db.ForeignKey("board.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     bumped_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_pinned = db.Column(db.Boolean, default=False)
     is_locked = db.Column(db.Boolean, default=False)
-    posts = db.relationship('Post', backref='thread', lazy='dynamic', cascade='all, delete-orphan')
+    posts = db.relationship(
+        "Post", backref="thread", lazy="dynamic", cascade="all, delete-orphan"
+    )
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    thread_id = db.Column(db.Integer, db.ForeignKey('thread.id'), nullable=False)
-    name = db.Column(db.String(80), default='Аноним')
+    thread_id = db.Column(db.Integer, db.ForeignKey("thread.id"), nullable=False)
+    name = db.Column(db.String(80), default="Аноним")
     subject = db.Column(db.String(200))
     comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -34,28 +41,33 @@ class Post(db.Model):
     tripcode = db.Column(db.String(32))
     is_admin_post = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45))
-    search_text = db.Column(db.Text)   # новое поле для поиска
-    files = db.relationship('PostFile', backref='post', lazy='dynamic', cascade='all, delete-orphan')
+    search_text = db.Column(db.Text)  # новое поле для поиска
+    files = db.relationship(
+        "PostFile", backref="post", lazy="dynamic", cascade="all, delete-orphan"
+    )
+
 
 class PostFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
     file_path = db.Column(db.String(255), nullable=False)
     thumb_path = db.Column(db.String(255), nullable=False)
     file_order = db.Column(db.Integer, default=0)
     file_size = db.Column(db.Integer, default=0)
     md5_hash = db.Column(db.String(32))
-    file_type = db.Column(db.String(20), default='image')
+    file_type = db.Column(db.String(20), default="image")
     duration = db.Column(db.Float, nullable=True)
 
+
 class PostFTS(db.Model):
-    __tablename__ = 'post_fts'
+    __tablename__ = "post_fts"
     post_id = db.Column(db.Integer, primary_key=True)
     board_id = db.Column(db.Integer)
     thread_id = db.Column(db.Integer)
     comment = db.Column(db.Text)
     subject = db.Column(db.String(200))
     name = db.Column(db.String(80))
+
 
 class Ban(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,48 +77,58 @@ class Ban(db.Model):
     expires_at = db.Column(db.DateTime, nullable=True)
     active = db.Column(db.Boolean, default=True)
 
+
 class WordFilter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pattern = db.Column(db.String(200), nullable=False)
-    replacement = db.Column(db.String(200), default='[CENSORED]')
+    replacement = db.Column(db.String(200), default="[CENSORED]")
     is_regex = db.Column(db.Boolean, default=False)
-    action = db.Column(db.String(20), default='replace')
+    action = db.Column(db.String(20), default="replace")
     active = db.Column(db.Boolean, default=True)
+
 
 class Setting(db.Model):
     key = db.Column(db.String(100), primary_key=True)
     value = db.Column(db.Text)
+
 
 def hash_password(password):
     if password:
         return generate_password_hash(password)
     return None
 
+
 def check_password(password, hashed):
     if password and hashed:
         return check_password_hash(hashed, password)
     return False
 
+
 # ===== Радио =====
 class RadioTrack(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    post_file_id = db.Column(db.Integer, db.ForeignKey('post_file.id'), nullable=True)  # если из поста
+    post_file_id = db.Column(
+        db.Integer, db.ForeignKey("post_file.id"), nullable=True
+    )  # если из поста
     artist = db.Column(db.String(200))
     title = db.Column(db.String(200))
-    file_path = db.Column(db.String(255))          # путь в static/radio/playlist/
-    original_hash = db.Column(db.String(64))       # SHA-256 исходного файла
+    file_path = db.Column(db.String(255))  # путь в static/radio/playlist/
+    original_hash = db.Column(db.String(64))  # SHA-256 исходного файла
     duration = db.Column(db.Float)
     approved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # Связь с PostFile (опционально)
-    post_file = db.relationship('PostFile', backref='radio_track', uselist=False, foreign_keys=[post_file_id])
+    post_file = db.relationship(
+        "PostFile", backref="radio_track", uselist=False, foreign_keys=[post_file_id]
+    )
+
 
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
     reason = db.Column(db.String(100))
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved = db.Column(db.Boolean, default=False)
 
-    post = db.relationship('Post', backref=db.backref('reports', lazy='dynamic'))
+    post = db.relationship("Post", backref=db.backref("reports", lazy="dynamic"))
