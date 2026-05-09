@@ -480,7 +480,7 @@ def process_comment(text, board_name, thread_id):
             quote_text = html.escape(quoted_post.comment)
             if len(quote_text) > 200:
                 quote_text = quote_text[:200] + "..."
-            return f'<blockquote class="inline-quote"><a href="{current_app.url_for("thread", board_name=board_name, thread_id=thread_id)}#post{num}">&gt;&gt;{num}</a> {quote_text}</blockquote>'
+            return f'<blockquote class="inline-quote"><a href="{current_app.url_for("board.thread", board_name=board_name, thread_id=thread_id)}#post{num}">&gt;&gt;{num}</a> {quote_text}</blockquote>'
         return match.group(0)
 
     text = re.sub(r">>(\d+)", replace_quote, text)
