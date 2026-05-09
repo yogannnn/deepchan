@@ -1,16 +1,17 @@
 import pytest
-from app import app as flask_app
+from app import create_app
 from models import db, Board
 
 
 @pytest.fixture(scope="function")
 def app():
+    flask_app = create_app()
     flask_app.config["TESTING"] = True
-    flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
     flask_app.config["WTF_CSRF_ENABLED"] = False
     flask_app.config["CAPTCHA_ENABLED"] = False
     flask_app.config["SERVER_NAME"] = "localhost"
-    flask_app.config["RATE_LIMIT_SECONDS"] = 0  # 👈 отключаем лимит
+    flask_app.config["RATE_LIMIT_SECONDS"] = 0
     with flask_app.app_context():
         db.create_all()
         if not Board.query.filter_by(short_name="b").first():

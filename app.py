@@ -1,146 +1,109 @@
-from flask import (
-    Flask,
-    render_template,
-    request,
-    session,
-    make_response,
-    redirect,
-    url_for,
-)
+from flask import Flask, render_template, request
 from flask_compress import Compress
-from core.middleware import ParanoidMiddleware
+from core.middleware import ParanoidMiddleware, inject_csrf_token, check_board_closed
+from core.config import load_settings
 from config import Config
 from models import db, Setting, RadioTrack, Post, Board, Thread, PostFTS
-from utils import generate_csrf_token, verify_csrf_token, process_comment
+from utils import process_comment
 from sqlalchemy import inspect, text
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-import time
-import random
-import subprocess
-from datetime import datetime, timezone
-from core.config import load_settings
-
-app = Flask(__name__)
-Compress(app)
-app.config.from_object(Config)
-db.init_app(app)
-app.secret_key = app.config["SECRET_KEY"]
-
-app.jinja_env.filters["process_comment"] = process_comment
-
-if not app.debug:
-    handler = RotatingFileHandler("logs/board.log", maxBytes=10000, backupCount=3)
-    handler.setLevel(logging.INFO)
-    app.logger.addHandler(handler)
-
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "thumbs"), exist_ok=True)
-
-from blueprints.main import main_bp
-from blueprints.board import board_bp
-from blueprints.admin import admin_bp
-from blueprints.radio import radio_bp
-
-app.register_blueprint(main_bp)
-app.register_blueprint(board_bp)
-app.register_blueprint(admin_bp)
-app.register_blueprint(radio_bp)
 
 
-@app.context_processor
-def inject_csrf_token():
-    def make_csrf_token(action):
-        user_id = (
-            request.authorization.username if request.authorization else "anonymous"
-        )
-        token, timestamp = generate_csrf_token(
-            user_id, action, app.config["SECRET_KEY"]
-        )
-        return {"token": token, "timestamp": timestamp}
+def create_app():
+    app = Flask(__name__)
+    Compress(app)
+    app.config.from_object(Config)
+    db.init_app(app)
+    app.secret_key = app.config["SECRET_KEY"]
+    app.jinja_env.filters["process_comment"] = process_comment
 
-    return dict(csrf_token=make_csrf_token)
+    if not app.debug:
+        handler = RotatingFileHandler("logs/board.log", maxBytes=10000, backupCount=3)
+        handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
 
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "thumbs"), exist_ok=True)
 
-@app.before_request
-def check_board_closed():
-    if app.config.get("BOARD_CLOSED", False):
-        if request.path.startswith("/admin") or request.path.startswith("/static"):
-            return
-        if request.endpoint != "board_closed":
-            return render_template("board_closed.html"), 503
+    # Регистрируем blueprints
+    from blueprints.main import main_bp
+    from blueprints.board import board_bp
+    from blueprints.admin import admin_bp
+    from blueprints.radio import radio_bp
 
+    app.register_blueprint(main_bp)
+    app.register_blueprint(board_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(radio_bp)
 
-@app.route("/closed")
-def board_closed():
-    return render_template("board_closed.html")
+    # Внедряем middleware
+    inject_csrf_token(app)
+    check_board_closed(app)
+    app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
 
+    @app.route("/closed")
+    def board_closed():
+        return render_template("board_closed.html")
 
-app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
-
-
-@app.after_request
-def add_cache_headers(response):
-    if request.path.startswith("/static"):
-        response.cache_control.no_cache = False
-        response.cache_control.no_store = False
-        if request.path.endswith(".css") or "/fonts/" in request.path:
-            response.cache_control.max_age = 31536000
-            response.cache_control.immutable = True
-            response.cache_control.public = True
-        elif request.path.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp")):
-            response.cache_control.max_age = 86400
-            response.cache_control.public = True
+    @app.after_request
+    def add_cache_headers(response):
+        if request.path.startswith("/static"):
+            response.cache_control.no_cache = False
+            response.cache_control.no_store = False
+            if request.path.endswith(".css") or "/fonts/" in request.path:
+                response.cache_control.max_age = 31536000
+                response.cache_control.immutable = True
+                response.cache_control.public = True
+            elif request.path.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp")):
+                response.cache_control.max_age = 86400
+                response.cache_control.public = True
+            else:
+                response.cache_control.max_age = 3600
         else:
-            response.cache_control.max_age = 3600
-    else:
-        response.cache_control.no_cache = True
-        response.cache_control.no_store = True
-    return response
+            response.cache_control.no_cache = True
+            response.cache_control.no_store = True
+        return response
 
+    @app.after_request
+    def add_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
 
-@app.after_request
-def add_security_headers(response):
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    return response
+    @app.errorhandler(400)
+    def bad_request(e):
+        return render_template("errors/400.html", description=e.description), 400
 
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template("errors/403.html", description=e.description), 403
 
-# Кастомные страницы ошибок
-@app.errorhandler(400)
-def bad_request(e):
-    return render_template("errors/400.html", description=e.description), 400
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template("errors/404.html", description=e.description), 404
 
+    @app.errorhandler(429)
+    def too_many_requests(e):
+        return render_template("errors/429.html", description=e.description), 429
 
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template("errors/403.html", description=e.description), 403
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        return render_template("errors/500.html", description=e.description), 500
 
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("errors/404.html", description=e.description), 404
-
-
-@app.errorhandler(429)
-def too_many_requests(e):
-    return render_template("errors/429.html", description=e.description), 429
-
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template("errors/500.html", description=e.description), 500
+    return app
 
 
 if __name__ == "__main__":
+    app = create_app()
     with app.app_context():
         db.create_all()
         if not inspect(db.engine).has_table("setting"):
             Setting.__table__.create(db.engine)
         if not inspect(db.engine).has_table("radio_track"):
             RadioTrack.__table__.create(db.engine)
-        load_settings()
+        load_settings(app)
         with db.engine.connect() as conn:
             res = conn.execute(text("PRAGMA table_info(post)"))
             cols = [row[1] for row in res]
@@ -183,23 +146,3 @@ if __name__ == "__main__":
         print("🚀 Запуск через Gevent (стриминг) на http://0.0.0.0:5000")
         http_server = WSGIServer(("0.0.0.0", 5000), app)
         http_server.serve_forever()
-
-
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template("errors/403.html", description=e.description), 403
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("errors/404.html", description=e.description), 404
-
-
-@app.errorhandler(429)
-def too_many_requests(e):
-    return render_template("errors/429.html", description=e.description), 429
-
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template("errors/500.html", description=e.description), 500
