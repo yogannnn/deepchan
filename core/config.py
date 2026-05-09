@@ -1,4 +1,5 @@
 import os
+from models import db
 from sqlalchemy import inspect, text
 from flask import current_app
 from models import Setting
