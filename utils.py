@@ -18,67 +18,13 @@ import io
 import html
 import subprocess
 import json
+from services.security import check_rate_limit, check_ban, apply_word_filters
 from services.text import parse_bbcode, process_urls, process_comment
 from services.captcha import generate_captcha
 from services.csrf import generate_csrf_token, verify_csrf_token
 from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont
 from flask import current_app, request, abort
 from models import Post
-
-_last_post_time = {}
-
-
-def check_rate_limit():
-    ip = request.remote_addr
-    now = time.time()
-    if ip in _last_post_time:
-        elapsed = now - _last_post_time[ip]
-        limit = int(current_app.config.get("RATE_LIMIT_SECONDS", 30))
-        if elapsed < limit:
-            abort(
-                429, description=f"Слишком часто. Подождите {limit - int(elapsed)} сек."
-            )
-    _last_post_time[ip] = now
-
-
-def check_ban(ip):
-    from models import Ban
-    from datetime import datetime, timezone
-
-    now = datetime.now(timezone.utc)
-    ban = Ban.query.filter(
-        Ban.ip_pattern == ip,
-        Ban.active == True,
-        (Ban.expires_at == None) | (Ban.expires_at > now),
-    ).first()
-    if ban:
-        abort(403, description=f"Вы забанены. Причина: {ban.reason or 'не указана'}")
-
-
-def apply_word_filters(text):
-    from models import WordFilter
-
-    filters = WordFilter.query.filter_by(active=True).all()
-    for f in filters:
-        if f.is_regex:
-            if re.search(f.pattern, text, re.IGNORECASE):
-                if f.action == "block":
-                    abort(
-                        400,
-                        description=f"Сообщение содержит запрещённое выражение: {f.pattern}",
-                    )
-                elif f.action == "replace":
-                    text = re.sub(f.pattern, f.replacement, text, flags=re.IGNORECASE)
-        else:
-            if f.pattern.lower() in text.lower():
-                if f.action == "block":
-                    abort(
-                        400,
-                        description=f"Сообщение содержит запрещённое слово: {f.pattern}",
-                    )
-                elif f.action == "replace":
-                    text = text.replace(f.pattern, f.replacement)
-    return text
 
 
 # ===== Утилиты для радио =====
