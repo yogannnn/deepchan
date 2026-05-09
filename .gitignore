@@ -38,3 +38,4 @@ check_*.sh
 __pycache__/
 logs/
 instance/board.db
+.coverage
