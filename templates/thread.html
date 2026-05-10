@@ -27,11 +27,12 @@
     <label>Пароль: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
-        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
+        <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
     <input type="submit" value="Ответить">
+<input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 <hr>
 {% endif %}
@@ -72,7 +73,8 @@
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     <input type="password" name="password" placeholder="Пароль" size="12">
                     <button type="submit">Удалить</button>
-                </form>
+                <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
+</form>
             </details>
         </div>
         {% endif %}

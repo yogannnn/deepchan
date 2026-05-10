@@ -24,10 +24,12 @@
     </label>
     
     <div class="captcha-block">
-        <img src="{{ url_for('main.captcha_route') }}" alt="captcha" class="captcha-img" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
+        <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha">
+        <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
         <label>Введите код: <input type="text" name="captcha_answer" required></label>
     </div>
     
     <button type="submit">Отправить жалобу</button>
+<input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 {% endblock %}

@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, PasswordField, SubmitField, BooleanField
 from flask_wtf.file import MultipleFileField
-from wtforms.validators import DataRequired, Length, Optional, ValidationError
-from flask import current_app, session
+from wtforms.validators import Length, Optional
+from flask import current_app
 
 
 class PostForm(FlaskForm):
@@ -14,9 +14,3 @@ class PostForm(FlaskForm):
     password = PasswordField("Пароль (для удаления)", validators=[Optional()])
     captcha_answer = StringField("Капча", validators=[Optional()])
     submit = SubmitField("Отправить")
-
-    def validate_captcha_answer(self, field):
-        if current_app.config.get("CAPTCHA_ENABLED", False):
-            if field.data != session.get("captcha_text", ""):
-                raise ValidationError("Неверный код с картинки.")
-            session.pop("captcha_text", None)

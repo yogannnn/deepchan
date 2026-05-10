@@ -24,6 +24,7 @@ from models import (
     check_password,
 )
 from forms import PostForm
+from services.captcha import generate_captcha, verify_captcha
 from utils import (
     save_files,
     check_rate_limit,
@@ -81,12 +82,21 @@ def board(board_name):
         .paginate(page=page, per_page=per_page, error_out=False)
     )
     form = PostForm()
+
+    captcha_data = None
+    captcha_token = None
+
+    if current_app.config.get("CAPTCHA_ENABLED", False):
+        captcha_data, _, captcha_token = generate_captcha()
+
     return render_template(
         "board.html",
         board=board,
         threads=threads_paginated.items,
         pagination=threads_paginated,
         form=form,
+        captcha_data=captcha_data,
+        captcha_token=captcha_token,
     )
 
 
@@ -113,6 +123,13 @@ def thread(board_name, thread_id):
         page=page, per_page=per_page, error_out=False
     )
     form = PostForm()
+
+    captcha_data = None
+    captcha_token = None
+
+    if current_app.config.get("CAPTCHA_ENABLED", False):
+        captcha_data, _, captcha_token = generate_captcha()
+
     quote_text = ""
     reply_to = request.args.get("reply", type=int)
     if reply_to:
@@ -125,6 +142,8 @@ def thread(board_name, thread_id):
         pagination=posts_paginated,
         form=form,
         quote_text=quote_text,
+        captcha_data=captcha_data,
+        captcha_token=captcha_token,
     )
 
 
@@ -133,8 +152,17 @@ def thread(board_name, thread_id):
 def create_post(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     form = PostForm()
+
     check_rate_limit()
     check_ban(request.remote_addr)
+
+    if current_app.config.get("CAPTCHA_ENABLED", False):
+        captcha_answer = request.form.get("captcha_answer", "")
+        captcha_token = request.form.get("captcha_token", "")
+
+        if not verify_captcha(captcha_answer, captcha_token):
+            abort(400, description="Неверный код капчи")
+
     if form.validate_on_submit():
         thread_id = request.args.get("thread_id", type=int)
         sage = form.sage.data
@@ -349,16 +377,33 @@ def report_post(board_name, post_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     post = Post.query.get_or_404(post_id)
 
-    if request.method == "POST":
-        # Проверяем капчу (обязательно, даже если глобально выключена)
-        from utils import generate_captcha
+    # Генерируем капчу для формы (GET) и передаём в шаблон
+    captcha_data = None
+    captcha_token = None
+    if current_app.config.get("CAPTCHA_ENABLED", False):
+        from services.captcha import generate_captcha
 
-        captcha_answer = request.form.get("captcha_answer", "")
-        if captcha_answer != session.get("captcha_text", ""):
-            flash("Неверный код с картинки.", "error")
+        captcha_data, _, captcha_token = generate_captcha()
+
+    if request.method == "POST":
+        # Проверяем, включена ли система жалоб
+        if not current_app.config.get("REPORTS_ENABLED", True):
+            flash("Система жалоб временно отключена.", "error")
             return redirect(
-                url_for("board.report_post", board_name=board_name, post_id=post_id)
+                url_for("board.thread", board_name=board_name, thread_id=post.thread_id)
             )
+
+        # Stateless-проверка капчи
+        if current_app.config.get("CAPTCHA_ENABLED", False):
+            captcha_answer = request.form.get("captcha_answer", "").strip()
+            captcha_token = request.form.get("captcha_token", "")
+            from services.captcha import verify_captcha
+
+            if not verify_captcha(captcha_answer, captcha_token):
+                flash("Неверный код с картинки.", "error")
+                return redirect(
+                    url_for("board.report_post", board_name=board_name, post_id=post_id)
+                )
 
         reason = request.form.get("reason", "")
         comment = request.form.get("comment", "")
@@ -376,7 +421,13 @@ def report_post(board_name, post_id):
             url_for("board.thread", board_name=board_name, thread_id=post.thread_id)
         )
 
-    return render_template("report.html", board=board, post=post)
+    return render_template(
+        "report.html",
+        board=board,
+        post=post,
+        captcha_data=captcha_data,
+        captcha_token=captcha_token,
+    )
 
 
 # ===== RSS =====
