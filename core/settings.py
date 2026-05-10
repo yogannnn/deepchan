@@ -136,3 +136,7 @@ class Settings:
     @property
     def deploy_mode(self):
         return self._cache.get("DEPLOY_MODE", "production")
+
+    @property
+    def site_url(self):
+        return self._cache.get("SITE_URL", "http://127.0.0.1:5000")
