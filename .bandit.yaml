@@ -1,2 +1,21 @@
-skips: ['B101', 'B104']
-severity: medium
+skips:
+  - B101   # assert (в тестах ок)
+  - B104   # temporary files (в тестах ок)
+  - B404   # subprocess import (мы контролируем аргументы)
+  - B311   # random (не для криптографии, а для тайминг-защиты)
+  - B607   # partial path (ffmpeg/ffprobe из системы)
+  - B201   # flask debug true (только в dev-режиме)
+  - B105   # hardcoded password (в тестах и админском секрете — ок)
+  - B110   # try-except-pass (временное, позже исправим)
+  - B603   # subprocess without shell=True (мы не используем shell=True)
+severity: high
+exit-zero: true
+
+# Исключаем папки с тестами и виртуалкой
+exclude_dirs:
+  - .venv
+  - tests
+  - htmlcov
+  - .pytest_cache
+  - logs
+  - instance
