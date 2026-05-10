@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 from flask_compress import Compress
 from core.middleware import ParanoidMiddleware, inject_csrf_token, check_board_closed
-from core.config import load_settings
 from config import Config
 from models import db, Setting, RadioTrack, Post, Board, Thread, PostFTS
 from utils import process_comment
@@ -110,9 +109,6 @@ if __name__ == "__main__":
         run_migrations(app)
 
         # Загружаем настройки из БД (старый метод, пока не перешли на Settings полностью)
-        from core.config import load_settings
-
-        load_settings(app)
 
     # Определяем режим запуска
     deploy_mode = app.config.get("DEPLOY_MODE", "production")
