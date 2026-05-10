@@ -13,6 +13,7 @@ def test_create_app_returns_working_app():
             db.session.add(Board(short_name="b", name="Бред", description="Тест"))
             db.session.commit()
 
+    app.config["BOARD_CLOSED"] = False
     with app.test_client() as client:
         response = client.get("/")
         assert response.status_code == 200
