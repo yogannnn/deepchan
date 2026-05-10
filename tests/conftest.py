@@ -11,9 +11,6 @@ def app():
     flask_app.config["WTF_CSRF_ENABLED"] = False
     flask_app.config["CAPTCHA_ENABLED"] = False
     flask_app.config["SERVER_NAME"] = "localhost"
-    # Отключаем rate-limit в тестах, обновляя кеш Settings
-    if "SETTINGS" in flask_app.config:
-        flask_app.config["SETTINGS"]._cache["RATE_LIMIT_SECONDS"] = "0"
     flask_app.config["RATE_LIMIT_SECONDS"] = 0
     with flask_app.app_context():
         db.create_all()

@@ -121,16 +121,16 @@ def save_files(files):
     saved = []
     if not files:
         return saved
-    max_files = int(current_app.config["SETTINGS"].max_files)
+    max_files = int(current_app.config.get("MAX_FILES", 4))
     if len(files) > max_files:
         abort(400, description=f"Слишком много файлов (максимум {max_files})")
-    max_image_dimension = current_app.config["SETTINGS"].max_image_dimension
-    max_video_duration = current_app.config["SETTINGS"].max_video_duration
-    max_video_size = current_app.config["SETTINGS"].max_video_size
-    max_audio_duration = current_app.config["SETTINGS"].max_audio_duration
-    max_audio_size = current_app.config["SETTINGS"].max_audio_size
-    webp_enabled = current_app.config["SETTINGS"].webp_convert_enabled
-    stealth_trim = current_app.config["SETTINGS"].stealth_trim
+    max_image_dimension = current_app.config.get("MAX_IMAGE_DIMENSION", 5000)
+    max_video_duration = current_app.config.get("MAX_VIDEO_DURATION", 180)
+    max_video_size = current_app.config.get("MAX_VIDEO_SIZE", 50 * 1024 * 1024)
+    max_audio_duration = current_app.config.get("MAX_AUDIO_DURATION", 600)
+    max_audio_size = current_app.config.get("MAX_AUDIO_SIZE", 30 * 1024 * 1024)
+    webp_enabled = current_app.config.get("WEBP_CONVERT_ENABLED", True)
+    stealth_trim = current_app.config.get("STEALTH_TRIM", True)
     allowed_extensions = current_app.config.get(
         "ALLOWED_EXTENSIONS",
         [

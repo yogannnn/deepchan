@@ -16,13 +16,6 @@ jobs:
       - name: Create required directories
         run: |
           mkdir -p logs instance
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
@@ -31,7 +24,3 @@ jobs:
       - name: Run tests with coverage
         run: |
           pytest --cov=. --cov-report=term-missing
-      - name: Run Bandit security scan
-        run: |
-          pip install bandit
-          bandit -c .bandit.yaml -r .

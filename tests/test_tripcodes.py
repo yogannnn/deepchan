@@ -17,7 +17,7 @@ def test_admin_tripcode_shows_badge(client, app):
 
         # Устанавливаем админский секрет
         app.config["ADMIN_TRIP_SECRET"] = "adminpass"
-        app.config["SETTINGS"]._cache["ADMIN_TRIP_SECRET"] = "adminpass"
+
         token, ts = generate_csrf_token("anonymous", "post", app.config["SECRET_KEY"])
 
     # Отправляем пост с именем "Админ#adminpass"
