@@ -28,7 +28,7 @@ jobs:
       - name: Check dependencies with safety
         run: |
           pip install safety
-          safety check -r requirements-lock.txt
+          safety scan --full-report
 
       - name: Run bandit
         run: bandit -r . -c .bandit.yaml -ll
