@@ -1,6 +1,7 @@
 from flask import current_app
-from models import db, Setting
 from sqlalchemy import inspect
+
+from models import Setting, db
 
 
 class Settings:

@@ -1,33 +1,35 @@
-from flask import (
-    Blueprint,
-    render_template,
-    redirect,
-    url_for,
-    request,
-    abort,
-    flash,
-    Response,
-    current_app,
-)
-from models import db, RadioTrack
-from utils import (
-    get_file_hash,
-    get_media_duration,
-    convert_for_radio,
-    verify_csrf_token,
-)
+import glob
 import os
+import random
 import secrets
 import subprocess
-import glob
-import random
 from functools import wraps
+
+from flask import (
+    Blueprint,
+    Response,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+
+from models import RadioTrack, db
+from utils import (
+    convert_for_radio,
+    get_file_hash,
+    get_media_duration,
+    verify_csrf_token,
+)
 
 radio_bp = Blueprint("radio", __name__, url_prefix="")
 
 
 def admin_required(f):
-    from flask import request, Response
+    from flask import Response, request
 
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -45,7 +47,7 @@ def admin_required(f):
 
 def csrf_protect(action):
     def decorator(f):
-        from flask import request, abort
+        from flask import abort, request
 
         @wraps(f)
         def decorated(*args, **kwargs):

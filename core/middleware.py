@@ -1,5 +1,5 @@
-import time
 import random
+import time
 
 
 class ParanoidMiddleware:
@@ -17,7 +17,7 @@ class ParanoidMiddleware:
         return self.app(environ, custom_start_response)
 
 
-from flask import request, render_template
+from flask import render_template, request
 
 
 def inject_csrf_token(app):

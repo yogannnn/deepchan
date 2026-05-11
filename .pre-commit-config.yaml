@@ -4,3 +4,19 @@ repos:
     hooks:
       - id: black
         language_version: python3.10
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black", "--filter-files"]
+
+  - repo: local
+    hooks:
+      - id: forbidden-config-get
+        name: Check for current_app.config.get
+        entry: /bin/sh -c '! grep -rIn "current_app\.config\.get(" blueprints/ services/ core/'
+        language: system
+        types: [python]
+        pass_filenames: false

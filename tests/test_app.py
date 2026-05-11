@@ -1,6 +1,6 @@
 def test_create_app_returns_working_app():
     from app import create_app
-    from models import db, Board
+    from models import Board, db
 
     app = create_app()
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"

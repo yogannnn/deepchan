@@ -1,8 +1,9 @@
+import base64
+import hashlib
+import hmac
 import random
 import time
-import hmac
-import hashlib
-import base64
+
 from captcha.image import ImageCaptcha
 from flask import current_app
 

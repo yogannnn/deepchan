@@ -1,15 +1,17 @@
+import io
+
 from flask import (
     Blueprint,
+    redirect,
     render_template,
+    request,
     send_file,
     session,
-    request,
-    redirect,
     url_for,
 )
-from models import Board, Thread, Post
+
+from models import Board, Post, Thread
 from utils import generate_captcha
-import io
 
 main_bp = Blueprint("main", __name__)
 

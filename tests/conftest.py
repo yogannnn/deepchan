@@ -1,6 +1,8 @@
 import pytest
+
 from app import create_app
-from models import db as _db, Board
+from models import Board
+from models import db as _db
 
 
 @pytest.fixture(scope="function")

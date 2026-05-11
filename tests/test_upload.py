@@ -1,10 +1,12 @@
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from io import BytesIO
-from utils import generate_csrf_token
 from unittest.mock import patch
+
+from utils import generate_csrf_token
 
 
 def test_upload_invalid_extension(client, app):
@@ -27,8 +29,9 @@ def test_upload_invalid_extension(client, app):
 
 def test_upload_valid_image(client, app):
     """Загрузка валидного JPEG должна создать пост и вернуть 200."""
-    from PIL import Image
     from io import BytesIO
+
+    from PIL import Image
 
     # Создадим минимальный JPEG в памяти
     img = Image.new("RGB", (10, 10), color="green")

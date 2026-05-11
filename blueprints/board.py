@@ -1,50 +1,53 @@
-from flask import session
+import html
+import os
+from datetime import datetime, timezone
+
 from flask import (
     Blueprint,
-    render_template,
-    redirect,
-    url_for,
-    request,
     abort,
-    make_response,
-    flash,
     current_app,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
     session,
+    url_for,
 )
+
+from forms import PostForm
 from models import (
-    db,
     Board,
-    Thread,
     Post,
     PostFile,
     PostFTS,
     RadioTrack,
     Report,
-    hash_password,
+    Thread,
     check_password,
+    db,
+    hash_password,
 )
-from forms import PostForm
 from services.captcha import generate_captcha, verify_captcha
 from utils import (
-    save_files,
-    check_rate_limit,
-    process_comment,
-    check_ban,
     apply_word_filters,
+    check_ban,
+    check_rate_limit,
+    generate_tripcode,
     get_file_hash,
     get_media_duration,
-    generate_tripcode,
+    process_comment,
+    save_files,
 )
-from datetime import datetime, timezone
-import html
-import os
 
 board_bp = Blueprint("board", __name__, url_prefix="")
 
 
 def csrf_protect(action):
     from functools import wraps
-    from flask import request, abort
+
+    from flask import abort, request
+
     from utils import verify_csrf_token
 
     def decorator(f):

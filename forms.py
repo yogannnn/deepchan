@@ -1,8 +1,8 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, PasswordField, SubmitField, BooleanField
-from flask_wtf.file import MultipleFileField
-from wtforms.validators import Length, Optional
 from flask import current_app
+from flask_wtf import FlaskForm
+from flask_wtf.file import MultipleFileField
+from wtforms import BooleanField, PasswordField, StringField, SubmitField, TextAreaField
+from wtforms.validators import Length, Optional
 
 
 class PostForm(FlaskForm):

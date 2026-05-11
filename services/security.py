@@ -1,7 +1,9 @@
-import time
 import re
+import time
 from datetime import datetime, timezone
-from flask import current_app, request, abort
+
+from flask import abort, current_app, request
+
 from models import Ban, WordFilter
 
 _last_post_time = {}

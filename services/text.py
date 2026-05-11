@@ -1,6 +1,8 @@
-import re
 import html
+import re
+
 from flask import current_app
+
 from models import Post
 
 

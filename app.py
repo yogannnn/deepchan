@@ -1,14 +1,16 @@
-from migrate import run_migrations
+import logging
+import os
+from logging.handlers import RotatingFileHandler
+
 from flask import Flask, render_template, request
 from flask_compress import Compress
-from core.middleware import ParanoidMiddleware, inject_csrf_token, check_board_closed
-from core.settings import Settings
+
 from config import Config
-from models import db, Setting, RadioTrack, Post, Board, Thread, PostFTS
+from core.middleware import ParanoidMiddleware, check_board_closed, inject_csrf_token
+from core.settings import Settings
+from migrate import run_migrations
+from models import Board, Post, PostFTS, RadioTrack, Setting, Thread, db
 from utils import process_comment
-import os
-import logging
-from logging.handlers import RotatingFileHandler
 
 
 def create_app():
@@ -33,9 +35,9 @@ def create_app():
     os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "thumbs"), exist_ok=True)
 
     # Регистрируем blueprints
-    from blueprints.main import main_bp
-    from blueprints.board import board_bp
     from blueprints.admin import admin_bp
+    from blueprints.board import board_bp
+    from blueprints.main import main_bp
     from blueprints.radio import radio_bp
 
     app.register_blueprint(main_bp)

@@ -1,28 +1,38 @@
-from flask import Blueprint, render_template, redirect, url_for, request, abort, flash
-from flask import current_app
+import os
+import shutil
+from datetime import datetime, timedelta, timezone
+from functools import wraps
+
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from sqlalchemy import func
+
 from models import (
-    db,
+    Ban,
     Board,
-    Thread,
     Post,
     PostFile,
     PostFTS,
-    Ban,
-    WordFilter,
-    Setting,
     Report,
+    Setting,
+    Thread,
+    WordFilter,
+    db,
 )
-from sqlalchemy import func
-from datetime import datetime, timedelta, timezone
-import os
-import shutil
-from functools import wraps
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
 def admin_required(f):
-    from flask import request, Response
+    from flask import Response, request
 
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -40,7 +50,8 @@ def admin_required(f):
 
 def csrf_protect(action):
     def decorator(f):
-        from flask import request, abort
+        from flask import abort, request
+
         from utils import verify_csrf_token
 
         @wraps(f)

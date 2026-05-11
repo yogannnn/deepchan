@@ -1,6 +1,6 @@
-import time
-import hmac
 import hashlib
+import hmac
+import time
 
 
 def generate_csrf_token(user_id, action, secret_key, timestamp=None):

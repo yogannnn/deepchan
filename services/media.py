@@ -1,10 +1,11 @@
+import hashlib
+import json
 import os
 import secrets
-import hashlib
 import subprocess
-import json
-from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont
-from flask import current_app, abort
+
+from flask import abort, current_app
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
 
 def add_watermark(img, text, position=(5, 5)):

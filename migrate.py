@@ -1,5 +1,6 @@
 from sqlalchemy import inspect, text
-from models import db, Board
+
+from models import Board, db
 
 
 def run_migrations(app):
