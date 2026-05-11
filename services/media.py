@@ -131,24 +131,7 @@ def save_files(files):
     max_audio_size = current_app.config["SETTINGS"].max_audio_size
     webp_enabled = current_app.config["SETTINGS"].webp_convert_enabled
     stealth_trim = current_app.config["SETTINGS"].stealth_trim
-    allowed_extensions = current_app.config.get(
-        "ALLOWED_EXTENSIONS",
-        [
-            "jpg",
-            "jpeg",
-            "png",
-            "gif",
-            "webp",
-            "mp4",
-            "webm",
-            "mov",
-            "mp3",
-            "ogg",
-            "flac",
-            "wav",
-            "m4a",
-        ],
-    )
+    allowed_extensions = current_app.config["SETTINGS"].allowed_extensions
     video_exts = {"mp4", "webm", "mov", "avi", "mkv"}
     audio_exts = {"mp3", "ogg", "flac", "wav", "m4a"}
     for idx, f in enumerate(files):

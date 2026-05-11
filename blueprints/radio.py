@@ -84,7 +84,7 @@ def radio_page():
 
 @radio_bp.route("/radio-stream")
 def radio_stream():
-    radio_folder = current_app.config.get("RADIO_FOLDER", "/opt/deepchan/static/radio")
+    radio_folder = current_app.config["SETTINGS"].radio_folder
     playlist_dir = os.path.join(radio_folder, "playlist")
 
     def generate():
@@ -155,9 +155,7 @@ def admin_radio_upload():
     )
     db.session.add(track)
     db.session.commit()
-    pending_dir = os.path.join(
-        current_app.config.get("RADIO_FOLDER", "/opt/deepchan/static/radio"), "pending"
-    )
+    pending_dir = os.path.join(current_app.config["SETTINGS"].radio_folder, "pending")
     os.makedirs(pending_dir, exist_ok=True)
     pending_path = os.path.join(pending_dir, f"radio_pending_{track.id}.{ext}")
     os.rename(tmp_path, pending_path)
@@ -175,9 +173,7 @@ def admin_radio_approve(track_id):
     if track.approved:
         flash("Трек уже одобрен", "error")
         return redirect(url_for("radio.admin_radio"))
-    playlist_dir = os.path.join(
-        current_app.config.get("RADIO_FOLDER", "/opt/deepchan/static/radio"), "playlist"
-    )
+    playlist_dir = os.path.join(current_app.config["SETTINGS"].radio_folder, "playlist")
     os.makedirs(playlist_dir, exist_ok=True)
     output_path = os.path.join(playlist_dir, f"radio_{track.id}.mp3")
     input_path = (

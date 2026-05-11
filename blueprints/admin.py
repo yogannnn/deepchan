@@ -540,9 +540,7 @@ def admin_settings():
         "threads_per_page": current_app.config["SETTINGS"].threads_per_page,
         "posts_per_page": current_app.config["SETTINGS"].posts_per_page,
         "max_files": current_app.config["SETTINGS"].max_files,
-        "allowed_extensions": current_app.config.get(
-            "ALLOWED_EXTENSIONS", ["jpg", "jpeg", "png", "gif"]
-        ),
+        "allowed_extensions": current_app.config["SETTINGS"].allowed_extensions,
         "announcement_html": current_app.config["SETTINGS"].announcement_html,
         "max_content_length": current_app.config["SETTINGS"].max_content_length
         // (1024 * 1024),
