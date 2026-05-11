@@ -1,11 +1,11 @@
+from migrate import run_migrations
 from flask import Flask, render_template, request
 from flask_compress import Compress
 from core.middleware import ParanoidMiddleware, inject_csrf_token, check_board_closed
-from core.config import load_settings
+from core.settings import Settings
 from config import Config
 from models import db, Setting, RadioTrack, Post, Board, Thread, PostFTS
 from utils import process_comment
-from sqlalchemy import inspect, text
 import os
 import logging
 from logging.handlers import RotatingFileHandler
@@ -18,6 +18,9 @@ def create_app():
     db.init_app(app)
     app.secret_key = app.config["SECRET_KEY"]
     app.jinja_env.filters["process_comment"] = process_comment
+
+    settings = Settings()
+    app.config["SETTINGS"] = settings
 
     if not app.debug:
         handler = RotatingFileHandler("logs/board.log", maxBytes=10000, backupCount=3)
@@ -97,46 +100,15 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+    run_migrations(app)
+
     with app.app_context():
-        db.create_all()
-        if not inspect(db.engine).has_table("setting"):
-            Setting.__table__.create(db.engine)
-        if not inspect(db.engine).has_table("radio_track"):
-            RadioTrack.__table__.create(db.engine)
-        load_settings(app)
-        with db.engine.connect() as conn:
-            res = conn.execute(text("PRAGMA table_info(post)"))
-            cols = [row[1] for row in res]
-            if "search_text" not in cols:
-                conn.execute(text("ALTER TABLE post ADD COLUMN search_text TEXT"))
-                conn.commit()
-        for post in Post.query.all():
-            if not post.search_text:
-                post.search_text = (post.comment + " " + (post.subject or "")).lower()
-        db.session.commit()
-        with db.engine.connect() as conn:
-            for table, col, col_type in [
-                ("post_file", "md5_hash", "VARCHAR(32)"),
-                ("post_file", "file_size", "INTEGER DEFAULT 0"),
-                ("post", "ip_address", "VARCHAR(45)"),
-                ("post_file", "file_type", 'VARCHAR(20) DEFAULT "image"'),
-                ("post_file", "duration", "FLOAT"),
-            ]:
-                res = conn.execute(text(f"PRAGMA table_info({table.split()[0]})"))
-                cols = [row[1] for row in res]
-                if col not in cols:
-                    conn.execute(
-                        text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
-                    )
-            conn.commit()
-        insp = inspect(db.engine)
-        if not insp.has_table("post_fts"):
-            PostFTS.__table__.create(db.engine)
-        if not Board.query.filter_by(short_name="b").first():
-            b = Board(short_name="b", name="Бред", description="Общий раздел")
-            db.session.add(b)
-            db.session.commit()
-    deploy_mode = app.config.get("DEPLOY_MODE", "production")
+        settings = Settings()
+        settings.load()
+        app.config["SETTINGS"] = settings
+
+    deploy_mode = app.config["SETTINGS"].deploy_mode
+
     if deploy_mode == "development":
         print("🚀 Запуск через Flask development server на http://0.0.0.0:5000")
         app.run(host="0.0.0.0", port=5000, debug=True, threaded=True)

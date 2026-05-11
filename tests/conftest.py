@@ -1,5 +1,6 @@
 import pytest
 from app import create_app
+from core.settings import Settings
 from models import db, Board
 
 
@@ -11,7 +12,10 @@ def app():
     flask_app.config["WTF_CSRF_ENABLED"] = False
     flask_app.config["CAPTCHA_ENABLED"] = False
     flask_app.config["SERVER_NAME"] = "localhost"
-    flask_app.config["RATE_LIMIT_SECONDS"] = 0
+    settings = Settings()
+    settings._cache["RATE_LIMIT_SECONDS"] = 0
+    settings._cache["CAPTCHA_ENABLED"] = False
+    flask_app.config["SETTINGS"] = settings
     with flask_app.app_context():
         db.create_all()
         if not Board.query.filter_by(short_name="b").first():

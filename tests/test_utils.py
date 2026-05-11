@@ -7,10 +7,12 @@ from utils import generate_captcha, generate_csrf_token, verify_csrf_token
 
 
 def test_generate_captcha():
-    data, text = generate_captcha()
+    data, text, token = generate_captcha("test-secret")
     assert len(text) == 6
     assert text.isdigit()
-    assert data.read(4)  # проверяем, что это похоже на картинку
+    assert token
+    assert isinstance(data, str)
+    assert len(data) > 100
 
 
 def test_csrf_token_lifecycle():

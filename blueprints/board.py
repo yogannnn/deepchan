@@ -75,7 +75,7 @@ def csrf_protect(action):
 def board(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     page = request.args.get("page", 1, type=int)
-    per_page = int(current_app.config.get("THREADS_PER_PAGE", 50))
+    per_page = current_app.config["SETTINGS"].threads_per_page
     threads_paginated = (
         board.threads.filter(Thread.posts.any())
         .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
@@ -86,7 +86,7 @@ def board(board_name):
     captcha_data = None
     captcha_token = None
 
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         captcha_data, _, captcha_token = generate_captcha()
 
     return render_template(
@@ -103,7 +103,7 @@ def board(board_name):
 @board_bp.route("/<string:board_name>/catalog", strict_slashes=False)
 def board_catalog(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
-    per_page = int(current_app.config.get("THREADS_PER_PAGE", 30))
+    per_page = current_app.config["SETTINGS"].threads_per_page
     threads = (
         board.threads.filter(Thread.posts.any())
         .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
@@ -118,7 +118,7 @@ def thread(board_name, thread_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
     page = request.args.get("page", 1, type=int)
-    per_page = int(current_app.config.get("POSTS_PER_PAGE", 50))
+    per_page = current_app.config["SETTINGS"].posts_per_page
     posts_paginated = thread.posts.order_by(Post.created_at.asc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -127,7 +127,7 @@ def thread(board_name, thread_id):
     captcha_data = None
     captcha_token = None
 
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         captcha_data, _, captcha_token = generate_captcha()
 
     quote_text = ""
@@ -156,13 +156,19 @@ def create_post(board_name):
     check_rate_limit()
     check_ban(request.remote_addr)
 
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         captcha_answer = request.form.get("captcha_answer", "")
         captcha_token = request.form.get("captcha_token", "")
 
         if not verify_captcha(captcha_answer, captcha_token):
             abort(400, description="Неверный код капчи")
 
+    # Статичная проверка капчи
+    if current_app.config["SETTINGS"].captcha_enabled:
+        captcha_answer = request.form.get("captcha_answer", "").strip()
+        captcha_token = request.form.get("captcha_token", "")
+        if not verify_captcha(captcha_answer, captcha_token):
+            abort(400, description="Неверный код с картинки.")
     if form.validate_on_submit():
         thread_id = request.args.get("thread_id", type=int)
         sage = form.sage.data
@@ -205,7 +211,7 @@ def create_post(board_name):
             display_name = parts[0] or "Аноним"
             password = parts[1]
             tripcode = generate_tripcode(password, current_app.config["SECRET_KEY"])
-            admin_secret = current_app.config.get("ADMIN_TRIP_SECRET", "")
+            admin_secret = current_app.config["SETTINGS"].admin_trip_secret
             if admin_secret and password == admin_secret:
                 is_admin = True
         safe_name = html.escape(display_name) if display_name else "Аноним"
@@ -241,7 +247,7 @@ def create_post(board_name):
             )
             db.session.add(pf)
 
-            if file_type == "audio" and current_app.config.get("RADIO_ENABLED", False):
+            if file_type == "audio" and current_app.config["SETTINGS"].radio_enabled:
                 if not RadioTrack.query.filter_by(original_hash=sha256).first():
                     track = RadioTrack(
                         post_file_id=pf.id,
@@ -271,7 +277,7 @@ def create_post(board_name):
 
         if thread_id:
             total_posts = thread.posts.count()
-            per_page = int(current_app.config.get("POSTS_PER_PAGE", 50))
+            per_page = current_app.config["SETTINGS"].posts_per_page
             last_page = (total_posts + per_page - 1) // per_page
             return redirect(
                 url_for(
@@ -380,21 +386,21 @@ def report_post(board_name, post_id):
     # Генерируем капчу для формы (GET) и передаём в шаблон
     captcha_data = None
     captcha_token = None
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         from services.captcha import generate_captcha
 
         captcha_data, _, captcha_token = generate_captcha()
 
     if request.method == "POST":
         # Проверяем, включена ли система жалоб
-        if not current_app.config.get("REPORTS_ENABLED", True):
+        if not current_app.config["SETTINGS"].reports_enabled:
             flash("Система жалоб временно отключена.", "error")
             return redirect(
                 url_for("board.thread", board_name=board_name, thread_id=post.thread_id)
             )
 
         # Stateless-проверка капчи
-        if current_app.config.get("CAPTCHA_ENABLED", False):
+        if current_app.config["SETTINGS"].captcha_enabled:
             captcha_answer = request.form.get("captcha_answer", "").strip()
             captcha_token = request.form.get("captcha_token", "")
             from services.captcha import verify_captcha
@@ -448,7 +454,7 @@ def board_rss(board_name):
         .limit(20)
         .all()
     )
-    site_url = current_app.config.get("SITE_URL", "http://deepchan.i2p")
+    site_url = current_app.config["SETTINGS"].site_url
     return render_rss("rss_board.xml", board=board, threads=threads, site_url=site_url)
 
 
@@ -457,7 +463,7 @@ def thread_rss(board_name, thread_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
     posts = thread.posts.order_by(Post.created_at.desc()).limit(50).all()
-    site_url = current_app.config.get("SITE_URL", "http://deepchan.i2p")
+    site_url = current_app.config["SETTINGS"].site_url
     return render_rss(
         "rss_thread.xml", board=board, thread=thread, posts=posts, site_url=site_url
     )

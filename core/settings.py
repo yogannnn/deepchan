@@ -1,142 +1,98 @@
-from flask import current_app
-from models import Setting
 from sqlalchemy import inspect
+from models import db, Setting
 
 
 class Settings:
-    _instance = None
+    DEFAULTS = {
+        "SITE_TITLE": "DeepChan",
+        "THREADS_PER_PAGE": 50,
+        "POSTS_PER_PAGE": 50,
+        "MAX_FILES": 4,
+        "ALLOWED_EXTENSIONS": "jpg,jpeg,png,gif,webp,mp4,webm,mov,mp3,ogg,flac,wav,m4a",
+        "MAX_CONTENT_LENGTH": 10485760,
+        "MAX_IMAGE_DIMENSION": 5000,
+        "MAX_VIDEO_DURATION": 180,
+        "MAX_VIDEO_SIZE": 52428800,
+        "MAX_AUDIO_DURATION": 600,
+        "MAX_AUDIO_SIZE": 31457280,
+        "WEBP_CONVERT_ENABLED": True,
+        "STEALTH_TRIM": True,
+        "RADIO_ENABLED": False,
+        "RADIO_BITRATE": "128k",
+        "CAPTCHA_ENABLED": True,
+        "AUTO_REFRESH_ENABLED": True,
+        "AUTO_REFRESH_INTERVAL": 30,
+        "RATE_LIMIT_SECONDS": 30,
+        "STATS_SHOW_IPS": False,
+        "BOARD_CLOSED": False,
+        "REPORTS_ENABLED": True,
+        "HEADER_HTML": "",
+        "FOOTER_HTML": "",
+        "ANNOUNCEMENT_HTML": "",
+        "ADMIN_TRIP_SECRET": "",
+        "DEPLOY_MODE": "production",
+        "SITE_URL": "http://deepchan.i2p",
+    }
 
-    def __init__(self, app=None):
-        self.app = app
+    BOOL_KEYS = {
+        "WEBP_CONVERT_ENABLED",
+        "STEALTH_TRIM",
+        "RADIO_ENABLED",
+        "CAPTCHA_ENABLED",
+        "AUTO_REFRESH_ENABLED",
+        "STATS_SHOW_IPS",
+        "BOARD_CLOSED",
+        "REPORTS_ENABLED",
+    }
+
+    INT_KEYS = {
+        "THREADS_PER_PAGE",
+        "POSTS_PER_PAGE",
+        "MAX_FILES",
+        "MAX_CONTENT_LENGTH",
+        "MAX_IMAGE_DIMENSION",
+        "MAX_VIDEO_DURATION",
+        "MAX_VIDEO_SIZE",
+        "MAX_AUDIO_DURATION",
+        "MAX_AUDIO_SIZE",
+        "AUTO_REFRESH_INTERVAL",
+        "RATE_LIMIT_SECONDS",
+    }
+
+    def __init__(self):
         self._cache = {}
-        if app:
-            self.load()
 
     def load(self):
-        from models import db
+        self._cache = {}
+        if not inspect(db.engine).has_table("setting"):
+            return
+        for key, default in self.DEFAULTS.items():
+            row = Setting.query.filter_by(key=key).first()
+            value = row.value if row else default
+            self._cache[key] = self._convert(key, value)
+        # Заполняем app.config для обратной совместимости с шаблонами и тестами
+        from flask import current_app
 
-        with self.app.app_context():
-            if not inspect(db.engine).has_table("setting"):
-                return
-            for s in Setting.query.all():
-                self._cache[s.key] = s.value
-                # Заполняем app.config для совместимости с шаблонами
-                self.app.config[s.key] = s.value
+        current_app.config.update(self._cache)
 
-    # Типизированные свойства
-    @property
-    def site_title(self):
-        return self._cache.get("SITE_TITLE", "Имиджборда")
+    def _convert(self, key, value):
+        if key in self.BOOL_KEYS:
+            if isinstance(value, bool):
+                return value
+            return str(value).lower() in ("1", "true", "yes", "on")
+        if key in self.INT_KEYS:
+            try:
+                return int(value)
+            except Exception:
+                return int(self.DEFAULTS[key])
+        if key == "ALLOWED_EXTENSIONS":
+            if isinstance(value, list):
+                return value
+            return [x.strip().lower() for x in str(value).split(",") if x.strip()]
+        return str(value)
 
-    @property
-    def threads_per_page(self):
-        return int(self._cache.get("THREADS_PER_PAGE", 30))
-
-    @property
-    def posts_per_page(self):
-        return int(self._cache.get("POSTS_PER_PAGE", 50))
-
-    @property
-    def max_files(self):
-        return int(self._cache.get("MAX_FILES", 4))
-
-    @property
-    def allowed_extensions(self):
-        val = self._cache.get("ALLOWED_EXTENSIONS", "jpg,jpeg,png,gif")
-        return (
-            [x.strip().lower() for x in val.split(",")]
-            if val
-            else ["jpg", "jpeg", "png", "gif"]
-        )
-
-    @property
-    def max_content_length(self):
-        return int(self._cache.get("MAX_CONTENT_LENGTH", 10 * 1024 * 1024))
-
-    @property
-    def max_image_dimension(self):
-        return int(self._cache.get("MAX_IMAGE_DIMENSION", 5000))
-
-    @property
-    def max_video_duration(self):
-        return int(self._cache.get("MAX_VIDEO_DURATION", 180))
-
-    @property
-    def max_video_size(self):
-        return int(self._cache.get("MAX_VIDEO_SIZE", 50 * 1024 * 1024))
-
-    @property
-    def max_audio_duration(self):
-        return int(self._cache.get("MAX_AUDIO_DURATION", 600))
-
-    @property
-    def max_audio_size(self):
-        return int(self._cache.get("MAX_AUDIO_SIZE", 30 * 1024 * 1024))
-
-    @property
-    def webp_convert_enabled(self):
-        return self._cache.get("WEBP_CONVERT_ENABLED", "True") == "True"
-
-    @property
-    def stealth_trim(self):
-        return self._cache.get("STEALTH_TRIM", "True") == "True"
-
-    @property
-    def radio_enabled(self):
-        return self._cache.get("RADIO_ENABLED", "True") == "True"
-
-    @property
-    def radio_bitrate(self):
-        return self._cache.get("RADIO_BITRATE", "128k")
-
-    @property
-    def captcha_enabled(self):
-        return self._cache.get("CAPTCHA_ENABLED", "False") == "True"
-
-    @property
-    def auto_refresh_enabled(self):
-        return self._cache.get("AUTO_REFRESH_ENABLED", "True") == "True"
-
-    @property
-    def auto_refresh_interval(self):
-        return int(self._cache.get("AUTO_REFRESH_INTERVAL", 30))
-
-    @property
-    def rate_limit_seconds(self):
-        return int(self._cache.get("RATE_LIMIT_SECONDS", 30))
-
-    @property
-    def stats_show_ips(self):
-        return self._cache.get("STATS_SHOW_IPS", "False") == "True"
-
-    @property
-    def board_closed(self):
-        return self._cache.get("BOARD_CLOSED", "False") == "True"
-
-    @property
-    def reports_enabled(self):
-        return self._cache.get("REPORTS_ENABLED", "True") == "True"
-
-    @property
-    def header_html(self):
-        return self._cache.get("HEADER_HTML", "")
-
-    @property
-    def footer_html(self):
-        return self._cache.get("FOOTER_HTML", "")
-
-    @property
-    def announcement_html(self):
-        return self._cache.get("ANNOUNCEMENT_HTML", "")
-
-    @property
-    def admin_trip_secret(self):
-        return self._cache.get("ADMIN_TRIP_SECRET", "")
-
-    @property
-    def deploy_mode(self):
-        return self._cache.get("DEPLOY_MODE", "production")
-
-    @property
-    def site_url(self):
-        return self._cache.get("SITE_URL", "http://127.0.0.1:5000")
+    def __getattr__(self, name):
+        key = name.upper()
+        if key in self.DEFAULTS:
+            return self._cache.get(key, self.DEFAULTS[key])
+        raise AttributeError(name)

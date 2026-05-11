@@ -12,7 +12,7 @@ def check_rate_limit():
     now = time.time()
     if ip in _last_post_time:
         elapsed = now - _last_post_time[ip]
-        limit = int(current_app.config.get("RATE_LIMIT_SECONDS", 30))
+        limit = current_app.config["SETTINGS"].rate_limit_seconds
         if elapsed < limit:
             abort(
                 429, description=f"Слишком часто. Подождите {limit - int(elapsed)} сек."

@@ -527,9 +527,9 @@ def admin_settings():
         return redirect(url_for("admin.admin_settings"))
 
     ctx = {
-        "admin_trip_secret": current_app.config.get("ADMIN_TRIP_SECRET", ""),
-        "captcha_enabled": current_app.config.get("CAPTCHA_ENABLED", False),
-        "stats_show_ips": current_app.config.get("STATS_SHOW_IPS", False),
+        "admin_trip_secret": current_app.config["SETTINGS"].admin_trip_secret,
+        "captcha_enabled": current_app.config["SETTINGS"].captcha_enabled,
+        "stats_show_ips": current_app.config["SETTINGS"].stats_show_ips,
         "board_closed": current_app.config.get("BOARD_CLOSED", False),
         "auto_refresh_enabled": current_app.config.get("AUTO_REFRESH_ENABLED", True),
         "auto_refresh_interval": current_app.config.get("AUTO_REFRESH_INTERVAL", 30),
@@ -539,7 +539,7 @@ def admin_settings():
         "site_title": current_app.config.get("SITE_TITLE", "Имиджборда"),
         "threads_per_page": current_app.config.get("THREADS_PER_PAGE", 50),
         "posts_per_page": current_app.config.get("POSTS_PER_PAGE", 50),
-        "max_files": current_app.config.get("MAX_FILES", 4),
+        "max_files": current_app.config["SETTINGS"].max_files,
         "allowed_extensions": current_app.config.get(
             "ALLOWED_EXTENSIONS", ["jpg", "jpeg", "png", "gif"]
         ),
@@ -548,16 +548,16 @@ def admin_settings():
             current_app.config.get("MAX_CONTENT_LENGTH") or 10 * 1024 * 1024
         )
         // (1024 * 1024),
-        "max_image_dimension": current_app.config.get("MAX_IMAGE_DIMENSION", 5000),
-        "max_video_duration": current_app.config.get("MAX_VIDEO_DURATION", 180),
-        "max_video_size": current_app.config.get("MAX_VIDEO_SIZE", 50 * 1024 * 1024)
+        "max_image_dimension": current_app.config["SETTINGS"].max_image_dimension,
+        "max_video_duration": current_app.config["SETTINGS"].max_video_duration,
+        "max_video_size": current_app.config["SETTINGS"].max_video_size
         // (1024 * 1024),
-        "max_audio_duration": current_app.config.get("MAX_AUDIO_DURATION", 600),
-        "max_audio_size": current_app.config.get("MAX_AUDIO_SIZE", 30 * 1024 * 1024)
+        "max_audio_duration": current_app.config["SETTINGS"].max_audio_duration,
+        "max_audio_size": current_app.config["SETTINGS"].max_audio_size
         // (1024 * 1024),
-        "webp_convert_enabled": current_app.config.get("WEBP_CONVERT_ENABLED", True),
-        "stealth_trim": current_app.config.get("STEALTH_TRIM", True),
-        "radio_enabled": current_app.config.get("RADIO_ENABLED", False),
+        "webp_convert_enabled": current_app.config["SETTINGS"].webp_convert_enabled,
+        "stealth_trim": current_app.config["SETTINGS"].stealth_trim,
+        "radio_enabled": current_app.config["SETTINGS"].radio_enabled,
         "radio_bitrate": current_app.config.get("RADIO_BITRATE", "128k"),
     }
     return render_template("admin/settings.html", **ctx)
@@ -611,11 +611,11 @@ def admin_stats():
 
     upload_folder = current_app.config["UPLOAD_FOLDER"]
     disk_usage = shutil.disk_usage(upload_folder)
-    total_disk_gb = disk_usage.total / (1024 ** 3)
-    used_disk_gb = disk_usage.used / (1024 ** 3)
-    free_disk_gb = disk_usage.free / (1024 ** 3)
+    total_disk_gb = disk_usage.total / (1024**3)
+    used_disk_gb = disk_usage.used / (1024**3)
+    free_disk_gb = disk_usage.free / (1024**3)
 
-    show_ips = current_app.config.get("STATS_SHOW_IPS", False)
+    show_ips = current_app.config["SETTINGS"].stats_show_ips
     recent_ips = []
     if show_ips:
         recent_ips = (
