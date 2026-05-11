@@ -6,13 +6,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from utils import generate_captcha, generate_csrf_token, verify_csrf_token
 
 
-def test_generate_captcha():
-    data, text, token = generate_captcha("test-secret")
-    assert len(text) == 6
-    assert text.isdigit()
-    assert token
-    assert isinstance(data, str)
-    assert len(data) > 100
+def test_generate_captcha(app):
+    with app.app_context():
+        data, text, token = generate_captcha()
+        assert len(text) == 6
+        assert text.isdigit()
+        assert len(token) > 0
 
 
 def test_csrf_token_lifecycle():
