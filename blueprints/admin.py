@@ -184,6 +184,7 @@ def admin_toggle_lock(thread_id):
 def admin_delete_thread(thread_id):
     thread = Thread.query.get_or_404(thread_id)
     for post in thread.posts:
+        PostFTS.query.filter_by(post_id=post.id).delete()
         for pf in post.files:
             try:
                 os.remove(
@@ -215,6 +216,7 @@ def admin_bulk_threads():
     if action == "delete":
         for t in threads:
             for post in t.posts:
+                PostFTS.query.filter_by(post_id=post.id).delete()
                 for pf in post.files:
                     try:
                         os.remove(
