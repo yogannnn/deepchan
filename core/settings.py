@@ -1,5 +1,6 @@
-from sqlalchemy import inspect
+from flask import current_app
 from models import db, Setting
+from sqlalchemy import inspect
 
 
 class Settings:
@@ -17,8 +18,9 @@ class Settings:
         "MAX_AUDIO_SIZE": 31457280,
         "WEBP_CONVERT_ENABLED": True,
         "STEALTH_TRIM": True,
-        "RADIO_ENABLED": False,
+        "RADIO_ENABLED": True,
         "RADIO_BITRATE": "128k",
+        "RADIO_FOLDER": "/opt/deepchan/static/radio",
         "CAPTCHA_ENABLED": True,
         "AUTO_REFRESH_ENABLED": True,
         "AUTO_REFRESH_INTERVAL": 30,
@@ -33,7 +35,6 @@ class Settings:
         "DEPLOY_MODE": "production",
         "SITE_URL": "http://deepchan.i2p",
     }
-
     BOOL_KEYS = {
         "WEBP_CONVERT_ENABLED",
         "STEALTH_TRIM",
@@ -44,7 +45,6 @@ class Settings:
         "BOARD_CLOSED",
         "REPORTS_ENABLED",
     }
-
     INT_KEYS = {
         "THREADS_PER_PAGE",
         "POSTS_PER_PAGE",
@@ -59,7 +59,8 @@ class Settings:
         "RATE_LIMIT_SECONDS",
     }
 
-    def __init__(self):
+    def __init__(self, app=None):
+        self.app = app
         self._cache = {}
 
     def load(self):
@@ -70,10 +71,10 @@ class Settings:
             row = Setting.query.filter_by(key=key).first()
             value = row.value if row else default
             self._cache[key] = self._convert(key, value)
-        # Заполняем app.config для обратной совместимости с шаблонами и тестами
-        from flask import current_app
 
-        current_app.config.update(self._cache)
+        # Синхронизируем с app.config (для тестов и шаблонов)
+        if self.app:
+            self.app.config.update(self._cache)
 
     def _convert(self, key, value):
         if key in self.BOOL_KEYS:
@@ -93,6 +94,11 @@ class Settings:
 
     def __getattr__(self, name):
         key = name.upper()
+        # Сначала пытаемся взять из app.config (для тестов), затем из кеша, затем из DEFAULTS
+        if self.app and key in self.app.config:
+            return self._convert(key, self.app.config[key])
+        if key in self._cache:
+            return self._cache[key]
         if key in self.DEFAULTS:
-            return self._cache.get(key, self.DEFAULTS[key])
+            return self._convert(key, self.DEFAULTS[key])
         raise AttributeError(name)

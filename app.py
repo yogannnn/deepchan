@@ -19,7 +19,9 @@ def create_app():
     app.secret_key = app.config["SECRET_KEY"]
     app.jinja_env.filters["process_comment"] = process_comment
 
-    settings = Settings()
+    settings = Settings(app)
+    with app.app_context():
+        settings.load()
     app.config["SETTINGS"] = settings
 
     if not app.debug:
@@ -103,7 +105,9 @@ if __name__ == "__main__":
     run_migrations(app)
 
     with app.app_context():
-        settings = Settings()
+        settings = Settings(app)
+    with app.app_context():
+        settings.load()
         settings.load()
         app.config["SETTINGS"] = settings
 

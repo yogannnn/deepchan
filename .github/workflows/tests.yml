@@ -24,3 +24,15 @@ jobs:
       - name: Run tests with coverage
         run: |
           pytest --cov=. --cov-report=term-missing
+
+      - name: Run bandit
+        run: bandit -r . -c .bandit.yaml
+
+      - name: Run grep for leftover config.get
+        run: |
+          LEFT=$(grep -rIn "current_app\.config\.get(" blueprints/ services/ core/ || true)
+          if [ -n "$LEFT" ]; then
+            echo "Найдены остатки current_app.config.get:"
+            echo "$LEFT"
+            exit 1
+          fi

@@ -86,7 +86,7 @@ def board(board_name):
     captcha_data = None
     captcha_token = None
 
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         captcha_data, _, captcha_token = generate_captcha()
 
     return render_template(
@@ -127,7 +127,7 @@ def thread(board_name, thread_id):
     captcha_data = None
     captcha_token = None
 
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         captcha_data, _, captcha_token = generate_captcha()
 
     quote_text = ""
@@ -156,7 +156,7 @@ def create_post(board_name):
     check_rate_limit()
     check_ban(request.remote_addr)
 
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         captcha_answer = request.form.get("captcha_answer", "")
         captcha_token = request.form.get("captcha_token", "")
 
@@ -219,9 +219,9 @@ def create_post(board_name):
             subject=safe_subject if not thread_id else None,
             comment=filtered_comment,
             sage=sage,
-            password_hash=hash_password(form.password.data)
-            if form.password.data
-            else None,
+            password_hash=(
+                hash_password(form.password.data) if form.password.data else None
+            ),
             ip_address=request.remote_addr,
         )
         post.search_text = (post.comment + " " + (post.subject or "")).lower()
@@ -380,7 +380,7 @@ def report_post(board_name, post_id):
     # Генерируем капчу для формы (GET) и передаём в шаблон
     captcha_data = None
     captcha_token = None
-    if current_app.config.get("CAPTCHA_ENABLED", False):
+    if current_app.config["SETTINGS"].captcha_enabled:
         from services.captcha import generate_captcha
 
         captcha_data, _, captcha_token = generate_captcha()
@@ -394,7 +394,7 @@ def report_post(board_name, post_id):
             )
 
         # Stateless-проверка капчи
-        if current_app.config.get("CAPTCHA_ENABLED", False):
+        if current_app.config["SETTINGS"].captcha_enabled:
             captcha_answer = request.form.get("captcha_answer", "").strip()
             captcha_token = request.form.get("captcha_token", "")
             from services.captcha import verify_captcha

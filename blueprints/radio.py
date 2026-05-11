@@ -72,7 +72,7 @@ def csrf_protect(action):
 
 @radio_bp.route("/radio")
 def radio_page():
-    if not current_app.config.get("RADIO_ENABLED", False):
+    if not current_app.config["SETTINGS"].radio_enabled:
         return render_template("radio_disabled.html")
     tracks = (
         RadioTrack.query.filter_by(approved=True)
@@ -191,7 +191,7 @@ def admin_radio_approve(track_id):
             output_path,
             track.artist,
             track.title,
-            current_app.config.get("RADIO_BITRATE", "128k"),
+            current_app.config["SETTINGS"].radio_bitrate,
         )
     except Exception as e:
         flash(f"Ошибка конвертации: {str(e)}", "error")
@@ -253,7 +253,7 @@ def admin_radio_delete(track_id):
 @admin_required
 @csrf_protect("toggle_radio")
 def admin_radio_toggle():
-    current = current_app.config.get("RADIO_ENABLED", False)
+    current = current_app.config["SETTINGS"].radio_enabled
     from models import Setting
 
     s = db.session.get(Setting, "RADIO_ENABLED")

@@ -33,7 +33,7 @@ def global_catalog():
 
     board_id = request.args.get("board_id", type=int)
     page = request.args.get("page", 1, type=int)
-    per_page = int(current_app.config.get("THREADS_PER_PAGE", 30))
+    per_page = current_app.config["SETTINGS"].threads_per_page
     query = Thread.query.filter(Thread.posts.any())
     if board_id:
         query = query.filter(Thread.board_id == board_id)

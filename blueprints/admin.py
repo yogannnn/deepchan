@@ -530,23 +530,21 @@ def admin_settings():
         "admin_trip_secret": current_app.config["SETTINGS"].admin_trip_secret,
         "captcha_enabled": current_app.config["SETTINGS"].captcha_enabled,
         "stats_show_ips": current_app.config["SETTINGS"].stats_show_ips,
-        "board_closed": current_app.config.get("BOARD_CLOSED", False),
-        "auto_refresh_enabled": current_app.config.get("AUTO_REFRESH_ENABLED", True),
-        "auto_refresh_interval": current_app.config.get("AUTO_REFRESH_INTERVAL", 30),
-        "rate_limit_seconds": current_app.config.get("RATE_LIMIT_SECONDS", 30),
-        "header_html": current_app.config.get("HEADER_HTML", ""),
-        "footer_html": current_app.config.get("FOOTER_HTML", ""),
-        "site_title": current_app.config.get("SITE_TITLE", "Имиджборда"),
-        "threads_per_page": current_app.config.get("THREADS_PER_PAGE", 50),
-        "posts_per_page": current_app.config.get("POSTS_PER_PAGE", 50),
+        "board_closed": current_app.config["SETTINGS"].board_closed,
+        "auto_refresh_enabled": current_app.config["SETTINGS"].auto_refresh_enabled,
+        "auto_refresh_interval": current_app.config["SETTINGS"].auto_refresh_interval,
+        "rate_limit_seconds": current_app.config["SETTINGS"].rate_limit_seconds,
+        "header_html": current_app.config["SETTINGS"].header_html,
+        "footer_html": current_app.config["SETTINGS"].footer_html,
+        "site_title": current_app.config["SETTINGS"].site_title,
+        "threads_per_page": current_app.config["SETTINGS"].threads_per_page,
+        "posts_per_page": current_app.config["SETTINGS"].posts_per_page,
         "max_files": current_app.config["SETTINGS"].max_files,
         "allowed_extensions": current_app.config.get(
             "ALLOWED_EXTENSIONS", ["jpg", "jpeg", "png", "gif"]
         ),
-        "announcement_html": current_app.config.get("ANNOUNCEMENT_HTML", ""),
-        "max_content_length": int(
-            current_app.config.get("MAX_CONTENT_LENGTH") or 10 * 1024 * 1024
-        )
+        "announcement_html": current_app.config["SETTINGS"].announcement_html,
+        "max_content_length": current_app.config["SETTINGS"].max_content_length
         // (1024 * 1024),
         "max_image_dimension": current_app.config["SETTINGS"].max_image_dimension,
         "max_video_duration": current_app.config["SETTINGS"].max_video_duration,
@@ -558,7 +556,7 @@ def admin_settings():
         "webp_convert_enabled": current_app.config["SETTINGS"].webp_convert_enabled,
         "stealth_trim": current_app.config["SETTINGS"].stealth_trim,
         "radio_enabled": current_app.config["SETTINGS"].radio_enabled,
-        "radio_bitrate": current_app.config.get("RADIO_BITRATE", "128k"),
+        "radio_bitrate": current_app.config["SETTINGS"].radio_bitrate,
     }
     return render_template("admin/settings.html", **ctx)
 

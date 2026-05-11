@@ -11,6 +11,56 @@ def app():
     flask_app.config["WTF_CSRF_ENABLED"] = False
     flask_app.config["SERVER_NAME"] = "localhost"
     flask_app.config["RATE_LIMIT_SECONDS"] = 0
+    flask_app.config["CAPTCHA_ENABLED"] = False
+    flask_app.config["ALLOWED_EXTENSIONS"] = [
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+        "mp4",
+        "webm",
+        "mov",
+        "mp3",
+        "ogg",
+        "flac",
+        "wav",
+        "m4a",
+    ]
+    flask_app.config["MAX_CONTENT_LENGTH"] = 10485760
+    flask_app.config["MAX_IMAGE_DIMENSION"] = 5000
+    flask_app.config["MAX_VIDEO_DURATION"] = 180
+    flask_app.config["MAX_VIDEO_SIZE"] = 52428800
+    flask_app.config["MAX_AUDIO_DURATION"] = 600
+    flask_app.config["MAX_AUDIO_SIZE"] = 31457280
+    flask_app.config["WEBP_CONVERT_ENABLED"] = True
+    flask_app.config["STEALTH_TRIM"] = True
+    flask_app.config["RADIO_ENABLED"] = False
+    flask_app.config["CAPTCHA_ENABLED"] = False
+    flask_app.config["ALLOWED_EXTENSIONS"] = [
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+        "mp4",
+        "webm",
+        "mov",
+        "mp3",
+        "ogg",
+        "flac",
+        "wav",
+        "m4a",
+    ]
+    flask_app.config["MAX_CONTENT_LENGTH"] = 10485760
+    flask_app.config["MAX_IMAGE_DIMENSION"] = 5000
+    flask_app.config["MAX_VIDEO_DURATION"] = 180
+    flask_app.config["MAX_VIDEO_SIZE"] = 52428800
+    flask_app.config["MAX_AUDIO_DURATION"] = 600
+    flask_app.config["MAX_AUDIO_SIZE"] = 31457280
+    flask_app.config["WEBP_CONVERT_ENABLED"] = True
+    flask_app.config["STEALTH_TRIM"] = True
+    flask_app.config["RADIO_ENABLED"] = False
 
     # Обновляем кеш Settings тестовыми значениями (число, а не строка!)
     if "SETTINGS" in flask_app.config:

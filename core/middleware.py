@@ -40,7 +40,7 @@ def inject_csrf_token(app):
 def check_board_closed(app):
     @app.before_request
     def _check():
-        if app.config.get("BOARD_CLOSED", False):
+        if app.config["SETTINGS"].board_closed:
             if request.path.startswith("/admin") or request.path.startswith("/static"):
                 return
             if request.endpoint != "board_closed":
