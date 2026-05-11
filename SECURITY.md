@@ -12,9 +12,9 @@
 Если вы нашли уязвимость в безопасности, **пожалуйста, не создавайте публичный Issue**.  
 Вместо этого свяжитесь с нами приватно через один из каналов:
 
-- Email: `deepchan@proton.me` (зашифруйте PGP ключом ниже)
-- Signal: `+countrycode.number` (заменить на реальный номер)
-- Session / Tox / SimpleX: (добавить ID по желанию)
+- Email: `yogannnn@gmail.com` (зашифруйте PGP ключом ниже)
+- Telegram: `@servertronix`
+- Tox: `B82FA1AB98D895053C3A8A2E27AF200DB35A1480B87BC6676FA1126FE9C5E4785FF927C67465`
 
 PGP ключ:
 ```
