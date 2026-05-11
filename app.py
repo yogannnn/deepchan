@@ -77,6 +77,9 @@ def create_app():
     def add_security_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
+        response.headers[
+            "Content-Security-Policy"
+        ] = "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         return response
 
     @app.errorhandler(400)
