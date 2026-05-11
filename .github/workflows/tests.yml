@@ -25,6 +25,11 @@ jobs:
         run: |
           pytest --cov=. --cov-report=term-missing
 
+      - name: Check dependencies with safety
+        run: |
+          pip install safety
+          safety check -r requirements-lock.txt
+
       - name: Run bandit
         run: bandit -r . -c .bandit.yaml -ll
 
