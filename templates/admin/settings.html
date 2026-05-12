@@ -9,6 +9,16 @@
             Название сайта:
             <input type="text" name="site_title" value="{{ site_title }}" placeholder="Имиджборда">
         </label>
+
+        <label>
+            Язык сайта:
+            <select name="site_lang">
+                {% for lang in available_langs %}
+                    <option value="{{ lang }}" {% if site_lang == lang %}selected{% endif %}>{{ lang | upper }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
         <label>
             Секрет админа (для трипкода с плашкой Adm): <input type="text" name="admin_trip_secret" value="{{ admin_trip_secret }}">
         </label>

@@ -507,6 +507,7 @@ def admin_settings():
         save_setting("HEADER_HTML", request.form.get("header_html", ""))
         save_setting("FOOTER_HTML", request.form.get("footer_html", ""))
         save_setting("SITE_TITLE", request.form.get("site_title", "Имиджборда"))
+        save_setting("SITE_LANG", request.form.get("site_lang", "ru"))
         save_setting("THREADS_PER_PAGE", request.form.get("threads_per_page", "50"))
         save_setting("POSTS_PER_PAGE", request.form.get("posts_per_page", "50"))
         save_setting("MAX_FILES", request.form.get("max_files", "4"))
@@ -550,6 +551,12 @@ def admin_settings():
         "rate_limit_seconds": current_app.config["SETTINGS"].rate_limit_seconds,
         "header_html": current_app.config["SETTINGS"].header_html,
         "footer_html": current_app.config["SETTINGS"].footer_html,
+        "available_langs": [
+            os.path.splitext(f)[0]
+            for f in os.listdir(os.path.join(current_app.root_path, "translations"))
+            if f.endswith(".json")
+        ],
+        "site_lang": current_app.config["SETTINGS"].site_lang,
         "site_title": current_app.config["SETTINGS"].site_title,
         "threads_per_page": current_app.config["SETTINGS"].threads_per_page,
         "posts_per_page": current_app.config["SETTINGS"].posts_per_page,

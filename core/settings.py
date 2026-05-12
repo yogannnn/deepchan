@@ -35,6 +35,7 @@ class Settings:
         "ADMIN_TRIP_SECRET": "",
         "DEPLOY_MODE": "production",
         "SITE_URL": "http://deepchan.i2p",
+        "SITE_LANG": "ru",
     }
     BOOL_KEYS = {
         "WEBP_CONVERT_ENABLED",

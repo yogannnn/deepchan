@@ -1,17 +1,18 @@
 import json
 from pathlib import Path
 
-from flask import request
+from flask import current_app
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TRANSLATIONS_DIR = BASE_DIR / "translations"
 
 
-def get_locale():
-    lang = request.args.get("lang", "ru")
-    if lang not in ("ru", "en"):
-        lang = "ru"
-    return lang
+def get_default_lang():
+    """Возвращает язык из глобальных настроек, fallback — ru."""
+    try:
+        return current_app.config["SETTINGS"].site_lang
+    except (KeyError, RuntimeError):
+        return "ru"
 
 
 def load_translations(lang="ru"):
@@ -22,13 +23,16 @@ def load_translations(lang="ru"):
         return json.load(f)
 
 
-def t(key):
-    try:
-        lang = get_locale()
-    except Exception:
-        lang = "ru"
+def t(key, lang=None):
+    """Возвращает перевод для ключа. lang берётся из глобальной настройки, если не передан."""
+    if lang is None:
+        lang = get_default_lang()
     try:
         translations = load_translations(lang)
         return translations.get(key, key)
     except Exception:
-        return key
+        try:
+            translations = load_translations("ru")
+            return translations.get(key, key)
+        except Exception:
+            return key

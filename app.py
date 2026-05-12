@@ -6,6 +6,7 @@ from flask import Flask, render_template, request
 from flask_compress import Compress
 
 from config import Config
+from core.i18n import t
 from core.middleware import ParanoidMiddleware, check_board_closed, inject_csrf_token
 from core.settings import Settings
 from migrate import run_migrations
@@ -20,6 +21,7 @@ def create_app():
     db.init_app(app)
     app.secret_key = app.config["SECRET_KEY"]
     app.jinja_env.filters["process_comment"] = process_comment
+    app.jinja_env.globals["t"] = t
 
     settings = Settings(app)
     with app.app_context():
