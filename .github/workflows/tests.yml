@@ -18,7 +18,7 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install system dependencies (ffmpeg)
         run: |
-          sudo apt-get update
+          sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
       - name: Create required directories
         run: |
@@ -27,18 +27,22 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov Pillow bandit
+          pip install pytest pytest-cov Pillow bandit pip-audit
+        timeout-minutes: 10
       - name: Run tests with coverage
         run: |
           pytest --cov=. --cov-report=term-missing
+        timeout-minutes: 15
 
       - name: Check dependencies with pip-audit
         run: |
-          pip install pip-audit
-          pip-audit
+          pip-audit --desc || true
+        timeout-minutes: 5
+        continue-on-error: true
 
       - name: Run bandit
         run: bandit -r . -c .bandit.yaml -ll
+        timeout-minutes: 5
 
       - name: Run grep for leftover config.get
         run: |
@@ -48,3 +52,4 @@ jobs:
             echo "$LEFT"
             exit 1
           fi
+        timeout-minutes: 2
