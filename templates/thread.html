@@ -28,7 +28,7 @@
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
-        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+        <label>{{ t("thread.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
     <input type="submit" value="Ответить">
