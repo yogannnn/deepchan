@@ -2,7 +2,7 @@
 {% block title %}/{{ board.short_name }}/ - {{ t("catalog.board_catalog") }}{% endblock %}
 {% block content %}
 <h2>/{{ board.short_name }}/ - {{ t("catalog.board_catalog") }}</h2>
-<a href="{{ url_for('board.board', board_name=board.short_name) }}">← К доске</a>
+<a href="{{ url_for('board.board', board_name=board.short_name) }}">{{ t("board.back_to_board") }}</a>
 <hr>
 <div class="catalog">
 {% for thread in threads %}

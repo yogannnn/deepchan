@@ -269,5 +269,6 @@
   "pagination.of": "из",
   "pagination.posts_range": "Пост {start}-{end} из {total}",
   "thread.posts_count": "пост.",
-  "search.all_boards": "Все доски"
+  "search.all_boards": "Все доски",
+  "board.back_to_board": "← К доске"
 }

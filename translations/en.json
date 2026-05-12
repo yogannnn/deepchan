@@ -269,5 +269,6 @@
   "pagination.of": "of",
   "pagination.posts_range": "Post {start}-{end} of {total}",
   "thread.posts_count": "post.",
-  "search.all_boards": "All boards"
+  "search.all_boards": "All boards",
+  "board.back_to_board": "← Back to board"
 }
