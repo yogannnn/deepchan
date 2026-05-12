@@ -294,3 +294,8 @@ MIT License
 # DeepChan
 
 Анонимность. Минимализм. I2P-ready.
+
+---
+
+# DeepChan is a self-hosted imageboard engine.
+Server operators are responsible for complying with local laws and regulations.
