@@ -262,5 +262,11 @@
   "search.no_results": "Nothing found.",
   "search.post_num": "Post #{id}",
   "thread.captcha": "Enter code",
-  "site.title": "Boards"
+  "site.title": "Boards",
+  "pagination.prev": "← Back",
+  "pagination.next": "Forward →",
+  "pagination.page": "Page",
+  "pagination.of": "of",
+  "pagination.posts_range": "Post {start}-{end} of {total}",
+  "thread.posts_count": "post."
 }

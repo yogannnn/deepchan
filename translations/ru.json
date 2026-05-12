@@ -262,5 +262,11 @@
   "search.no_results": "Ничего не найдено.",
   "search.post_num": "Пост №{id}",
   "thread.captcha": "Введите код",
-  "site.title": "Доски"
+  "site.title": "Доски",
+  "pagination.prev": "← Назад",
+  "pagination.next": "Вперёд →",
+  "pagination.page": "Стр.",
+  "pagination.of": "из",
+  "pagination.posts_range": "Пост {start}-{end} из {total}",
+  "thread.posts_count": "пост."
 }

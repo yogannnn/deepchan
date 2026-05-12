@@ -1,21 +1,19 @@
 {% extends "base.html" %}
 {% set auto_refresh = config.AUTO_REFRESH_INTERVAL if config.AUTO_REFRESH_ENABLED else 0 %}
 {% block rss %}
-<link rel="alternate" type="application/rss+xml" title="RSS /{{ board.short_name }}/ - Тред #{{ thread.id }}" href="{{ url_for('board.thread_rss', board_name=board.short_name, thread_id=thread.id) }}">
 {% endblock %}
-{% block title %}{{ thread.posts.first().subject|e if thread.posts.first().subject else 'Тред' }} — /{{ board.short_name }}/{% endblock %}
+{% block title %}{{ thread.posts.first().subject|e if thread.posts.first().subject else t('catalog.no_subject') }} — /{{ board.short_name }}/{% endblock %}
 {% block content %}
 <p>
     <a href="{{ url_for('board.board', board_name=board.short_name) }}">{{ t("thread.back_to_board") }}</a> |
     <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("thread.refresh") }}</a>
-    | <span>Пост {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
+    | <span>{{ t("pagination.posts_range", start=(pagination.page-1)*pagination.per_page + 1, end=[pagination.page*pagination.per_page, pagination.total]|min, total=pagination.total) }}</span>
     {% if thread.is_pinned %}📌{% endif %}
     {% if thread.is_locked %}🔒{% endif %}
 </p>
 <hr>
 
 {% if not thread.is_locked %}
-
 <h3>{{ t("thread.reply") }}</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name, thread_id=thread.id) }}">
     {% set csrf = csrf_token('post') %}
@@ -29,11 +27,11 @@
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
-        <label>{{ t("thread.captcha") }}: <input type="text" name="captcha_answer" required></label>
+        <label>{{ t("board.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
     <input type="submit" value="{{ t('thread.reply') }}">
-<input type="hidden" name="captcha_token" value="{{ captcha_token }}">
+    <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 <hr>
 {% endif %}
@@ -41,11 +39,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
     {% endif %}
-    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
+    <span>{{ t("pagination.page") }} {{ pagination.page }} {{ t("pagination.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
     {% endif %}
 </div>
 <hr>
@@ -62,8 +60,7 @@
         <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
         {% if post.subject %}<span class="subject">{{ post.subject|e }}</span>{% endif %}
         {% if post.sage %}<span class="sage">SAGE</span>{% endif %}
-        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a> <a href="{{ url_for('board.report_post', board_name=board.short_name, post_id=post.id) }}" class="report-link" title="Пожаловаться">⚠️</a></span>
-
+        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a></span>
         {% if post.password_hash %}
         <div class="post-delete">
             <details>
@@ -74,8 +71,8 @@
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                     <input type="password" name="password" placeholder="{{ t('thread.delete_placeholder') }}" size="12">
                     <button type="submit">{{ t("thread.delete_title") }}</button>
-                <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
-</form>
+                    <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
+                </form>
             </details>
         </div>
         {% endif %}
@@ -85,12 +82,12 @@
         {% if pf.file_type == 'video' %}
             <video controls width="100%" preload="metadata" poster="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) if pf.thumb_path else '' }}">
                 <source src="{{ url_for('static', filename='uploads/' + pf.file_path) }}" type="video/{{ pf.file_path.split('.')[-1] }}">
-                Ваш браузер не поддерживает видео.
+                {{ t("radio.no_support") }}
             </video>
         {% elif pf.file_type == 'audio' %}
             <audio controls preload="metadata">
                 <source src="{{ url_for('static', filename='uploads/' + pf.file_path) }}" type="audio/{{ pf.file_path.split('.')[-1] }}">
-                Ваш браузер не поддерживает аудио.
+                {{ t("radio.no_support") }}
             </audio>
         {% else %}
             <a href="{{ url_for('static', filename='uploads/' + pf.file_path) }}" target="_blank">
@@ -107,11 +104,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
     {% endif %}
-    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
+    <span>{{ t("pagination.page") }} {{ pagination.page }} {{ t("pagination.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
     {% endif %}
 </div>
 {% endif %}

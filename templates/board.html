@@ -17,7 +17,7 @@
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-    <label>{{ t("board.name") }}: <input type="text" name="name" value="{{ t("anonymous") }}"></label><br>
+    <label>{{ t("board.name") }}: <input type="text" name="name" value="{{ t('anonymous') }}"></label><br>
     <label>{{ t("board.subject") }}: <input type="text" name="subject" required></label><br>
     <label>{{ t("board.comment") }}: <textarea name="comment"></textarea></label><br>
     <label>{{ t("board.files") }}: <input type="file" name="files" multiple accept="*/*"></label><br>
@@ -28,19 +28,19 @@
         <label>{{ t("board.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
-    <input type="submit" value="{{ t("board.create_button") }}">
-<input type="hidden" name="captcha_token" value="{{ captcha_token }}">
+    <input type="submit" value="{{ t('board.create_button') }}">
+    <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 <hr>
 
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
     {% endif %}
-    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
+    <span>{{ t("pagination.page") }} {{ pagination.page }} {{ t("pagination.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
     {% endif %}
 </div>
 <hr>
@@ -59,7 +59,7 @@
         <div class="thread-info">
             <div class="thread-title">
                 <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
-                    {{ op.subject|e if op and op.subject else 'Без темы' }}
+                    {{ op.subject|e if op and op.subject else t('catalog.no_subject') }}
                 </a>
                 <span class="thread-badges">
                     {% if thread.is_pinned %}📌{% endif %}
@@ -67,7 +67,7 @@
                 </span>
             </div>
             <div class="thread-meta">
-                <span>💬 {{ thread.posts.count() }} пост.</span>
+                <span>💬 {{ thread.posts.count() }} {{ t("thread.posts_count") }}</span>
                 <span>📅 {{ thread.created_at.strftime('%d.%m.%y %H:%M') }}</span>
                 <span>🔼 {{ thread.bumped_at.strftime('%d.%m.%y %H:%M') }}</span>
             </div>
@@ -85,11 +85,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
     {% endif %}
-    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
+    <span>{{ t("pagination.page") }} {{ pagination.page }} {{ t("pagination.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
     {% endif %}
 </div>
 {% endif %}
