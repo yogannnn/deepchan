@@ -297,5 +297,5 @@ MIT License
 
 ---
 
-# DeepChan is a self-hosted imageboard engine.
+DeepChan is a self-hosted imageboard engine.
 Server operators are responsible for complying with local laws and regulations.
