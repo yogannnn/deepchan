@@ -1,4 +1,5 @@
 # DeepChan
+<img width="1254" height="1254" alt="-5195214002437429764_121" src="https://github.com/user-attachments/assets/eb2546bb-298a-4f5e-ae4f-8d0398cc76d5" />
 
 Минималистичный движок анонимной имиджборды для сетей I2P и Tor.
 
