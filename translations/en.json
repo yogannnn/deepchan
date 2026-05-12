@@ -268,5 +268,6 @@
   "pagination.page": "Page",
   "pagination.of": "of",
   "pagination.posts_range": "Post {start}-{end} of {total}",
-  "thread.posts_count": "post."
+  "thread.posts_count": "post.",
+  "search.all_boards": "All boards"
 }
