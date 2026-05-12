@@ -14,7 +14,7 @@
             {% endfor %}
         </select>
     </label>
-    <input type="submit" value="Применить" class="btn">
+    <input type="submit" value="{{ t('admin.apply') }}" class="btn">
 </form>
 
 <div class="catalog">
@@ -29,7 +29,7 @@
                     <div style="height:160px; background:#1a2a1a; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);">{{ t("catalog.no_image") }}</div>
                 {% endif %}
                 <div class="catalog-item-board">/{{ thread.board.short_name }}/</div>
-                <div>{{ op.subject or '{{ t("catalog.no_subject") }}' }}</div>
+                <div>{{ op.subject or t('catalog.no_subject') }}</div>
             </a>
             <small>💬 {{ thread.posts.count() - 1 }}</small>
         </div>
@@ -42,11 +42,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
     {% endif %}
-    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    <span>{{ t("pagination.page") }} {{ pagination.page }} {{ t("pagination.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
     {% endif %}
 </div>
 {% endif %}
