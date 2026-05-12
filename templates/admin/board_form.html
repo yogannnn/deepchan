@@ -1,12 +1,12 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>{% if board %}Редактировать{% else %}Создать{% endif %} доску</h2>
+<h2>{% if board %}{{ t("admin.edit_board") }}{% else %}{{ t("admin.create_board") }}{% endif %} доску</h2>
 <form method="post">
-    <label>Короткое имя (латиница, без пробелов): <input type="text" name="short_name" value="{{ board.short_name if board else '' }}" required pattern="[a-zA-Z0-9]+"></label>
-    <label>Название: <input type="text" name="name" value="{{ board.name if board else '' }}" required></label>
-    <label>Описание: <textarea name="description">{{ board.description if board else '' }}</textarea></label>
-    <input type="submit" value="Сохранить">
-    <a href="{{ url_for('admin.admin_boards') }}" class="btn">Отмена</a>
+    <label>{{ t("admin.board_name") }}: <input type="text" name="short_name" value="{{ board.short_name if board else '' }}" required pattern="[a-zA-Z0-9]+"></label>
+    <label>{{ t("admin.board_title") }}: <input type="text" name="name" value="{{ board.name if board else '' }}" required></label>
+    <label>{{ t("admin.board_description") }}: <textarea name="description">{{ board.description if board else '' }}</textarea></label>
+    <input type="submit" value="{{ t("admin.save") }}">
+    <a href="{{ url_for('admin.admin_boards') }}" class="btn">{{ t("admin.cancel") }}</a>
     {% set csrf = csrf_token('create_board') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">

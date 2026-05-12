@@ -1,20 +1,20 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>Жалобы</h2>
+<h2>{{ t("admin.reports_manage") }}</h2>
 
 <p>
-    <a href="{{ url_for('admin.admin_reports', resolved=0) }}" class="btn {% if not resolved %}btn-primary{% endif %}">Новые</a>
-    <a href="{{ url_for('admin.admin_reports', resolved=1) }}" class="btn {% if resolved %}btn-primary{% endif %}">Обработанные</a>
+    <a href="{{ url_for('admin.admin_reports', resolved=0) }}" class="btn {% if not resolved %}btn-primary{% endif %}">{{ t("admin.reports_new") }}</a>
+    <a href="{{ url_for('admin.admin_reports', resolved=1) }}" class="btn {% if resolved %}btn-primary{% endif %}">{{ t("admin.reports_resolved_btn") }}</a>
 </p>
 
 <table class="admin-table">
     <thead>
         <tr>
             <th>ID</th>
-            <th>Пост</th>
-            <th>Причина</th>
-            <th>Комментарий</th>
-            <th>Дата</th>
+            <th>{{ t("admin.reports_post") }}</th>
+            <th>{{ t("admin.reports_reason") }}/th>
+            <th>{{ t("admin.reports_comment") }}</th>
+            <th>{{ t("admin.reports_date") }}</th>
             <th>Действия</th>
         </tr>
     </thead>
@@ -36,7 +36,7 @@
                     {% set csrf = csrf_token('resolve_report') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <button type="submit" class="btn btn-sm btn-success">✔️ Обработано</button>
+                    <button type="submit" class="btn btn-sm btn-success">{{ t("admin.reports_resolve") }}</button>
                 </form>
                 {% endif %}
                 <form method="post" action="{{ url_for('admin.admin_delete_report', report_id=report.id) }}" style="display:inline;" onsubmit="return confirm('Удалить жалобу?');">
@@ -48,7 +48,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="6">Нет жалоб.</td></tr>
+        <tr><td colspan="6">{{ t("admin.reports_no") }}</td></tr>
         {% endfor %}
     </tbody>
 </table>

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Поиск по /{{ board.short_name }}/{% endblock %}
+{% block title %}{{ t("search.board_search", board=board.short_name) }}{% endblock %}
 {% block content %}
-<h2>Поиск по /{{ board.short_name }}/</h2>
+<h2>{{ t("search.board_search", board=board.short_name) }}</h2>
 <form method="get" action="{{ url_for('search', board_name=board.short_name) }}">
-    <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
-    <button type="submit">Искать</button>
+    <input type="text" name="q" value="{{ query }}" placeholder="{{ t("search.query") }}" required>
+    <button type="submit">{{ t("search.search_btn") }}</button>
 </form>
 <hr>
 {% if query %}
@@ -12,7 +12,7 @@
         {% for post in results %}
         <div class="post">
             <div class="post-header">
-                <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=post.thread_id) }}#post{{ post.id }}">Пост №{{ post.id }}</a>
+                <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=post.thread_id) }}#post{{ post.id }}">{{ t("search.post_num", id=post.id) }}</a>
                 <span>{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
             </div>
             <blockquote>{{ post.comment|truncate(200) }}</blockquote>
@@ -31,7 +31,7 @@
         </div>
         {% endif %}
     {% else %}
-        <p>Ничего не найдено.</p>
+        <p>{{ t("search.no_results") }}</p>
     {% endif %}
 {% endif %}
 {% endblock %}

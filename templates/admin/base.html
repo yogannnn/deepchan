@@ -2,17 +2,17 @@
 {% block title %}Админка{% endblock %}
 {% block content %}
 <div class="admin-nav">
-    <a href="{{ url_for('admin.admin_index') }}">🏠 Главная</a> |
-    <a href="{{ url_for('admin.admin_boards') }}">📋 Доски</a> |
-    <a href="{{ url_for('admin.admin_threads') }}">🧵 Треды</a> |
-    <a href="{{ url_for('admin.admin_files') }}">🖼️ Файлы</a> |
-    <a href="{{ url_for('admin.admin_bans') }}">🚫 Баны</a> |
-    <a href="{{ url_for('admin.admin_filters') }}">🔍 Фильтры</a> |
-    <a href="{{ url_for('admin.admin_stats') }}">📊 Статистика</a> |
-    <a href="{{ url_for('radio.admin_radio') }}">📻 Радио</a> |
-    <a href="{{ url_for('admin.admin_reports') }}">🚨 Жалобы</a> |
-    <a href="{{ url_for('admin.admin_settings') }}">⚙️ Настройки</a> |
-    <a href="{{ url_for('main.index') }}">← На сайт</a>
+    <a href="{{ url_for('admin.admin_index') }}">{{ t("admin.home") }}</a> |
+    <a href="{{ url_for('admin.admin_boards') }}">{{ t("admin.boards") }}</a> |
+    <a href="{{ url_for('admin.admin_threads') }}">{{ t("admin.threads") }}</a> |
+    <a href="{{ url_for('admin.admin_files') }}">{{ t("admin.files") }}</a> |
+    <a href="{{ url_for('admin.admin_bans') }}">{{ t("admin.bans") }}</a> |
+    <a href="{{ url_for('admin.admin_filters') }}">{{ t("admin.filters") }}</a> |
+    <a href="{{ url_for('admin.admin_stats') }}">{{ t("admin.stats") }}</a> |
+    <a href="{{ url_for('radio.admin_radio') }}">{{ t("admin.radio") }}</a> |
+    <a href="{{ url_for('admin.admin_reports') }}">{{ t("admin.reports") }}</a> |
+    <a href="{{ url_for('admin.admin_settings') }}">{{ t("admin.settings") }}</a> |
+    <a href="{{ url_for('main.index') }}">{{ t("admin.back_to_site") }}</a>
 </div>
 <hr>
 {% with messages = get_flashed_messages() %}

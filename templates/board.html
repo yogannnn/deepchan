@@ -7,28 +7,28 @@
 <h2>/{{ board.short_name }}/ - {{ board.name }}</h2>
 <p>{{ board.description }}</p>
 <hr>
-<a href="{{ url_for('board.board_catalog', board_name=board.short_name) }}">Каталог</a> |
-<a href="{{ url_for('board.board', board_name=board.short_name) }}">Обновить</a> |
-<a href="{{ url_for('board.board_rss', board_name=board.short_name) }}">📡 RSS</a>
+<a href="{{ url_for('board.board_catalog', board_name=board.short_name) }}">{{ t("board.catalog") }}</a> |
+<a href="{{ url_for('board.board', board_name=board.short_name) }}">{{ t("board.refresh") }}</a> |
+<a href="{{ url_for('board.board_rss', board_name=board.short_name) }}">{{ t("board.rss") }}</a>
 <hr>
 
-<h3>Создать тред</h3>
+<h3>{{ t("board.create_thread") }}</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name) }}">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-    <label>Имя: <input type="text" name="name" value="Аноним"></label><br>
-    <label>Тема: <input type="text" name="subject" required></label><br>
-    <label>Комментарий: <textarea name="comment"></textarea></label><br>
-    <label>Файлы: <input type="file" name="files" multiple accept="*/*"></label><br>
-    <label>Пароль: <input type="password" name="password"></label><br>
+    <label>{{ t("board.name") }}: <input type="text" name="name" value="{{ t("anonymous") }}"></label><br>
+    <label>{{ t("board.subject") }}: <input type="text" name="subject" required></label><br>
+    <label>{{ t("board.comment") }}: <textarea name="comment"></textarea></label><br>
+    <label>{{ t("board.files") }}: <input type="file" name="files" multiple accept="*/*"></label><br>
+    <label>{{ t("board.password") }}: <input type="password" name="password"></label><br>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
-        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+        <label>{{ t("board.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
-    <input type="submit" value="Создать">
+    <input type="submit" value="{{ t("board.create_button") }}">
 <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 <hr>
@@ -36,11 +36,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
     {% endif %}
-    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
     {% endif %}
 </div>
 <hr>
@@ -73,23 +73,23 @@
             </div>
         </div>
         <div class="thread-actions">
-            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">Скрыть</a>
+            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("board.hide") }}</a>
         </div>
     </div>
     <hr>
     {% endif %}
 {% else %}
-    <p>Нет тредов.</p>
+    <p>{{ t("board.no_threads") }}</p>
 {% endfor %}
 
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
     {% endif %}
-    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.board', board_name=board.short_name, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
     {% endif %}
 </div>
 {% endif %}

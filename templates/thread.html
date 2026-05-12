@@ -6,8 +6,8 @@
 {% block title %}{{ thread.posts.first().subject|e if thread.posts.first().subject else 'Тред' }} — /{{ board.short_name }}/{% endblock %}
 {% block content %}
 <p>
-    <a href="{{ url_for('board.board', board_name=board.short_name) }}">← К списку тредов</a> |
-    <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">Обновить</a>
+    <a href="{{ url_for('board.board', board_name=board.short_name) }}">{{ t("thread.back_to_board") }}</a> |
+    <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("thread.refresh") }}</a>
     | <span>Пост {{ (pagination.page-1)*pagination.per_page + 1 }}-{{ [pagination.page*pagination.per_page, pagination.total]|min }} из {{ pagination.total }}</span>
     {% if thread.is_pinned %}📌{% endif %}
     {% if thread.is_locked %}🔒{% endif %}
@@ -20,11 +20,11 @@
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-    <label>Имя: <input type="text" name="name" value="Аноним"></label>
-    <label>Комментарий: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
-    <label>Файлы: <input type="file" name="files" multiple accept="*/*"></label>
-    <label><input type="checkbox" name="sage"> Sage (не поднимать тред)</label>
-    <label>Пароль: <input type="password" name="password"></label>
+    <label>{{ t("thread.name") }}: <input type="text" name="name" value="{{ t("anonymous") }}"></label>
+    <label>{{ t("thread.comment") }}: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
+    <label>{{ t("thread.files") }}: <input type="file" name="files" multiple accept="*/*"></label>
+    <label><input type="checkbox" name="sage"> {{ t("thread.sage") }}</label>
+    <label>{{ t("thread.password") }}: <input type="password" name="password"></label>
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">
@@ -71,8 +71,8 @@
                     {% set csrf = csrf_token('delete_post') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <input type="password" name="password" placeholder="Пароль" size="12">
-                    <button type="submit">Удалить</button>
+                    <input type="password" name="password" placeholder="{{ t("thread.delete_placeholder") }}" size="12">
+                    <button type="submit">{{ t("thread.delete_title") }}</button>
                 <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
             </details>
@@ -116,6 +116,6 @@
 {% endif %}
 
 {% if thread.is_locked %}
-<p><strong>Тред закрыт.</strong></p>
+<p><strong>{{ t("thread.closed") }}.</strong></p>
 {% endif %}
 {% endblock %}

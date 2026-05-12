@@ -1,11 +1,11 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>🎵 Управление радио</h2>
+<h2>{{ t("admin.radio_manage") }}</h2>
 
 <div style="margin-bottom: 20px;">
-    <a href="?status=pending" class="btn {% if status == 'pending' %}btn-primary{% endif %}">⏳ На модерации</a>
-    <a href="?status=approved" class="btn {% if status == 'approved' %}btn-primary{% endif %}">✅ Одобрено</a>
-    <a href="?status=rejected" class="btn {% if status == 'rejected' %}btn-primary{% endif %}">❌ Отклонено</a>
+    <a href="?status=pending" class="btn {% if status == 'pending' %}btn-primary{% endif %}">{{ t("admin.radio_pending") }}</a>
+    <a href="?status=approved" class="btn {% if status == 'approved' %}btn-primary{% endif %}">{{ t("admin.radio_approved") }}</a>
+    <a href="?status=rejected" class="btn {% if status == 'rejected' %}btn-primary{% endif %}">{{ t("admin.radio_rejected") }}</a>
 </div>
 
 <hr>
@@ -15,37 +15,37 @@
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     <button type="submit" class="btn btn-{% if config.RADIO_ENABLED %}danger{% else %}success{% endif %}">
-        {% if config.RADIO_ENABLED %}⏸️ Выключить радио{% else %}▶️ Включить радио{% endif %}
+        {% if config.RADIO_ENABLED %}{{ t("admin.radio_toggle_off") }}{% else %}{{ t("admin.radio_toggle_on") }}{% endif %}
     </button>
 </form>
 
 <hr>
 
-<h3>➕ Загрузить трек</h3>
+<h3>{{ t("admin.radio_upload") }}</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('radio.admin_radio_upload') }}" style="margin-bottom: 30px; padding: 15px; background: var(--surface); border-radius: 8px;">
     {% set csrf = csrf_token('upload_radio') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <label>Исполнитель: <input type="text" name="artist" placeholder="Неизвестен"></label>
-        <label>Название: <input type="text" name="title" placeholder="Без названия"></label>
+        <label>{{ t("admin.radio_artist") }}: <input type="text" name="artist" placeholder="Неизвестен"></label>
+        <label>{{ t("admin.radio_title") }}: <input type="text" name="title" placeholder="Без названия"></label>
     </div>
-    <label>Файл (mp3, ogg, flac, wav, m4a): <input type="file" name="file" accept="audio/*" required></label>
-    <button type="submit" class="btn">Загрузить на модерацию</button>
+    <label>{{ t("admin.radio_file") }}: <input type="file" name="file" accept="audio/*" required></label>
+    <button type="submit" class="btn">{{ t("admin.radio_upload_btn") }}</button>
 </form>
 
 <hr>
 
-<h3>📋 Список треков ({{ status }})</h3>
+<h3>{{ t("admin.radio_list") }} ({{ status }})</h3>
 <table class="admin-table">
     <thead>
         <tr>
             <th>ID</th>
             <th>Исполнитель</th>
             <th>Название</th>
-            <th>Длит.</th>
-            <th>Источник</th>
-            <th>Статус</th>
+            <th>{{ t("admin.radio_duration") }}</th>
+            <th>{{ t("admin.radio_source") }}</th>
+            <th>{{ t("admin.radio_status") }}</th>
             <th>Действия</th>
         </tr>
     </thead>
@@ -58,9 +58,9 @@
             <td>{{ track.duration|int if track.duration else '—' }} с</td>
             <td>
                 {% if track.post_file_id %}
-                    Пост #{{ track.post_file.post_id }}
+                    {{ t("admin.radio_source_user") }}{{ track.post_file.post_id }}
                 {% else %}
-                    Админ
+                    {{ t("admin.radio_source_admin") }}
                 {% endif %}
             </td>
             <td>
@@ -79,25 +79,25 @@
                     {% set csrf = csrf_token('approve_radio') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <button type="submit" class="btn btn-sm btn-success" title="Одобрить">✅</button>
+                    <button type="submit" class="btn btn-sm btn-success" title="{{ t("admin.radio_approve") }}">✅</button>
                 </form>
                 <form method="post" action="{{ url_for('radio.admin_radio_reject', track_id=track.id) }}" style="display:inline;">
                     {% set csrf = csrf_token('reject_radio') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <button type="submit" class="btn btn-sm btn-warning" title="Отклонить">❌</button>
+                    <button type="submit" class="btn btn-sm btn-warning" title="{{ t("admin.radio_reject") }}">❌</button>
                 </form>
                 {% endif %}
                 <form method="post" action="{{ url_for('radio.admin_radio_delete', track_id=track.id) }}" style="display:inline;" onsubmit="return confirm('Удалить трек навсегда?');">
                     {% set csrf = csrf_token('delete_radio') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <button type="submit" class="btn btn-sm btn-danger" title="Удалить">🗑️</button>
+                    <button type="submit" class="btn btn-sm btn-danger" title="{{ t("admin.radio_delete") }}">🗑️</button>
                 </form>
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="7">Нет треков в этой категории.</td></tr>
+        <tr><td colspan="7">{{ t("admin.radio_no_tracks") }}</td></tr>
         {% endfor %}
     </tbody>
 </table>

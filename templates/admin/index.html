@@ -1,15 +1,15 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>Административная панель</h2>
-<p>Добро пожаловать. Выберите раздел:</p>
+<h2>{{ t("admin.title") }}</h2>
+<p>{{ t("admin.welcome") }}</p>
 <ul>
-    <li><a href="{{ url_for('admin.admin_boards') }}">📋 Доски</a></li>
-    <li><a href="{{ url_for('admin.admin_threads') }}">🧵 Треды</a></li>
-    <li><a href="{{ url_for('admin.admin_files') }}">🖼️ Файлы</a></li>
-    <li><a href="{{ url_for('admin.admin_bans') }}">🚫 Баны</a></li>
-    <li><a href="{{ url_for('admin.admin_filters') }}">🔍 Вордфильтр</a></li>
-    <li><a href="{{ url_for('admin.admin_stats') }}">📊 Статистика</a></li>
-    <li><a href="{{ url_for('admin.admin_reports') }}">🚨 Жалобы</a></li>
-    <li><a href="{{ url_for('admin.admin_settings') }}">⚙️ Настройки</a></li>
+    <li><a href="{{ url_for('admin.admin_boards') }}">📋 {{ t("admin.boards") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_threads') }}">🧵 {{ t("admin.threads") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_files') }}">🖼️ {{ t("admin.files") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_bans') }}">🚫 {{ t("admin.bans") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_filters') }}">🔍 {{ t("admin.filters") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_stats') }}">📊 {{ t("admin.stats") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_reports') }}">🚨 {{ t("admin.reports") }}</a></li>
+    <li><a href="{{ url_for('admin.admin_settings') }}">⚙️ {{ t("admin.settings") }}</a></li>
 </ul>
 {% endblock %}

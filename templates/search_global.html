@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Глобальный поиск{% endblock %}
+{% block title %}{{ t("search.title") }}{% endblock %}
 {% block content %}
-<h2>🔍 Глобальный поиск</h2>
+<h2>🔍 {{ t("search.title") }}</h2>
 <form method="get" action="{{ url_for('main.global_search') }}">
-    <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
+    <input type="text" name="q" value="{{ query }}" placeholder="{{ t("search.query") }}" required>
     <select name="board_id">
         <option value="">Все доски</option>
         {% for board in boards %}
@@ -12,7 +12,7 @@
             </option>
         {% endfor %}
     </select>
-    <button type="submit">Искать</button>
+    <button type="submit">{{ t("search.search_btn") }}</button>
 </form>
 <hr>
 {% if query %}
@@ -41,7 +41,7 @@
         </div>
         {% endif %}
     {% else %}
-        <p>Ничего не найдено.</p>
+        <p>{{ t("search.no_results") }}</p>
     {% endif %}
 {% endif %}
 {% endblock %}

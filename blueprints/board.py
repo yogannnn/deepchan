@@ -15,6 +15,7 @@ from flask import (
     url_for,
 )
 
+from core.i18n import t
 from forms import PostForm
 from models import (
     Board,
@@ -164,7 +165,7 @@ def create_post(board_name):
         captcha_token = request.form.get("captcha_token", "")
 
         if not verify_captcha(captcha_answer, captcha_token):
-            abort(400, description="Неверный код капчи")
+            abort(400, description=t("captcha.invalid"))
 
     if form.validate_on_submit():
         thread_id = request.args.get("thread_id", type=int)
@@ -172,20 +173,16 @@ def create_post(board_name):
         if thread_id:
             thread = Thread.query.get_or_404(thread_id)
             if thread.is_locked:
-                abort(403, description="Тред закрыт")
+                abort(403, description=t("thread.closed"))
             if not form.files.data and not form.comment.data:
-                form.comment.errors.append(
-                    "Нужно ввести комментарий или прикрепить файл"
-                )
+                form.comment.errors.append(t("comment_or_file_required"))
                 return render_template("error.html", form=form), 400
         else:
             if not form.subject.data:
-                form.subject.errors.append("Тема обязательна для нового треда")
+                form.subject.errors.append(t("subject_required"))
                 return render_template("error.html", form=form), 400
             if not form.files.data and not form.comment.data:
-                form.comment.errors.append(
-                    "Нужно ввести комментарий или прикрепить файл"
-                )
+                form.comment.errors.append(t("comment_or_file_required"))
                 return render_template("error.html", form=form), 400
             thread = Thread(board_id=board.id)
             db.session.add(thread)
@@ -298,7 +295,7 @@ def delete_post(board_name, post_id):
     post = Post.query.get_or_404(post_id)
     password = request.form.get("password")
     if not password or not check_password(password, post.password_hash):
-        abort(403, description="Неверный пароль")
+        abort(403, description=t("wrong_password"))
 
     thread = post.thread
     board = thread.board
@@ -391,7 +388,7 @@ def report_post(board_name, post_id):
     if request.method == "POST":
         # Проверяем, включена ли система жалоб
         if not current_app.config["SETTINGS"].reports_enabled:
-            flash("Система жалоб временно отключена.", "error")
+            flash(t("report_disabled"), "error")
             return redirect(
                 url_for("board.thread", board_name=board_name, thread_id=post.thread_id)
             )
@@ -403,7 +400,7 @@ def report_post(board_name, post_id):
             from services.captcha import verify_captcha
 
             if not verify_captcha(captcha_answer, captcha_token):
-                flash("Неверный код с картинки.", "error")
+                flash(t("captcha_error"), "error")
                 return redirect(
                     url_for("board.report_post", board_name=board_name, post_id=post_id)
                 )
@@ -411,7 +408,7 @@ def report_post(board_name, post_id):
         reason = request.form.get("reason", "")
         comment = request.form.get("comment", "")
         if not reason:
-            flash("Выберите причину.", "error")
+            flash(t("report_reason_required"), "error")
             return redirect(
                 url_for("board.report_post", board_name=board_name, post_id=post_id)
             )
@@ -419,7 +416,7 @@ def report_post(board_name, post_id):
         report = Report(post_id=post.id, reason=reason, comment=comment)
         db.session.add(report)
         db.session.commit()
-        flash("Жалоба отправлена. Спасибо.", "success")
+        flash(t("report_sent"), "success")
         return redirect(
             url_for("board.thread", board_name=board_name, thread_id=post.thread_id)
         )

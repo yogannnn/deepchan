@@ -1,17 +1,17 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>Настройки</h2>
+<h2>{{ t("admin.settings_manage") }}</h2>
 <form method="post">
     <!-- ===== ОСНОВНЫЕ ===== -->
     <div class="settings-section">
-        <h3>Основные</h3>
+        <h3>{{ t("admin.settings_main") }}</h3>
         <label>
-            Название сайта:
+            {{ t("admin.settings_site_title") }}:
             <input type="text" name="site_title" value="{{ site_title }}" placeholder="Имиджборда">
         </label>
 
         <label>
-            Язык сайта:
+            {{ t("admin.settings_lang") }}:
             <select name="site_lang">
                 {% for lang in available_langs %}
                     <option value="{{ lang }}" {% if site_lang == lang %}selected{% endif %}>{{ lang | upper }}</option>
@@ -20,39 +20,39 @@
         </label>
 
         <label>
-            Секрет админа (для трипкода с плашкой Adm): <input type="text" name="admin_trip_secret" value="{{ admin_trip_secret }}">
+            {{ t("admin.settings_admin_secret") }}: <input type="text" name="admin_trip_secret" value="{{ admin_trip_secret }}">
         </label>
         <label>
             <input type="checkbox" name="captcha_enabled" {% if captcha_enabled %}checked{% endif %}>
-            Включить графическую капчу
+            {{ t("admin.settings_captcha") }}
         </label>
         <label>
             <input type="checkbox" name="board_closed" {% if board_closed %}checked{% endif %}>
-            Закрыть борду (техработы)
+            {{ t("admin.settings_board_closed") }}
         </label>
     </div>
 
     <!-- ===== ПАГИНАЦИЯ ===== -->
     <div class="settings-section">
-        <h3>Пагинация</h3>
+        <h3>{{ t("admin.settings_pagination") }}</h3>
         <label>
-            Тредов на странице:
+            {{ t("admin.settings_threads_per_page") }}:
             <input type="number" name="threads_per_page" value="{{ threads_per_page }}" min="5" max="200">
         </label>
         <label>
-            Постов на странице:
+            {{ t("admin.settings_posts_per_page") }}:
             <input type="number" name="posts_per_page" value="{{ posts_per_page }}" min="5" max="200">
         </label>
     </div>
 
     <!-- ===== ЗАГРУЗКА ФАЙЛОВ ===== -->
     <div class="settings-section">
-        <h3>Загрузка файлов</h3>
+        <h3>{{ t("admin.settings_upload") }}</h3>
         <label>
-            Максимум файлов:
+            {{ t("admin.settings_max_files") }}:
             <input type="number" name="max_files" value="{{ max_files }}" min="1" max="10">
         </label>
-        <label>Разрешённые форматы:</label>
+        <label>{{ t("admin.settings_allowed_ext") }}:</label>
         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
             {% set extensions = ['jpg','jpeg','png','gif','webm','mp4','mp3','ogg','flac','wav','m4a'] %}
             {% for ext in extensions %}
@@ -62,80 +62,80 @@
                 </label>
             {% endfor %}
         </div>
-        <p class="hint">При снятии всех галочек будут разрешены только jpg, jpeg, png, gif.</p>
+        <p class="hint">{{ t("admin.settings_hint") }}</p>
         <label>
-            Максимальный размер файла (МБ):
+            {{ t("admin.settings_max_file_size") }}:
             <input type="number" name="max_content_length" value="{{ max_content_length }}" min="1" max="100">
         </label>
         <label>
-            Максимальное разрешение (пикселей):
+            {{ t("admin.settings_max_resolution") }}:
             <input type="number" name="max_image_dimension" value="{{ max_image_dimension }}" min="100" max="10000">
         </label>
         <label>
-            Максимальная длительность видео (сек):
+            {{ t("admin.settings_max_video_duration") }}:
             <input type="number" name="max_video_duration" value="{{ max_video_duration }}" min="10" max="600">
         </label>
         <label>
-            Максимальный размер видео (МБ):
+            {{ t("admin.settings_max_video_size") }}:
             <input type="number" name="max_video_size" value="{{ max_video_size }}" min="1" max="500">
         </label>
         <label>
-            Максимальная длительность аудио (сек):
+            {{ t("admin.settings_max_audio_duration") }}:
             <input type="number" name="max_audio_duration" value="{{ max_audio_duration }}" min="10" max="3600">
         </label>
         <label>
-            Максимальный размер аудио (МБ):
+            {{ t("admin.settings_max_audio_size") }}:
             <input type="number" name="max_audio_size" value="{{ max_audio_size }}" min="1" max="500">
         </label>
         <label>
             <input type="checkbox" name="webp_convert_enabled" {% if webp_convert_enabled %}checked{% endif %}>
-            Конвертировать изображения в WEBP (кроме анимированных GIF)
+            {{ t("admin.settings_webp") }}
         </label>
         <label>
             <input type="checkbox" name="stealth_trim" {% if stealth_trim %}checked{% endif %}>
-            Обрезать изображения до 2000px (защита от стеганографии)
+            {{ t("admin.settings_stealth") }}
         </label>
     </div>
 
     <!-- ===== АВТООБНОВЛЕНИЕ ===== -->
     <div class="settings-section">
-        <h3>Автообновление</h3>
+        <h3>{{ t("admin.settings_autorefresh") }}</h3>
         <label>
             <input type="checkbox" name="auto_refresh_enabled" {% if auto_refresh_enabled %}checked{% endif %}>
-            Включить автообновление в тредах
+            {{ t("admin.settings_autorefresh_enabled") }}
         </label>
         <label>
-            Интервал (сек):
+            {{ t("admin.settings_autorefresh_interval") }}:
             <input type="number" name="auto_refresh_interval" value="{{ auto_refresh_interval }}" min="10" max="300">
         </label>
     </div>
 
     <!-- ===== АНТИСПАМ ===== -->
     <div class="settings-section">
-        <h3>Антиспам</h3>
+        <h3>{{ t("admin.settings_antispam") }}</h3>
         <label>
-            Пауза между постами (сек):
+            {{ t("admin.settings_rate_limit") }}:
             <input type="number" name="rate_limit_seconds" value="{{ rate_limit_seconds }}" min="5" max="3600">
         </label>
     </div>
 
     <!-- ===== ВНЕШНИЙ ВИД ===== -->
     <div class="settings-section">
-        <h3>Внешний вид</h3>
+        <h3>{{ t("admin.settings_appearance") }}</h3>
         <label>
             <input type="checkbox" name="stats_show_ips" {% if stats_show_ips %}checked{% endif %}>
-            Показывать IP в статистике
+            {{ t("admin.settings_show_ips") }}
         </label>
         <label>
-            HTML-код шапки (вставляется после <body>):
+            {{ t("admin.settings_header_html") }}:
             <textarea name="header_html" rows="4">{{ header_html or '' }}</textarea>
         </label>
         <label>
-            HTML-код подвала (перед </body>):
+            {{ t("admin.settings_footer_html") }}:
             <textarea name="footer_html" rows="4">{{ footer_html or '' }}</textarea>
         </label>
         <label>
-            Текст объявления на главной:
+            {{ t("admin.settings_announcement_html") }}:
             <textarea name="announcement_html" rows="4">{{ announcement_html or '' }}</textarea>
         </label>
     </div>

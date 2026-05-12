@@ -326,7 +326,7 @@ def admin_delete_file(file_id):
         pass
     db.session.delete(pf)
     db.session.commit()
-    flash("Файл удалён", "info")
+    flash(t("file_deleted"), "info")
     return redirect(url_for("admin.admin_files", board_id=request.args.get("board_id")))
 
 
@@ -371,7 +371,7 @@ def admin_cleanup_files():
                             os.remove(thumb_path)
                     except:
                         pass
-        flash("Осиротевшие файлы удалены", "success")
+        flash(t("orphaned_removed"), "success")
     elif action == "old_threads":
         threshold = datetime.now(timezone.utc) - timedelta(days=30)
         old_threads = Thread.query.filter(Thread.bumped_at < threshold).all()
@@ -395,7 +395,7 @@ def admin_cleanup_files():
                         pass
             db.session.delete(t)
         db.session.commit()
-        flash(f"Удалено старых тредов: {len(old_threads)}", "success")
+        flash(t("old_threads_removed", count=len(old_threads)), "success")
     return redirect(url_for("admin.admin_files"))
 
 
@@ -421,7 +421,7 @@ def admin_add_ban():
     ban = Ban(ip_pattern=ip, reason=reason, expires_at=expires)
     db.session.add(ban)
     db.session.commit()
-    flash(f"IP {ip} забанен", "success")
+    flash(t("ban_added", ip=ip), "success")
     return redirect(url_for("admin.admin_bans"))
 
 
@@ -442,7 +442,7 @@ def admin_delete_ban(ban_id):
     ban = Ban.query.get_or_404(ban_id)
     db.session.delete(ban)
     db.session.commit()
-    flash("Бан удалён", "success")
+    flash(t("ban_removed"), "success")
     return redirect(url_for("admin.admin_bans"))
 
 
@@ -466,7 +466,7 @@ def admin_add_filter():
     )
     db.session.add(wf)
     db.session.commit()
-    flash("Фильтр добавлен", "success")
+    flash(t("filter_added"), "success")
     return redirect(url_for("admin.admin_filters"))
 
 
@@ -487,7 +487,7 @@ def admin_delete_filter(filter_id):
     wf = WordFilter.query.get_or_404(filter_id)
     db.session.delete(wf)
     db.session.commit()
-    flash("Фильтр удалён", "success")
+    flash(t("filter_removed"), "success")
     return redirect(url_for("admin.admin_filters"))
 
 
@@ -538,7 +538,7 @@ def admin_settings():
         save_setting("ADMIN_TRIP_SECRET", request.form.get("admin_trip_secret", ""))
         save_setting("RADIO_ENABLED", "radio_enabled" in request.form)
         save_setting("RADIO_BITRATE", request.form.get("radio_bitrate", "128k"))
-        flash("Настройки сохранены", "success")
+        flash(t("settings_saved"), "success")
         return redirect(url_for("admin.admin_settings"))
 
     ctx = {
@@ -678,7 +678,7 @@ def admin_resolve_report(report_id):
     report = Report.query.get_or_404(report_id)
     report.resolved = True
     db.session.commit()
-    flash("Жалоба отмечена как обработанная.", "success")
+    flash(t("report_resolved"), "success")
     return redirect(url_for("admin.admin_reports"))
 
 
@@ -689,7 +689,7 @@ def admin_delete_report(report_id):
     report = Report.query.get_or_404(report_id)
     db.session.delete(report)
     db.session.commit()
-    flash("Жалоба удалена.", "success")
+    flash(t("report_deleted"), "success")
     return redirect(url_for("admin.admin_reports"))
 
 

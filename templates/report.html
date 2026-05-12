@@ -1,35 +1,35 @@
 {% extends "base.html" %}
-{% block title %}Жалоба на пост №{{ post.id }}{% endblock %}
+{% block title %}{{ t("report.title", post_id=post.id) }}{% endblock %}
 {% block content %}
-<h2>Жалоба на пост №{{ post.id }}</h2>
-<p>Вы жалуетесь на пост в треде <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=post.thread_id) }}">{{ post.thread.posts.first().subject or 'Без темы' }}</a></p>
+<h2>{{ t("report.title", post_id=post.id) }}</h2>
+<p>{{ t("report.description") }} <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=post.thread_id) }}">{{ post.thread.posts.first().subject or 'Без темы' }}</a></p>
 
 <form method="post">
     {% set csrf = csrf_token('report') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     
-    <label>Причина:
+    <label>{{ t("report.reason") }}:
         <select name="reason" required>
             <option value="">-- Выберите --</option>
-            <option value="spam">Спам</option>
-            <option value="illegal">Противозаконный контент</option>
-            <option value="rules">Нарушение правил доски</option>
-            <option value="other">Другое</option>
+            <option value="spam">{{ t("report.reason_spam") }}</option>
+            <option value="illegal">{{ t("report.reason_illegal") }}</option>
+            <option value="rules">{{ t("report.reason_rules") }}</option>
+            <option value="other">{{ t("report.reason_other") }}</option>
         </select>
     </label>
     
-    <label>Комментарий (необязательно):
+    <label>{{ t("report.comment_label") }}:
         <textarea name="comment" rows="4"></textarea>
     </label>
     
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha">
         <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
-        <label>Введите код: <input type="text" name="captcha_answer" required></label>
+        <label>{{ t("report.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     
-    <button type="submit">Отправить жалобу</button>
+    <button type="submit">{{ t("report.submit") }}</button>
 <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 {% endblock %}

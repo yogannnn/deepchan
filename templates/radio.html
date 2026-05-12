@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Радио DeepChan{% endblock %}
 {% block content %}
-<h2>📻 Радио DeepChan</h2>
-<p style="margin-top: 10px; color: var(--text-dim); font-style: italic;">🎵 Сюда попадают треки из постов, которые одобрил модератор. Загружай аудио в треды, и, возможно, твой трек зазвучит в эфире!</p>
+<h2>{{ t("radio.title") }}</h2>
+<p style="margin-top: 10px; color: var(--text-dim); font-style: italic;">{{ t("radio.description") }}</p>
 <audio controls autoplay style="width:100%;">
-<p style="margin-top: 10px; color: var(--text-dim); font-style: italic;">🎵 Сюда попадают треки из постов, которые одобрил модератор. Загружай аудио в треды, и, возможно, твой трек зазвучит в эфире!</p>
+<p style="margin-top: 10px; color: var(--text-dim); font-style: italic;">{{ t("radio.description") }}</p>
     <source src="{{ url_for('radio.radio_stream') }}" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио.
+    {{ t("radio.no_support") }}
 </audio>
 <hr>
-<h3>Плейлист</h3>
+<h3>{{ t("radio.playlist") }}</h3>
 <ul>
 {% for track in tracks %}
     <li>{{ track.artist or 'Unknown' }} — {{ track.title or 'Untitled' }} ({{ track.duration|int }} сек)</li>
 {% else %}
-    <li>Плейлист пуст</li>
+    <li>{{ t("radio.empty") }}</li>
 {% endfor %}
 </ul>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>Управление досками</h2>
-<a href="{{ url_for('admin.admin_create_board') }}" class="btn">➕ Создать доску</a>
+<h2>{{ t("admin.manage_boards") }}</h2>
+<a href="{{ url_for('admin.admin_create_board') }}" class="btn">{{ t("admin.create_board") }}</a>
 <hr>
 <table class="admin-table">
     <thead>
@@ -26,13 +26,13 @@
                     {% set csrf = csrf_token('move_board') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <button type="submit" class="action-icon" title="Переместить вверх" {% if loop.first %}disabled{% endif %}>⬆️</button>
+                    <button type="submit" class="action-icon" title="{{ t("admin.move_up") }}" {% if loop.first %}disabled{% endif %}>⬆️</button>
                 </form>
                 <form method="post" action="{{ url_for('admin.admin_move_board_down', board_id=board.id) }}" style="display:inline;">
                     {% set csrf = csrf_token('move_board') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <button type="submit" class="action-icon" title="Переместить вниз" {% if loop.last %}disabled{% endif %}>⬇️</button>
+                    <button type="submit" class="action-icon" title="{{ t("admin.move_down") }}" {% if loop.last %}disabled{% endif %}>⬇️</button>
                 </form>
             </td>
             <td class="actions">

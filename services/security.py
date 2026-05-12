@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from flask import abort, current_app, request
 
+from core.i18n import t
 from models import Ban, WordFilter
 
 _last_post_time = {}
@@ -16,9 +17,7 @@ def check_rate_limit():
         elapsed = now - _last_post_time[ip]
         limit = current_app.config["SETTINGS"].rate_limit_seconds
         if elapsed < limit:
-            abort(
-                429, description=f"Слишком часто. Подождите {limit - int(elapsed)} сек."
-            )
+            abort(429, description=t("rate_limit", seconds=limit - int(elapsed)))
     _last_post_time[ip] = now
 
 
@@ -30,7 +29,7 @@ def check_ban(ip):
         (Ban.expires_at == None) | (Ban.expires_at > now),
     ).first()
     if ban:
-        abort(403, description=f"Вы забанены. Причина: {ban.reason or 'не указана'}")
+        abort(403, description=t("banned", reason=ban.reason or "не указана"))
 
 
 def apply_word_filters(text):
@@ -41,7 +40,7 @@ def apply_word_filters(text):
                 if f.action == "block":
                     abort(
                         400,
-                        description=f"Сообщение содержит запрещённое выражение: {f.pattern}",
+                        description=t("wordfilter_block", pattern=f.pattern),
                     )
                 elif f.action == "replace":
                     text = re.sub(f.pattern, f.replacement, text, flags=re.IGNORECASE)
@@ -50,7 +49,7 @@ def apply_word_filters(text):
                 if f.action == "block":
                     abort(
                         400,
-                        description=f"Сообщение содержит запрещённое слово: {f.pattern}",
+                        description=t("wordfilter_word", pattern=f.pattern),
                     )
                 elif f.action == "replace":
                     text = text.replace(f.pattern, f.replacement)

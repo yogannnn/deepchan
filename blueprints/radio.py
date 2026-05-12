@@ -17,6 +17,7 @@ from flask import (
     url_for,
 )
 
+from core.i18n import t
 from models import RadioTrack, db
 from utils import (
     convert_for_radio,
@@ -129,15 +130,15 @@ def admin_radio():
 @csrf_protect("upload_radio")
 def admin_radio_upload():
     if "file" not in request.files:
-        flash("Файл не выбран", "error")
+        flash(t("file_not_selected"), "error")
         return redirect(url_for("radio.admin_radio"))
     f = request.files["file"]
     if f.filename == "":
-        flash("Файл не выбран", "error")
+        flash(t("file_not_selected"), "error")
         return redirect(url_for("radio.admin_radio"))
     ext = f.filename.rsplit(".", 1)[-1].lower()
     if ext not in ["mp3", "ogg", "flac", "wav", "m4a"]:
-        flash("Недопустимый формат", "error")
+        flash(t("invalid_format"), "error")
         return redirect(url_for("radio.admin_radio"))
     tmp_path = os.path.join(
         current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
@@ -146,7 +147,7 @@ def admin_radio_upload():
     file_hash = get_file_hash(tmp_path)
     if RadioTrack.query.filter_by(original_hash=file_hash).first():
         os.remove(tmp_path)
-        flash("Трек уже существует в базе радио", "error")
+        flash(t("track_already_exists"), "error")
         return redirect(url_for("radio.admin_radio"))
     track = RadioTrack(
         artist=request.form.get("artist", "Unknown"),
@@ -163,7 +164,7 @@ def admin_radio_upload():
     os.rename(tmp_path, pending_path)
     track.file_path = pending_path
     db.session.commit()
-    flash("Трек добавлен на модерацию", "success")
+    flash(t("track_added"), "success")
     return redirect(url_for("radio.admin_radio"))
 
 
@@ -173,7 +174,7 @@ def admin_radio_upload():
 def admin_radio_approve(track_id):
     track = RadioTrack.query.get_or_404(track_id)
     if track.approved:
-        flash("Трек уже одобрен", "error")
+        flash(t("track_already_approved"), "error")
         return redirect(url_for("radio.admin_radio"))
     playlist_dir = os.path.join(current_app.config["SETTINGS"].radio_folder, "playlist")
     os.makedirs(playlist_dir, exist_ok=True)
@@ -192,14 +193,14 @@ def admin_radio_approve(track_id):
             current_app.config["SETTINGS"].radio_bitrate,
         )
     except Exception as e:
-        flash(f"Ошибка конвертации: {str(e)}", "error")
+        flash(t("conversion_error", error=str(e)), "error")
         return redirect(url_for("radio.admin_radio"))
     if os.path.exists(track.file_path):
         os.remove(track.file_path)
     track.file_path = output_path
     track.approved = True
     db.session.commit()
-    flash("Трек одобрен и добавлен в плейлист", "success")
+    flash(t("track_approved"), "success")
     return redirect(url_for("radio.admin_radio"))
 
 
@@ -209,14 +210,14 @@ def admin_radio_approve(track_id):
 def admin_radio_reject(track_id):
     track = RadioTrack.query.get_or_404(track_id)
     if track.approved:
-        flash("Нельзя отклонить уже одобренный трек", "error")
+        flash(t("cannot_reject_approved"), "error")
         return redirect(url_for("radio.admin_radio"))
     if os.path.exists(track.file_path):
         os.remove(track.file_path)
     track.approved = False
     track.file_path = None
     db.session.commit()
-    flash("Трек отклонён", "success")
+    flash(t("track_rejected"), "success")
     return redirect(url_for("radio.admin_radio"))
 
 
@@ -229,7 +230,7 @@ def admin_radio_edit(track_id):
         track.artist = request.form.get("artist", "")
         track.title = request.form.get("title", "")
         db.session.commit()
-        flash("Метаданные обновлены", "success")
+        flash(t("track_updated"), "success")
         return redirect(url_for("radio.admin_radio"))
     return render_template("admin/radio_edit.html", track=track)
 
@@ -243,7 +244,7 @@ def admin_radio_delete(track_id):
         os.remove(track.file_path)
     db.session.delete(track)
     db.session.commit()
-    flash("Трек удалён", "success")
+    flash(t("track_deleted"), "success")
     return redirect(url_for("radio.admin_radio"))
 
 
@@ -261,5 +262,5 @@ def admin_radio_toggle():
     db.session.add(s)
     db.session.commit()
     current_app.config["RADIO_ENABLED"] = not current
-    flash(f'Радио {"включено" if not current else "выключено"}', "success")
+    flash(t("radio_enabled") if not current else t("radio_disabled"), "success")
     return redirect(url_for("radio.admin_radio"))

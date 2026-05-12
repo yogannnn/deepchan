@@ -23,16 +23,24 @@ def load_translations(lang="ru"):
         return json.load(f)
 
 
-def t(key, lang=None):
-    """Возвращает перевод для ключа. lang берётся из глобальной настройки, если не передан."""
+def t(key, lang=None, **kwargs):
+    """Возвращает перевод для ключа. lang берётся из глобальной настройки, если не передан.
+    Поддерживает форматирование через **kwargs: t('key', name='Alice') подставит {name} в строку.
+    """
     if lang is None:
         lang = get_default_lang()
     try:
         translations = load_translations(lang)
-        return translations.get(key, key)
+        text = translations.get(key, key)
     except Exception:
         try:
             translations = load_translations("ru")
-            return translations.get(key, key)
+            text = translations.get(key, key)
         except Exception:
-            return key
+            text = key
+    if kwargs:
+        try:
+            return text.format(**kwargs)
+        except Exception:
+            return text
+    return text

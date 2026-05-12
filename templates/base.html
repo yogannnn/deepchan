@@ -54,7 +54,7 @@
     </main>
     <footer>
         <hr>
-        <small><a href="#top">Наверх</a></small>
+        <small><a href="#top">{{ t("footer.top") }}</a></small>
         {% if config.FOOTER_HTML %}
             {{ config.FOOTER_HTML | safe }}
         {% else %}

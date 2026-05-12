@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}/{{ board.short_name }}/ - Каталог{% endblock %}
+{% block title %}/{{ board.short_name }}/ - {{ t("catalog.board_catalog") }}{% endblock %}
 {% block content %}
-<h2>/{{ board.short_name }}/ - Каталог</h2>
+<h2>/{{ board.short_name }}/ - {{ t("catalog.board_catalog") }}</h2>
 <a href="{{ url_for('board.board', board_name=board.short_name) }}">← К доске</a>
 <hr>
 <div class="catalog">
@@ -13,15 +13,15 @@
             {% if op.files.first() %}
                 <img loading="lazy" src="{{ url_for('static', filename='uploads/thumbs/' + op.files.first().thumb_path) }}" alt="thumb">
             {% else %}
-                <div style="height:160px; background:#1a2a1a; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);">Нет картинки</div>
+                <div style="height:160px; background:#1a2a1a; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);">{{ t("catalog.no_image") }}</div>
             {% endif %}
-            <div>{{ op.subject or 'Без темы' }}</div>
+            <div>{{ op.subject or '{{ t("catalog.no_subject") }}' }}</div>
         </a>
         <small>💬 {{ thread.posts.count() - 1 }}</small>
     </div>
     {% endif %}
 {% else %}
-    <p>Нет тредов.</p>
+    <p>{{ t("catalog.no_threads") }}</p>
 {% endfor %}
 </div>
 {% endblock %}

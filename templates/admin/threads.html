@@ -1,29 +1,29 @@
 {% extends "admin/base.html" %}
 {% block admin_content %}
-<h2>Управление тредами</h2>
+<h2>{{ t("admin.manage_threads") }}</h2>
 
 <form method="get" class="filter-form">
-    <label>Доска:
+    <label>{{ t("admin.filter_by_board") }}
         <select name="board_id" onchange="this.form.submit()">
-            <option value="">Все доски</option>
+            <option value="">{{ t("admin.all_boards") }}</option>
             {% for b in boards %}
                 <option value="{{ b.id }}" {% if selected_board == b.id %}selected{% endif %}>/{{ b.short_name }}/ - {{ b.name }}</option>
             {% endfor %}
         </select>
     </label>
-    <noscript><input type="submit" value="Применить"></noscript>
+    <noscript><input type="submit" value="{{ t("admin.apply") }}"></noscript>
 </form>
 
 <form method="post" action="{{ url_for('admin.admin_bulk_threads', board_id=selected_board) }}" id="bulk-form">
     <input type="hidden" name="board_id" value="{{ selected_board }}">
     <div class="bulk-actions">
         <select name="action">
-            <option value="">-- Массовые действия --</option>
-            <option value="delete">Удалить выбранные</option>
-            <option value="lock">Закрыть выбранные</option>
-            <option value="unlock">Открыть выбранные</option>
+            <option value="">-- {{ t("admin.bulk_actions") }} --</option>
+            <option value="delete">{{ t("admin.delete_selected") }}</option>
+            <option value="lock">{{ t("admin.lock_selected") }}</option>
+            <option value="unlock">{{ t("admin.unlock_selected") }}</option>
         </select>
-        <button type="submit" class="btn">Применить</button>
+        <button type="submit" class="btn">{{ t("admin.apply") }}</button>
     </div>
     {% set csrf = csrf_token('bulk_threads') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
@@ -35,12 +35,12 @@
                 <th><input type="checkbox" onclick="document.querySelectorAll('.thread-checkbox').forEach(cb => cb.checked = this.checked)"></th>
                 <th>ID</th>
                 <th>Доска</th>
-                <th>Тема (ОП-пост)</th>
-                <th>Постов</th>
-                <th>Создан</th>
-                <th>Последний</th>
-                <th>Статус</th>
-                <th>Действия</th>
+                <th>{{ t("admin.thread_subject") }}</th>
+                <th>{{ t("admin.thread_posts") }}</th>
+                <th>{{ t("admin.thread_created") }}</th>
+                <th>{{ t("admin.thread_last") }}</th>
+                <th>{{ t("admin.thread_status") }}</th>
+                <th>{{ t("admin.thread_actions") }}</th>
             </tr>
         </thead>
         <tbody>
@@ -67,24 +67,24 @@
                         {% set csrf = csrf_token('toggle_pin') %}
                         <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                         <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                        <button type="submit" class="action-icon" title="Закрепить/открепить">📌</button>
+                        <button type="submit" class="action-icon" title="{{ t("admin.pin") }}">📌</button>
                     </form>
                     <form method="post" action="{{ url_for('admin.admin_toggle_lock', thread_id=thread.id, board_id=selected_board) }}" class="inline-form">
                         {% set csrf = csrf_token('toggle_lock') %}
                         <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                         <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                        <button type="submit" class="action-icon" title="Закрыть/открыть">🔒</button>
+                        <button type="submit" class="action-icon" title="{{ t("admin.lock") }}">🔒</button>
                     </form>
                     <form method="post" action="{{ url_for('admin.admin_delete_thread', thread_id=thread.id, board_id=selected_board) }}" class="inline-form" onsubmit="return confirm('Удалить тред #{{ thread.id }}?');">
                         {% set csrf = csrf_token('delete_thread') %}
                         <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                         <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                        <button type="submit" class="action-icon" title="Удалить">🗑️</button>
+                        <button type="submit" class="action-icon" title="{{ t("admin.delete") }}">🗑️</button>
                     </form>
                 </td>
             </tr>
             {% else %}
-            <tr><td colspan="9">Нет тредов</td></tr>
+            <tr><td colspan="9">{{ t("admin.no_threads") }}</td></tr>
             {% endfor %}
         </tbody>
     </table>
