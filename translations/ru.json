@@ -261,5 +261,6 @@
   "search.search_btn": "Искать",
   "search.no_results": "Ничего не найдено.",
   "search.post_num": "Пост №{id}",
-  "thread.captcha": "Введите код"
+  "thread.captcha": "Введите код",
+  "site.title": "Доски"
 }
