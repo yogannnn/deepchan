@@ -15,6 +15,7 @@
 <hr>
 
 {% if not thread.is_locked %}
+
 <h3>{{ t("thread.reply") }}</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name, thread_id=thread.id) }}">
     {% set csrf = csrf_token('post') %}
