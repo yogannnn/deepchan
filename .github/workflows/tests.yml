@@ -35,7 +35,6 @@ jobs:
         timeout-minutes: 15
 
       - name: Check dependencies with pip-audit
-        timeout-minutes: 5
         run: |
           pip-audit --desc || true
         timeout-minutes: 5
