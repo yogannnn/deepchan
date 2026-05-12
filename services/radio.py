@@ -16,7 +16,7 @@ def get_file_hash(filepath):
 def convert_for_radio(input_path, output_path, artist=None, title=None, bitrate="128k"):
     tmp_path = output_path + ".tmp.mp3"
     cmd = [
-        "ffmpeg",
+        "/usr/bin/ffmpeg",
         "-i",
         input_path,
         "-b:a",
@@ -28,7 +28,7 @@ def convert_for_radio(input_path, output_path, artist=None, title=None, bitrate=
     ]
     subprocess.run(cmd, capture_output=True, timeout=60, check=True)
     if artist or title:
-        cmd2 = ["ffmpeg", "-i", tmp_path, "-c", "copy"]
+        cmd2 = ["/usr/bin/ffmpeg", "-i", tmp_path, "-c", "copy"]
         if artist:
             cmd2 += ["-metadata", f"artist={artist}"]
         if title:

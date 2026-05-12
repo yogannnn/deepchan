@@ -25,7 +25,7 @@ def get_media_duration(filepath):
     try:
         result = subprocess.run(
             [
-                "ffprobe",
+                "/usr/bin/ffprobe",
                 "-v",
                 "error",
                 "-show_entries",
@@ -51,7 +51,7 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
         tmp_thumb = thumb_path + ".tmp.webp"
         subprocess.run(
             [
-                "ffmpeg",
+                "/usr/bin/ffmpeg",
                 "-i",
                 video_path,
                 "-ss",
@@ -80,7 +80,7 @@ def clean_media_metadata(input_path, output_path, is_audio=False):
     try:
         subprocess.run(
             [
-                "ffmpeg",
+                "/usr/bin/ffmpeg",
                 "-i",
                 input_path,
                 "-map_metadata",
@@ -194,7 +194,10 @@ def save_files(files):
             )
             f.save(audio_tmp)
             duration = get_media_duration(audio_tmp)
-            if duration is None or duration > max_audio_duration:
+            if duration is None:
+                os.remove(audio_tmp)
+                abort(400, description="Не удалось определить длительность аудио")
+            if duration > max_audio_duration:
                 os.remove(audio_tmp)
                 abort(
                     400,
