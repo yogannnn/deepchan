@@ -15,7 +15,7 @@
 <hr>
 
 {% if not thread.is_locked %}
-<h3>Ответить</h3>
+<h3>{{ t("thread.reply") }}</h3>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name, thread_id=thread.id) }}">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
@@ -31,7 +31,7 @@
         <label>{{ t("thread.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
-    <input type="submit" value="Ответить">
+    <input type="submit" value="{{ t("thread.reply") }}">
 <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 <hr>

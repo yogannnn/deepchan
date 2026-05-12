@@ -260,5 +260,6 @@
   "search.query": "Enter query...",
   "search.search_btn": "Search",
   "search.no_results": "Nothing found.",
-  "search.post_num": "Post #{id}"
+  "search.post_num": "Post #{id}",
+  "thread.captcha": "Enter code"
 }
