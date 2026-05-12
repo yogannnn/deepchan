@@ -20,10 +20,12 @@
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     <label>{{ t("thread.name") }}: <input type="text" name="name" value="{{ t('anonymous') }}"></label>
-    <label>{{ t("thread.comment") }}: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
+    <label>{{ t("thread.comment") }}: <textarea name="comment" autofocus>{{ form.comment.data if form.comment.data else (quote_text or "") }}</textarea></label>
     <label>{{ t("thread.files") }}: <input type="file" name="files" multiple accept="*/*"></label>
     <label><input type="checkbox" name="sage"> {{ t("thread.sage") }}</label>
     <label>{{ t("thread.password") }}: <input type="password" name="password"></label>
+        {% if captcha_error %}<div class="flash">{{ captcha_error }}</div>{% endif %}
+
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">

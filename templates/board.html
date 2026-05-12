@@ -18,10 +18,12 @@
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
     <label>{{ t("board.name") }}: <input type="text" name="name" value="{{ t('anonymous') }}"></label><br>
-    <label>{{ t("board.subject") }}: <input type="text" name="subject" required></label><br>
-    <label>{{ t("board.comment") }}: <textarea name="comment"></textarea></label><br>
+    <label>{{ t("board.subject") }}: <input type="text" name="subject" value="{{ form.subject.data or "" }}" required></label><br>
+    <label>{{ t("board.comment") }}: <textarea name="comment">{{ form.comment.data or "" }}</textarea></label><br>
     <label>{{ t("board.files") }}: <input type="file" name="files" multiple accept="*/*"></label><br>
     <label>{{ t("board.password") }}: <input type="password" name="password"></label><br>
+        {% if captcha_error %}<div class="flash">{{ captcha_error }}</div>{% endif %}
+
     {% if config.CAPTCHA_ENABLED %}
     <div class="captcha-block">
         <img src="data:image/png;base64,{{ captcha_data }}" alt="captcha" class="captcha-img" loading="eager" onclick="this.src='{{ url_for('main.captcha_route') }}?'+Math.random();">

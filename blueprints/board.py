@@ -165,7 +165,58 @@ def create_post(board_name):
         captcha_token = request.form.get("captcha_token", "")
 
         if not verify_captcha(captcha_answer, captcha_token):
-            abort(400, description=t("captcha.invalid"))
+            form.captcha_answer.errors = [t("captcha.invalid")]
+            captcha_error = t("captcha.invalid")
+            # Генерируем новую капчу
+            captcha_data, _, captcha_token = generate_captcha()
+            thread_id = request.args.get("thread_id", type=int)
+            if thread_id:
+                thread = Thread.query.get_or_404(thread_id)
+                page = request.args.get("page", 1, type=int)
+                per_page = current_app.config["SETTINGS"].posts_per_page
+                posts_paginated = thread.posts.order_by(Post.created_at.asc()).paginate(
+                    page=page, per_page=per_page, error_out=False
+                )
+                quote_text = ""
+                reply_to = request.args.get("reply", type=int)
+                if reply_to:
+                    quote_text = f">>{reply_to}\n"
+                return (
+                    render_template(
+                        "thread.html",
+                        board=board,
+                        thread=thread,
+                        posts=posts_paginated.items,
+                        pagination=posts_paginated,
+                        form=form,
+                        quote_text=quote_text,
+                        captcha_data=captcha_data,
+                        captcha_token=captcha_token,
+                        captcha_error=captcha_error,
+                    ),
+                    400,
+                )
+            else:
+                page = request.args.get("page", 1, type=int)
+                per_page = current_app.config["SETTINGS"].threads_per_page
+                threads_paginated = (
+                    board.threads.filter(Thread.posts.any())
+                    .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
+                    .paginate(page=page, per_page=per_page, error_out=False)
+                )
+                return (
+                    render_template(
+                        "board.html",
+                        board=board,
+                        threads=threads_paginated.items,
+                        pagination=threads_paginated,
+                        form=form,
+                        captcha_data=captcha_data,
+                        captcha_token=captcha_token,
+                        captcha_error=captcha_error,
+                    ),
+                    400,
+                )
 
     if form.validate_on_submit():
         thread_id = request.args.get("thread_id", type=int)
