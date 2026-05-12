@@ -20,7 +20,7 @@
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-    <label>{{ t("thread.name") }}: <input type="text" name="name" value="{{ t("anonymous") }}"></label>
+    <label>{{ t("thread.name") }}: <input type="text" name="name" value="{{ t('anonymous') }}"></label>
     <label>{{ t("thread.comment") }}: <textarea name="comment" autofocus>{{ quote_text or "" }}</textarea></label>
     <label>{{ t("thread.files") }}: <input type="file" name="files" multiple accept="*/*"></label>
     <label><input type="checkbox" name="sage"> {{ t("thread.sage") }}</label>
@@ -31,7 +31,7 @@
         <label>{{ t("thread.captcha") }}: <input type="text" name="captcha_answer" required></label>
     </div>
     {% endif %}
-    <input type="submit" value="{{ t("thread.reply") }}">
+    <input type="submit" value="{{ t('thread.reply') }}">
 <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
 <hr>
@@ -40,11 +40,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
     {% endif %}
-    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
     {% endif %}
 </div>
 <hr>
@@ -71,7 +71,7 @@
                     {% set csrf = csrf_token('delete_post') %}
                     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
                     <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
-                    <input type="password" name="password" placeholder="{{ t("thread.delete_placeholder") }}" size="12">
+                    <input type="password" name="password" placeholder="{{ t('thread.delete_placeholder') }}" size="12">
                     <button type="submit">{{ t("thread.delete_title") }}</button>
                 <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
@@ -106,16 +106,16 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">← Назад</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.prev_num) }}">{{ t("board.back") }}</a>
     {% endif %}
-    <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
+    <span>{{ t("board.page") }} {{ pagination.page }} {{ t("board.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">Вперёд →</a>
+        <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id, page=pagination.next_num) }}">{{ t("board.forward") }}</a>
     {% endif %}
 </div>
 {% endif %}
 
 {% if thread.is_locked %}
-<p><strong>{{ t("thread.closed") }}.</strong></p>
+<p><strong>{{ t("thread.closed") }}</strong></p>
 {% endif %}
 {% endblock %}
