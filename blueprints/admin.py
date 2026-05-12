@@ -15,6 +15,7 @@ from flask import (
 )
 from sqlalchemy import func
 
+from core.i18n import t
 from models import (
     Ban,
     Board,
