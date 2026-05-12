@@ -165,8 +165,8 @@ def create_post(board_name):
         captcha_token = request.form.get("captcha_token", "")
 
         if not verify_captcha(captcha_answer, captcha_token):
-            form.captcha_answer.errors = [t("captcha.invalid")]
-            captcha_error = t("captcha.invalid")
+            form.captcha_answer.errors = ["Invalid captcha code"]
+            captcha_error = "Invalid captcha code"
             # Генерируем новую капчу
             captcha_data, _, captcha_token = generate_captcha()
             thread_id = request.args.get("thread_id", type=int)
