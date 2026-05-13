@@ -324,6 +324,9 @@ def create_post(board_name):
         db.session.add(fts_entry)
 
         db.session.commit()
+        current_app.emit(
+            "content.changed", action="created", post=post, thread=thread, board=board
+        )
 
         if thread_id:
             total_posts = thread.posts.count()
@@ -374,6 +377,9 @@ def delete_post(board_name, post_id):
             PostFTS.query.filter_by(post_id=p.id).delete()
         db.session.delete(thread)
         db.session.commit()
+        current_app.emit(
+            "content.changed", action="deleted", post=post, thread=thread, board=board
+        )
         return redirect(url_for("board.board", board_name=board.short_name))
     else:
         for pf in post.files:
@@ -391,6 +397,9 @@ def delete_post(board_name, post_id):
         PostFTS.query.filter_by(post_id=post.id).delete()
         db.session.delete(post)
         db.session.commit()
+        current_app.emit(
+            "content.changed", action="deleted", post=post, thread=thread, board=board
+        )
         return redirect(
             url_for("board.thread", board_name=board.short_name, thread_id=thread.id)
         )

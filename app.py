@@ -1,3 +1,5 @@
+import importlib
+import json
 import logging
 import os
 from logging.handlers import RotatingFileHandler
@@ -28,6 +30,61 @@ def create_app():
         settings.load()
     app.config["SETTINGS"] = settings
 
+    # Инициализируем систему событий
+    app.events = {}
+
+    def on(event_name, callback):
+        if event_name not in app.events:
+            app.events[event_name] = []
+        app.events[event_name].append(callback)
+
+    def emit(event_name, **kwargs):
+        results = []
+        for callback in app.events.get(event_name, []):
+            try:
+                result = callback(**kwargs)
+                if result is not None:
+                    results.append(result)
+            except Exception as e:
+                app.logger.error(
+                    f"Hook {event_name} error in {callback.__qualname__}: {e}"
+                )
+        return results
+
+    app.on = on
+    app.emit = emit
+
+    # Загружаем плагины из папки plugins/
+    plugins_dir = os.path.join(app.root_path, "plugins")
+    if os.path.isdir(plugins_dir):
+        for plugin_name in os.listdir(plugins_dir):
+            plugin_path = os.path.join(plugins_dir, plugin_name)
+            init_file = os.path.join(plugin_path, "__init__.py")
+            if os.path.isfile(init_file):
+                try:
+                    # Проверяем манифест
+                    manifest_path = os.path.join(plugin_path, "plugin.json")
+                    if os.path.isfile(manifest_path):
+                        with open(manifest_path) as f:
+                            manifest = json.load(f)
+                        app.logger.info(
+                            f'Loading plugin: {manifest.get("name", plugin_name)}'
+                        )
+
+                    # Загружаем модуль и вызываем init_app
+                    spec = importlib.util.spec_from_file_location(
+                        f"plugins.{plugin_name}", init_file
+                    )
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    if hasattr(module, "init_app"):
+                        module.init_app(app)
+                except Exception as e:
+                    app.logger.error(f"Failed to load plugin {plugin_name}: {e}")
+
+    # Отправляем сигнал о старте
+    app.emit("core.started", app=app)
+
     if not app.debug:
         handler = RotatingFileHandler("logs/board.log", maxBytes=10000, backupCount=3)
         handler.setLevel(logging.INFO)
@@ -50,6 +107,14 @@ def create_app():
     # Внедряем middleware
     inject_csrf_token(app)
     check_board_closed(app)
+
+    @app.context_processor
+    def inject_widgets():
+        """Собирает виджеты для шапки и подвала."""
+        header_widgets = app.emit("ui.header_rendering", request=request)
+        footer_widgets = app.emit("ui.footer_rendering", request=request)
+        return dict(header_widgets=header_widgets, footer_widgets=footer_widgets)
+
     app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
 
     @app.route("/closed")
@@ -58,6 +123,7 @@ def create_app():
 
     @app.after_request
     def add_cache_headers(response):
+        app.emit("http.after_request", request=request, response=response)
         if request.path.startswith("/static"):
             response.cache_control.no_cache = False
             response.cache_control.no_store = False
@@ -117,6 +183,61 @@ if __name__ == "__main__":
         settings.load()
         settings.load()
         app.config["SETTINGS"] = settings
+
+    # Инициализируем систему событий
+    app.events = {}
+
+    def on(event_name, callback):
+        if event_name not in app.events:
+            app.events[event_name] = []
+        app.events[event_name].append(callback)
+
+    def emit(event_name, **kwargs):
+        results = []
+        for callback in app.events.get(event_name, []):
+            try:
+                result = callback(**kwargs)
+                if result is not None:
+                    results.append(result)
+            except Exception as e:
+                app.logger.error(
+                    f"Hook {event_name} error in {callback.__qualname__}: {e}"
+                )
+        return results
+
+    app.on = on
+    app.emit = emit
+
+    # Загружаем плагины из папки plugins/
+    plugins_dir = os.path.join(app.root_path, "plugins")
+    if os.path.isdir(plugins_dir):
+        for plugin_name in os.listdir(plugins_dir):
+            plugin_path = os.path.join(plugins_dir, plugin_name)
+            init_file = os.path.join(plugin_path, "__init__.py")
+            if os.path.isfile(init_file):
+                try:
+                    # Проверяем манифест
+                    manifest_path = os.path.join(plugin_path, "plugin.json")
+                    if os.path.isfile(manifest_path):
+                        with open(manifest_path) as f:
+                            manifest = json.load(f)
+                        app.logger.info(
+                            f'Loading plugin: {manifest.get("name", plugin_name)}'
+                        )
+
+                    # Загружаем модуль и вызываем init_app
+                    spec = importlib.util.spec_from_file_location(
+                        f"plugins.{plugin_name}", init_file
+                    )
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    if hasattr(module, "init_app"):
+                        module.init_app(app)
+                except Exception as e:
+                    app.logger.error(f"Failed to load plugin {plugin_name}: {e}")
+
+    # Отправляем сигнал о старте
+    app.emit("core.started", app=app)
 
     deploy_mode = app.config["SETTINGS"].deploy_mode
 

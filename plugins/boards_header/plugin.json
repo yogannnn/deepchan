@@ -1,0 +1,6 @@
+{
+  "name": "boards_header",
+  "version": "1.0.0",
+  "description": "Показывает ссылки на доски в шапке.",
+  "api_version": 1
+}

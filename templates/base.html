@@ -46,6 +46,13 @@
     </script>
     <header>
         <h1><a href="{{ url_for('main.index') }}">{{ config.SITE_TITLE or 'Имиджборда' }}</a></h1>
+    {% if header_widgets %}
+    <div style="margin-top: 10px;">
+    {% for widget in header_widgets %}
+        {{ widget | safe }}
+    {% endfor %}
+    </div>
+    {% endif %}
     </header>
     <main>
         <div class="container">
@@ -55,7 +62,13 @@
     <footer>
         <hr>
         <small><a href="#top">{{ t("footer.top") }}</a></small>
-        {% if config.FOOTER_HTML %}
+       
+{% if footer_widgets %}
+    {% for widget in footer_widgets %}
+        {{ widget | safe }}
+    {% endfor %}
+{% endif %}
+{% if config.FOOTER_HTML %}
             {{ config.FOOTER_HTML | safe }}
         {% else %}
             <div style="margin-top: 30px; padding: 15px 0; border-top: 1px solid #1e3b1e; text-align: center; color: #7ab37a; font-size: 0.85rem;">

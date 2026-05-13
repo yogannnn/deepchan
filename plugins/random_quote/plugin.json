@@ -1,0 +1,6 @@
+{
+  "name": "random_quote",
+  "version": "1.0.0",
+  "description": "Добавляет случайную цитату в подвал.",
+  "api_version": 1
+}
