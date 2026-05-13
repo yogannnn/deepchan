@@ -42,6 +42,6 @@ QUOTES = [
 def init_app(app):
     def on_footer_render(**kwargs):
         quote = random.choice(QUOTES)
-        return f'<p style="text-align:center; color:#66ff66; margin-top:10px;">💬 {quote}<br><span style="font-size:0.7rem; color:#7ab37a;">(тест второго плагина, ничего умнее я не придумал)</span></p>'
+        return f'<p style="text-align:center; color:#66ff66; margin-top:10px;">{quote}<br><span style="font-size:0.7rem; color:#7ab37a;">(тест второго плагина, ничего умнее я не придумал)</span></p>'
 
     app.on("ui.footer_rendering", on_footer_render)
