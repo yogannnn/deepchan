@@ -117,6 +117,24 @@ def create_app():
 
     app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
 
+    # Хук ui.before_render: оборачиваем render_template, чтобы плагины могли менять контекст
+    _original_render_template = app.jinja_env.globals.get(
+        "render_template", render_template
+    )
+
+    def _hooked_render(*args, **kwargs):
+        # Позволяем плагинам изменить kwargs или прервать рендеринг
+        app.emit(
+            "ui.before_render", template_name=args[0] if args else None, context=kwargs
+        )
+        return _original_render_template(*args, **kwargs)
+
+    # Подменяем в Jinja и в самом Flask (на всякий случай)
+    app.jinja_env.globals["render_template"] = _hooked_render
+    import flask
+
+    flask.render_template = _hooked_render
+
     @app.route("/closed")
     def board_closed():
         return render_template("board_closed.html")

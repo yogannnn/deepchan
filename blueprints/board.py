@@ -93,6 +93,7 @@ def board(board_name):
     if current_app.config["SETTINGS"].captcha_enabled:
         captcha_data, _, captcha_token = generate_captcha()
 
+    current_app.emit("board.opening", board=board)
     return render_template(
         "board.html",
         board=board,
@@ -143,6 +144,7 @@ def thread(board_name, thread_id):
     reply_to = request.args.get("reply", type=int)
     if reply_to:
         quote_text = f">>{reply_to}\n"
+    current_app.emit("thread.opening", thread=thread, board=board)
     return render_template(
         "thread.html",
         board=board,
