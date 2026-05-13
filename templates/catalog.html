@@ -15,7 +15,13 @@
             {% else %}
                 <div style="height:160px; background:#1a2a1a; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);">{{ t("catalog.no_image") }}</div>
             {% endif %}
-            <div>{{ op.subject or '{{ t("catalog.no_subject") }}' }}</div>
+            <div class="catalog-item-board">/{{ board.short_name }}/</div>
+            <div class="catalog-title">{{ op.subject or t('catalog.no_subject') }}</div>
+            {% if last_replies.get(thread.id) %}
+            <div class="catalog-last-reply">
+                <span class="reply-prefix">>></span>{{ last_replies[thread.id] }}
+            </div>
+            {% endif %}
         </a>
         <small>💬 {{ thread.posts.count() - 1 }}</small>
     </div>

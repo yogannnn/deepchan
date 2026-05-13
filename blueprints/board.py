@@ -114,7 +114,12 @@ def board_catalog(board_name):
         .limit(per_page)
         .all()
     )
-    return render_template("catalog.html", board=board, threads=threads)
+    from models import get_last_replies
+
+    last_replies = get_last_replies([t.id for t in threads])
+    return render_template(
+        "catalog.html", board=board, threads=threads, last_replies=last_replies
+    )
 
 
 @board_bp.route("/<string:board_name>/thread/<int:thread_id>")

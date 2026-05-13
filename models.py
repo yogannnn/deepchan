@@ -12,7 +12,7 @@ class Board(db.Model):
     short_name = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text)
-    position = db.Column(db.Integer, default=0)  # новое поле для сортировки
+    position = db.Column(db.Integer, default=0)
     threads = db.relationship(
         "Thread", backref="board", lazy="dynamic", cascade="all, delete-orphan"
     )
@@ -42,7 +42,7 @@ class Post(db.Model):
     tripcode = db.Column(db.String(32))
     is_admin_post = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45))
-    search_text = db.Column(db.Text)  # новое поле для поиска
+    search_text = db.Column(db.Text)
     files = db.relationship(
         "PostFile", backref="post", lazy="dynamic", cascade="all, delete-orphan"
     )
@@ -108,17 +108,14 @@ def check_password(password, hashed):
 # ===== Радио =====
 class RadioTrack(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    post_file_id = db.Column(
-        db.Integer, db.ForeignKey("post_file.id"), nullable=True
-    )  # если из поста
+    post_file_id = db.Column(db.Integer, db.ForeignKey("post_file.id"), nullable=True)
     artist = db.Column(db.String(200))
     title = db.Column(db.String(200))
-    file_path = db.Column(db.String(255))  # путь в static/radio/playlist/
-    original_hash = db.Column(db.String(64))  # SHA-256 исходного файла
+    file_path = db.Column(db.String(255))
+    original_hash = db.Column(db.String(64))
     duration = db.Column(db.Float)
     approved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    # Связь с PostFile (опционально)
     post_file = db.relationship(
         "PostFile", backref="radio_track", uselist=False, foreign_keys=[post_file_id]
     )
@@ -131,5 +128,43 @@ class Report(db.Model):
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved = db.Column(db.Boolean, default=False)
-
     post = db.relationship("Post", backref=db.backref("reports", lazy="dynamic"))
+
+
+def get_last_replies(thread_ids):
+    """Возвращает словарь {thread_id: last_reply_comment} для тредов, у которых есть ответы."""
+    if not thread_ids:
+        return {}
+    from sqlalchemy import func
+
+    # Первые посты
+    first_posts = (
+        db.session.query(Post.thread_id, func.min(Post.id).label("first_id"))
+        .filter(Post.thread_id.in_(thread_ids))
+        .group_by(Post.thread_id)
+        .cte("first_posts")
+    )
+
+    # Последние посты
+    last_posts = (
+        db.session.query(Post.thread_id, func.max(Post.id).label("last_id"))
+        .filter(Post.thread_id.in_(thread_ids))
+        .group_by(Post.thread_id)
+        .cte("last_posts")
+    )
+
+    # Выбираем комментарии последних, исключая те, где last_id == first_id
+    query = (
+        db.session.query(last_posts.c.thread_id, Post.comment)
+        .join(Post, Post.id == last_posts.c.last_id)
+        .join(first_posts, first_posts.c.thread_id == last_posts.c.thread_id)
+        .filter(last_posts.c.last_id != first_posts.c.first_id)
+    )
+
+    result = {}
+    for thread_id, comment in query.all():
+        short = comment.replace("\r", " ").replace("\n", " ")
+        if len(short) > 120:
+            short = short[:120] + "..."
+        result[thread_id] = short
+    return result

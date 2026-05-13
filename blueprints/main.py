@@ -10,7 +10,7 @@ from flask import (
     url_for,
 )
 
-from models import Board, Post, Thread
+from models import Board, Post, Thread, get_last_replies
 from utils import generate_captcha
 
 main_bp = Blueprint("main", __name__)
@@ -42,6 +42,8 @@ def global_catalog():
     threads_paginated = query.order_by(
         Thread.is_pinned.desc(), Thread.bumped_at.desc()
     ).paginate(page=page, per_page=per_page, error_out=False)
+
+    last_replies = get_last_replies([t.id for t in threads_paginated.items])
     boards = Board.query.order_by(Board.position).all()
     return render_template(
         "catalog_global.html",
@@ -49,6 +51,7 @@ def global_catalog():
         pagination=threads_paginated,
         boards=boards,
         selected_board=board_id,
+        last_replies=last_replies,
     )
 
 
