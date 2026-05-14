@@ -271,5 +271,10 @@
   "thread.posts_count": "пост.",
   "search.all_boards": "Все доски",
   "board.back_to_board": "← К доске",
-  "admin.plugins": "🔌 Плагины"
+  "admin.plugins": "🔌 Плагины",
+  "stats.total_boards": "досок",
+  "stats.total_threads": "тредов",
+  "stats.total_posts": "постов",
+  "stats.total_files": "файлов",
+  "stats.footer_line": "Всего: {boards} {boards_word}, {threads} {threads_word}, {posts} {posts_word}, {files} {files_word}"
 }

@@ -271,5 +271,10 @@
   "thread.posts_count": "post.",
   "search.all_boards": "All boards",
   "board.back_to_board": "← Back to board",
-  "admin.plugins": "🔌 Plugins"
+  "admin.plugins": "🔌 Plugins",
+  "stats.total_boards": "boards",
+  "stats.total_threads": "threads",
+  "stats.total_posts": "posts",
+  "stats.total_files": "files",
+  "stats.footer_line": "Total: {boards} {boards_word}, {threads} {threads_word}, {posts} {posts_word}, {files} {files_word}"
 }
