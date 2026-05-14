@@ -19,6 +19,7 @@
         <tr>
             <th>Плагин</th>
             <th>Версия</th>
+            <th>Приоритет</th>
             <th>Статус</th>
             <th>Загружен</th>
             <th>Действие</th>
@@ -29,6 +30,7 @@
         <tr>
             <td>{{ p.display_name }}</td>
             <td>{{ p.version }}</td>
+            <td>{{ p.priority }}</td>
             <td>{{ '✅ Включён' if p.enabled else '❌ Отключён' }}</td>
             <td>{{ 'Да' if p.loaded else 'Нет' }}</td>
             <td>
@@ -43,7 +45,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="5">Нет установленных плагинов.</td></tr>
+        <tr><td colspan="6">Нет установленных плагинов.</td></tr>
         {% endfor %}
     </tbody>
 </table>

@@ -102,6 +102,7 @@ def admin_plugins():
                     "loaded": loaded,
                 }
             )
+    plugins.sort(key=lambda p: p["priority"])
     return render_template("admin/plugins.html", plugins=plugins)
 
 
