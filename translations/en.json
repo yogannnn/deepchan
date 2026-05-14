@@ -270,5 +270,6 @@
   "pagination.posts_range": "Post {start}-{end} of {total}",
   "thread.posts_count": "post.",
   "search.all_boards": "All boards",
-  "board.back_to_board": "← Back to board"
+  "board.back_to_board": "← Back to board",
+  "admin.plugins": "🔌 Plugins"
 }

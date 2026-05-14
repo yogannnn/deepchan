@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>🔌 Плагины</h2>
+
+<h3>Загрузить плагин</h3>
+<form method="post" enctype="multipart/form-data" action="{{ url_for('admin_plugins.admin_upload_plugin') }}">
+    {% set csrf = csrf_token('upload_plugin') %}
+    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+    <label>Архив (.zip): <input type="file" name="plugin_zip" accept=".zip" required></label>
+    <button type="submit" class="btn">Загрузить</button>
+</form>
+
+<hr>
+
+<h3>Установленные плагины</h3>
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>Плагин</th>
+            <th>Версия</th>
+            <th>Статус</th>
+            <th>Загружен</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in plugins %}
+        <tr>
+            <td>{{ p.display_name }}</td>
+            <td>{{ p.version }}</td>
+            <td>{{ '✅ Включён' if p.enabled else '❌ Отключён' }}</td>
+            <td>{{ 'Да' if p.loaded else 'Нет' }}</td>
+            <td>
+                <form method="post" action="{{ url_for('admin_plugins.admin_toggle_plugin', name=p.name) }}" style="display:inline;">
+                    {% set csrf = csrf_token('toggle_plugin') %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+                    <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+                    <button type="submit" class="btn btn-sm">
+                        {{ 'Отключить' if p.enabled else 'Включить' }}
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Нет установленных плагинов.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p style="margin-top:10px; color:#ffaa00;">⚠️ Изменения вступают в силу после перезапуска приложения.</p>
+{% endblock %}
