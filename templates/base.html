@@ -31,7 +31,7 @@
     @media (max-width:480px){.catalog{grid-template-columns:1fr}}  
 </style>
     
-<!--    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ config.STYLE_VERSION or '1' }}"> -->
+ <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ config.STYLE_VERSION or '1' }}"> 
     {% if auto_refresh %}
     <meta http-equiv="refresh" content="{{ auto_refresh }}">
     {% endif %}
