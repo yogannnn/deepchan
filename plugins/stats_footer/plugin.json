@@ -1,0 +1,6 @@
+{
+  "name": "stats_footer",
+  "version": "1.0.0",
+  "description": "Показывает общую статистику борды в подвале.",
+  "api_version": 1
+}
