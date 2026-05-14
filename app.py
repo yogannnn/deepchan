@@ -4,7 +4,7 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template, request
+from flask import Flask, g, render_template, request
 from flask_compress import Compress
 
 from config import Config
@@ -19,6 +19,8 @@ def create_app():
     app = Flask(__name__)
     Compress(app)
     app.config.from_object(Config)
+    if app.config.get("TESTING"):
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     db.init_app(app)
     app.secret_key = app.config["SECRET_KEY"]
     app.jinja_env.filters["process_comment"] = process_comment
@@ -61,6 +63,7 @@ def create_app():
 
     app.on = on
     app.emit = emit
+    app.jinja_env.globals["emit"] = app.emit
 
     # ======= ЗАГРУЗКА ПЛАГИНОВ =======
     plugins_dir = os.path.join(app.root_path, "plugins")
@@ -82,26 +85,23 @@ def create_app():
                     app.logger.error(f"Invalid plugin.json in {plugin_name}: {e}")
                     continue
 
-            name = manifest.get("name", plugin_name)
-
             # Проверяем, включён ли плагин (по умолчанию True)
             enabled = True
             try:
-                enabled_key = f"plugin_{name}_enabled"
+                enabled_key = f"plugin_{plugin_name}_enabled"
                 with app.app_context():
                     setting = Setting.query.filter_by(key=enabled_key).first()
                 if setting is not None:
                     enabled = setting.value.lower() == "true"
             except Exception:
-                # Таблица setting ещё не создана (например, в тестах) – считаем включённым
                 pass
 
             if not enabled:
-                app.logger.info(f"Plugin {name} is disabled, skipping")
+                app.logger.info(f"Plugin {plugin_name} is disabled, skipping")
                 continue
 
             try:
-                app.logger.info(f"Loading plugin: {name}")
+                app.logger.info(f"Loading plugin: {plugin_name}")
                 spec = importlib.util.spec_from_file_location(
                     f"plugins.{plugin_name}", init_file
                 )
@@ -109,13 +109,13 @@ def create_app():
                 spec.loader.exec_module(module)
                 if hasattr(module, "init_app"):
                     module.init_app(app)
-                app.plugin_registry[name] = {
+                app.plugin_registry[plugin_name] = {
                     "manifest": manifest,
                     "module": module,
                     "enabled": True,
                 }
             except Exception as e:
-                app.logger.error(f"Failed to load plugin {name}: {e}")
+                app.logger.error(f"Failed to load plugin {plugin_name}: {e}")
 
     app.emit("core.started", app=app)
 
@@ -137,27 +137,15 @@ def create_app():
     check_board_closed(app)
     app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
 
-    # Хук ui.before_render: оборачиваем render_template, чтобы плагины могли менять контекст
-    _original_render_template = app.jinja_env.globals.get(
-        "render_template", render_template
-    )
-
-    def _hooked_render(*args, **kwargs):
-        # Позволяем плагинам изменить kwargs или прервать рендеринг
-        app.emit(
-            "ui.before_render", template_name=args[0] if args else None, context=kwargs
-        )
-        return _original_render_template(*args, **kwargs)
-
-    # Подменяем в Jinja и в самом Flask (на всякий случай)
-    app.jinja_env.globals["render_template"] = _hooked_render
-    import flask
-
-    flask.render_template = _hooked_render
-
     @app.route("/closed")
     def board_closed():
         return render_template("board_closed.html")
+
+    @app.context_processor
+    def inject_widgets():
+        header_widgets = app.emit("ui.header_rendering", request=request)
+        footer_widgets = app.emit("ui.footer_rendering", request=request)
+        return dict(header_widgets=header_widgets, footer_widgets=footer_widgets)
 
     @app.after_request
     def add_cache_headers(response):
@@ -206,13 +194,6 @@ def create_app():
     @app.errorhandler(500)
     def internal_server_error(e):
         return render_template("errors/500.html", description=e.description), 500
-
-    @app.context_processor
-    def inject_widgets():
-        """Собирает виджеты для шапки и подвала."""
-        header_widgets = app.emit("ui.header_rendering", request=request)
-        footer_widgets = app.emit("ui.footer_rendering", request=request)
-        return dict(header_widgets=header_widgets, footer_widgets=footer_widgets)
 
     return app
 

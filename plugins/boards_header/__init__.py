@@ -1,6 +1,7 @@
 from flask import render_template_string
 
 from models import Board
+from services.boards import get_boards
 
 TEMPLATE = """
 <span style="margin-left: 15px; font-size: 0.9rem;">
@@ -15,7 +16,7 @@ TEMPLATE = """
 
 def init_app(app):
     def on_header_render(**kwargs):
-        boards = Board.query.order_by(Board.position).all()
+        boards = get_boards()
         return render_template_string(TEMPLATE, boards=boards)
 
     app.on("ui.header_rendering", on_header_render)

@@ -13,6 +13,9 @@
     <a href="{{ url_for('admin.admin_reports') }}">{{ t("admin.reports") }}</a> |
     <a href="{{ url_for('admin.admin_settings') }}">{{ t("admin.settings") }}</a> |
     <a href="{{ url_for('admin_plugins.admin_plugins') }}">{{ t("admin.plugins") }}</a> |
+    {% for item in emit("admin.menu_rendering") %}
+    {{ item | safe }}
+    {% endfor %}
     <a href="{{ url_for('main.index') }}">{{ t("admin.back_to_site") }}</a>
 </div>
 <hr>

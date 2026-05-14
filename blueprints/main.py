@@ -11,6 +11,7 @@ from flask import (
 )
 
 from models import Board, Post, Thread, get_last_replies
+from services.boards import get_boards
 from utils import generate_captcha
 
 main_bp = Blueprint("main", __name__)
@@ -18,7 +19,7 @@ main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
 def index():
-    boards = Board.query.order_by(Board.position).all()
+    boards = get_boards()
     return render_template("index.html", boards=boards)
 
 
@@ -44,7 +45,7 @@ def global_catalog():
     ).paginate(page=page, per_page=per_page, error_out=False)
 
     last_replies = get_last_replies([t.id for t in threads_paginated.items])
-    boards = Board.query.order_by(Board.position).all()
+    boards = get_boards()
     return render_template(
         "catalog_global.html",
         threads=threads_paginated.items,
@@ -63,7 +64,7 @@ def global_search():
     per_page = 20
     results = []
     pagination = None
-    boards = Board.query.order_by(Board.position).all()
+    boards = get_boards()
     if query:
         post_query = Post.query.join(Thread).join(Board)
         if board_id:

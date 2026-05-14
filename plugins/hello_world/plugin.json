@@ -2,5 +2,6 @@
   "name": "hello_world",
   "version": "1.0.0",
   "description": "A simple test plugin to validate the plugin system.",
-  "api_version": 1
+  "api_version": 1,
+  "priority": 50
 }

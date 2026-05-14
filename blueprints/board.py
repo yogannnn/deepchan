@@ -27,8 +27,10 @@ from models import (
     Thread,
     check_password,
     db,
+    get_last_replies,
     hash_password,
 )
+from services.boards import get_boards
 from services.captcha import generate_captcha, verify_captcha
 from utils import (
     apply_word_filters,
