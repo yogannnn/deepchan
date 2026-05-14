@@ -10,7 +10,6 @@ TEMPLATE = """
 {% endfor %}
 </span>
 <br>
-<span style="margin-left: 15px; font-size: 0.7rem; color: #7ab37a;">(тест первого плагина, вывод досок)</span>
 """
 
 
