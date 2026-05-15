@@ -14,6 +14,16 @@ from flask import (
     session,
     url_for,
 )
+from utils import (
+    apply_word_filters,
+    check_ban,
+    check_rate_limit,
+    generate_tripcode,
+    get_file_hash,
+    get_media_duration,
+    process_comment,
+    save_files,
+)
 
 from core.i18n import t
 from forms import PostForm
@@ -30,18 +40,8 @@ from models import (
     get_last_replies,
     hash_password,
 )
-from services.boards import get_boards
+from services.boards import get_boards, get_visible_board_ids
 from services.captcha import generate_captcha, verify_captcha
-from utils import (
-    apply_word_filters,
-    check_ban,
-    check_rate_limit,
-    generate_tripcode,
-    get_file_hash,
-    get_media_duration,
-    process_comment,
-    save_files,
-)
 
 board_bp = Blueprint("board", __name__, url_prefix="")
 
@@ -50,7 +50,6 @@ def csrf_protect(action):
     from functools import wraps
 
     from flask import abort, request
-
     from utils import verify_csrf_token
 
     def decorator(f):
@@ -83,7 +82,9 @@ def board(board_name):
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config["SETTINGS"].threads_per_page
     threads_paginated = (
-        board.threads.filter(Thread.posts.any())
+        board.threads.filter(
+            Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
+        )
         .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
         .paginate(page=page, per_page=per_page, error_out=False)
     )
@@ -111,12 +112,9 @@ def board(board_name):
 def board_catalog(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     per_page = current_app.config["SETTINGS"].threads_per_page
-    threads = (
-        board.threads.filter(Thread.posts.any())
-        .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
-        .limit(per_page)
-        .all()
-    )
+    from services.threads import get_board_threads
+
+    threads = get_board_threads(board.id)
     from models import get_last_replies
 
     last_replies = get_last_replies([t.id for t in threads])
@@ -128,7 +126,9 @@ def board_catalog(board_name):
 @board_bp.route("/<string:board_name>/thread/<int:thread_id>")
 def thread(board_name, thread_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
-    thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
+    from services.threads import get_thread
+
+    thread = get_thread(thread_id)
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config["SETTINGS"].posts_per_page
     posts_paginated = thread.posts.order_by(Post.created_at.asc()).paginate(
@@ -209,7 +209,9 @@ def create_post(board_name):
                 page = request.args.get("page", 1, type=int)
                 per_page = current_app.config["SETTINGS"].threads_per_page
                 threads_paginated = (
-                    board.threads.filter(Thread.posts.any())
+                    board.threads.filter(
+                        Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
+                    )
                     .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
                     .paginate(page=page, per_page=per_page, error_out=False)
                 )
@@ -248,90 +250,12 @@ def create_post(board_name):
             db.session.add(thread)
             db.session.flush()
 
-        filtered_comment = apply_word_filters(form.comment.data)
-        filtered_subject = (
-            apply_word_filters(form.subject.data) if form.subject.data else None
-        )
+        # Используем сервис для создания поста
+        from services.posts import create_post
 
-        saved_files = save_files(form.files.data)
+        post = create_post(board, thread, form, form.files.data, request.remote_addr)
 
-        # Обработка трипкода
-        name_input = form.name.data.strip() if form.name.data else "Аноним"
-        display_name = name_input
-        tripcode = None
-        is_admin = False
-        if "#" in name_input:
-            parts = name_input.split("#", 1)
-            display_name = parts[0] or "Аноним"
-            password = parts[1]
-            tripcode = generate_tripcode(password, current_app.config["SECRET_KEY"])
-            admin_secret = current_app.config["SETTINGS"].admin_trip_secret
-            if admin_secret and password == admin_secret:
-                is_admin = True
-        safe_name = html.escape(display_name) if display_name else "Аноним"
-        safe_subject = html.escape(form.subject.data) if form.subject.data else None
-
-        post = Post(
-            thread_id=thread.id,
-            name=safe_name,
-            tripcode=tripcode,
-            is_admin_post=is_admin,
-            subject=safe_subject if not thread_id else None,
-            comment=filtered_comment,
-            sage=sage,
-            password_hash=(
-                hash_password(form.password.data) if form.password.data else None
-            ),
-            ip_address=request.remote_addr,
-        )
-        post.search_text = (post.comment + " " + (post.subject or "")).lower()
-        db.session.add(post)
-        db.session.flush()
-
-        for fn, tn, order, size, sha256, file_type, duration in saved_files:
-            pf = PostFile(
-                post_id=post.id,
-                file_path=fn,
-                thumb_path=tn,
-                file_order=order,
-                file_size=size,
-                md5_hash=sha256,
-                file_type=file_type,
-                duration=duration,
-            )
-            db.session.add(pf)
-
-            if file_type == "audio" and current_app.config["SETTINGS"].radio_enabled:
-                if not RadioTrack.query.filter_by(original_hash=sha256).first():
-                    track = RadioTrack(
-                        post_file_id=pf.id,
-                        artist="Unknown",
-                        title="Untitled",
-                        original_hash=sha256,
-                        duration=duration,
-                        approved=False,
-                        file_path=fn,
-                    )
-                    db.session.add(track)
-
-        if not sage:
-            thread.bumped_at = datetime.now(timezone.utc)
-
-        fts_entry = PostFTS(
-            post_id=post.id,
-            board_id=board.id,
-            thread_id=thread.id,
-            comment=post.comment,
-            subject=post.subject or "",
-            name=post.name,
-        )
-        db.session.add(fts_entry)
-
-        db.session.commit()
-        current_app.emit(
-            "content.changed", action="created", post=post, thread=thread, board=board
-        )
-
+        # Перенаправляем на страницу треда
         if thread_id:
             total_posts = thread.posts.count()
             per_page = current_app.config["SETTINGS"].posts_per_page
@@ -420,7 +344,9 @@ def board_search(board_name):
     if query:
         post_query = Post.query.join(Thread).filter(Thread.board_id == board.id)
         post_query = post_query.filter(
-            Post.search_text.contains(query.lower())
+            Post.search_text.contains(query.lower()),
+            Board.id.in_(get_visible_board_ids()),
+            Board.id.in_(get_visible_board_ids()),
         ).order_by(Post.created_at.desc())
         pagination = post_query.paginate(page=page, per_page=per_page, error_out=False)
         results = pagination.items
@@ -512,7 +438,9 @@ def render_rss(template, **context):
 def board_rss(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     threads = (
-        board.threads.filter(Thread.posts.any())
+        board.threads.filter(
+            Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
+        )
         .order_by(Thread.created_at.desc())
         .limit(20)
         .all()
@@ -524,7 +452,9 @@ def board_rss(board_name):
 @board_bp.route("/<string:board_name>/thread/<int:thread_id>/rss")
 def thread_rss(board_name, thread_id):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
-    thread = Thread.query.filter_by(id=thread_id, board_id=board.id).first_or_404()
+    from services.threads import get_thread
+
+    thread = get_thread(thread_id)
     posts = thread.posts.order_by(Post.created_at.desc()).limit(50).all()
     site_url = current_app.config["SETTINGS"].site_url
     return render_rss(

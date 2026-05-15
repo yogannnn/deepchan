@@ -118,6 +118,19 @@ def generate_audio_thumbnail(text="AUDIO", width=200, height=200):
     return img
 
 
+def process_file(file, post, board, thread):
+    """Обрабатывает файл перед сохранением, вызывая хуки media.before_process и media.after_process."""
+    current_app.emit(
+        "media.before_process", file=file, post=post, board=board, thread=thread
+    )
+    saved = save_files([file])
+    if saved:
+        current_app.emit(
+            "media.after_process", file=saved[0], post=post, board=board, thread=thread
+        )
+    return saved
+
+
 def save_files(files):
     saved = []
     if not files:

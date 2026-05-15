@@ -9,10 +9,10 @@ from flask import (
     session,
     url_for,
 )
+from utils import generate_captcha
 
 from models import Board, Post, Thread, get_last_replies
-from services.boards import get_boards
-from utils import generate_captcha
+from services.boards import get_boards, get_visible_board_ids
 
 main_bp = Blueprint("main", __name__)
 
@@ -37,7 +37,9 @@ def global_catalog():
     board_id = request.args.get("board_id", type=int)
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config["SETTINGS"].threads_per_page
-    query = Thread.query.filter(Thread.posts.any())
+    query = Thread.query.filter(
+        Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
+    )
     if board_id:
         query = query.filter(Thread.board_id == board_id)
     threads_paginated = query.order_by(
@@ -70,7 +72,8 @@ def global_search():
         if board_id:
             post_query = post_query.filter(Board.id == board_id)
         post_query = post_query.filter(
-            Post.search_text.contains(query.lower())
+            Post.search_text.contains(query.lower()),
+            Board.id.in_(get_visible_board_ids()),
         ).order_by(Post.created_at.desc())
         pagination = post_query.paginate(page=page, per_page=per_page, error_out=False)
         results = pagination.items

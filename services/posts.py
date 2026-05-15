@@ -1,0 +1,130 @@
+"""
+Сервис для работы с постами.
+Единая точка создания и получения постов.
+"""
+import html
+from datetime import datetime, timezone
+
+from flask import abort, current_app
+
+from models import Board, Post, PostFile, PostFTS, RadioTrack, Thread, db, hash_password
+from services.media import process_file, save_files
+from services.security import apply_word_filters
+from services.tripcodes import generate_tripcode
+
+
+def create_post(board, thread, form, files_data, ip_address):
+    """Создаёт пост в указанном треде (или создаёт новый тред, если thread=None).
+    Вызывает хуки posts.before_create и posts.after_create.
+    Возвращает объект Post.
+    """
+    # Хук перед созданием — плагины могут отклонить пост (abort) или модифицировать данные
+    current_app.emit(
+        "posts.before_create",
+        board=board,
+        thread=thread,
+        form=form,
+        ip_address=ip_address,
+    )
+
+    # Применяем фильтры
+    filtered_comment = apply_word_filters(form.comment.data)
+    filtered_subject = (
+        apply_word_filters(form.subject.data) if form.subject.data else None
+    )
+
+    # Обработка трипкода
+    name_input = form.name.data.strip() if form.name.data else "Аноним"
+    display_name = name_input
+    tripcode = None
+    is_admin = False
+    if "#" in name_input:
+        parts = name_input.split("#", 1)
+        display_name = parts[0] or "Аноним"
+        password = parts[1]
+        tripcode = generate_tripcode(password, current_app.config["SECRET_KEY"])
+        admin_secret = current_app.config["SETTINGS"].admin_trip_secret
+        if admin_secret and password == admin_secret:
+            is_admin = True
+
+    safe_name = html.escape(display_name) if display_name else "Аноним"
+    safe_subject = html.escape(form.subject.data) if form.subject.data else None
+
+    # Сохраняем файлы (вызывается после создания поста)
+    saved_files = save_files(files_data)
+
+    # Создаём пост
+    post = Post(
+        thread_id=thread.id,
+        name=safe_name,
+        tripcode=tripcode,
+        is_admin_post=is_admin,
+        subject=safe_subject if thread else None,
+        comment=filtered_comment,
+        sage=form.sage.data,
+        password_hash=(
+            hash_password(form.password.data) if form.password.data else None
+        ),
+        ip_address=ip_address,
+    )
+    post.search_text = (post.comment + " " + (post.subject or "")).lower()
+    db.session.add(post)
+    db.session.flush()
+
+    # Привязываем файлы
+    for fn, tn, order, size, sha256, file_type, duration in saved_files:
+        pf = PostFile(
+            post_id=post.id,
+            file_path=fn,
+            thumb_path=tn,
+            file_order=order,
+            file_size=size,
+            md5_hash=sha256,
+            file_type=file_type,
+            duration=duration,
+        )
+        db.session.add(pf)
+
+        # Радио-трек
+        if file_type == "audio" and current_app.config["SETTINGS"].radio_enabled:
+            if not RadioTrack.query.filter_by(original_hash=sha256).first():
+                track = RadioTrack(
+                    post_file_id=pf.id,
+                    artist="Unknown",
+                    title="Untitled",
+                    original_hash=sha256,
+                    duration=duration,
+                    approved=False,
+                    file_path=fn,
+                )
+                db.session.add(track)
+
+    # Обновляем bump
+    if not form.sage.data:
+        thread.bumped_at = datetime.now(timezone.utc)
+
+    # Полнотекстовый поиск
+    fts_entry = PostFTS(
+        post_id=post.id,
+        board_id=board.id,
+        thread_id=thread.id,
+        comment=post.comment,
+        subject=post.subject or "",
+        name=post.name,
+    )
+    db.session.add(fts_entry)
+
+    db.session.commit()
+
+    # Хук после создания — уведомления, аналитика, etc.
+    current_app.emit("posts.after_create", post=post, board=board, thread=thread)
+
+    return post
+
+
+def get_post(post_id):
+    """Возвращает пост по id, пропуская через хук posts.before_render."""
+    post = Post.query.get_or_404(post_id)
+    # Хук позволяет плагинам модифицировать пост перед отображением
+    current_app.emit("posts.before_render", post=post)
+    return post

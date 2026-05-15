@@ -1,0 +1,7 @@
+{
+  "name": "post_logger",
+  "version": "1.0.0",
+  "description": "Логирует новые посты в файл.",
+  "api_version": 1,
+  "priority": 50
+}
