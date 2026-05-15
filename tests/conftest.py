@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from app import create_app
@@ -7,6 +9,7 @@ from models import db as _db
 
 @pytest.fixture(scope="function")
 def app():
+    os.environ["DEEPCHAN_TESTING"] = "1"
     flask_app = create_app()
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     flask_app.config["TESTING"] = True

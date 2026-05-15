@@ -19,7 +19,7 @@ def create_app():
     app = Flask(__name__)
     Compress(app)
     app.config.from_object(Config)
-    if app.config.get("TESTING"):
+    if os.environ.get("DEEPCHAN_TESTING") == "1":
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     db.init_app(app)
     app.secret_key = app.config["SECRET_KEY"]
