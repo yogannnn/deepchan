@@ -4,7 +4,8 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from models import Board, Post, Thread
-from utils import generate_csrf_token, generate_tripcode
+from services.csrf import generate_csrf_token
+from services.tripcodes import generate_tripcode
 
 
 def test_admin_tripcode_shows_badge(client, app):

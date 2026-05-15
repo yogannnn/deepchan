@@ -19,12 +19,9 @@ from flask import (
 
 from core.i18n import t
 from models import RadioTrack, db
-from utils import (
-    convert_for_radio,
-    get_file_hash,
-    get_media_duration,
-    verify_csrf_token,
-)
+from services.csrf import verify_csrf_token
+from services.media import get_media_duration
+from services.radio import convert_for_radio, get_file_hash
 
 radio_bp = Blueprint("radio", __name__, url_prefix="")
 

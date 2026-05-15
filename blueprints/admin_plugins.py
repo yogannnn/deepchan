@@ -40,7 +40,7 @@ def csrf_protect(action):
     def decorator(f):
         from flask import abort, request
 
-        from utils import verify_csrf_token
+        from services.csrf import verify_csrf_token
 
         @wraps(f)
         def decorated(*args, **kwargs):

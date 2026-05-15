@@ -3,7 +3,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from utils import generate_captcha, generate_csrf_token, verify_csrf_token
+from services.captcha import generate_captcha
+from services.csrf import generate_csrf_token, verify_csrf_token
 
 
 def test_generate_captcha(app):

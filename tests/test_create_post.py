@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from models import Board, Post, Thread
-from utils import generate_csrf_token
+from services.csrf import generate_csrf_token
 
 
 def test_create_thread(client, app):

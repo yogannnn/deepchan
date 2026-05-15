@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from models import Board, Post, Thread  # 👈 а эти чудо-модели забыли
-from utils import generate_csrf_token
+from services.csrf import generate_csrf_token
 
 
 def test_open_thread_with_quote(client, app):

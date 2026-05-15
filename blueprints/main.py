@@ -9,10 +9,10 @@ from flask import (
     session,
     url_for,
 )
-from utils import generate_captcha
 
 from models import Board, Post, Thread, get_last_replies
 from services.boards import get_boards, get_visible_board_ids
+from services.captcha import generate_captcha
 
 main_bp = Blueprint("main", __name__)
 

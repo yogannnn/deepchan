@@ -23,7 +23,7 @@ from flask import render_template, request
 def inject_csrf_token(app):
     @app.context_processor
     def _inject():
-        from utils import generate_csrf_token
+        from services.csrf import generate_csrf_token
 
         def make_csrf_token(action):
             user_id = (

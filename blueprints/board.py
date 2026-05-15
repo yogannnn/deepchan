@@ -14,16 +14,6 @@ from flask import (
     session,
     url_for,
 )
-from utils import (
-    apply_word_filters,
-    check_ban,
-    check_rate_limit,
-    generate_tripcode,
-    get_file_hash,
-    get_media_duration,
-    process_comment,
-    save_files,
-)
 
 from core.i18n import t
 from forms import PostForm
@@ -42,6 +32,11 @@ from models import (
 )
 from services.boards import get_boards, get_visible_board_ids
 from services.captcha import generate_captcha, verify_captcha
+from services.media import get_media_duration, save_files
+from services.radio import get_file_hash
+from services.security import apply_word_filters, check_ban, check_rate_limit
+from services.text import process_comment
+from services.tripcodes import generate_tripcode
 
 board_bp = Blueprint("board", __name__, url_prefix="")
 
@@ -50,7 +45,8 @@ def csrf_protect(action):
     from functools import wraps
 
     from flask import abort, request
-    from utils import verify_csrf_token
+
+    from services.csrf import verify_csrf_token
 
     def decorator(f):
         @wraps(f)

@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from io import BytesIO
 from unittest.mock import patch
 
-from utils import generate_csrf_token
+from services.csrf import generate_csrf_token
 
 
 def test_upload_invalid_extension(client, app):
@@ -58,7 +58,7 @@ def test_upload_valid_image(client, app):
     assert "Пост с картинкой" in response.data.decode("utf-8")
 
 
-@patch("utils.get_media_duration", return_value=30.0)
+@patch("services.media.get_media_duration", return_value=30.0)
 def test_upload_valid_audio(mock_duration, client, app):
     """Загрузка MP3-заглушки должна создать пост и вернуть 200 (длительность мокирована)."""
     import io

@@ -12,7 +12,7 @@ from core.middleware import ParanoidMiddleware, check_board_closed, inject_csrf_
 from core.settings import Settings
 from migrate import run_migrations
 from models import Board, Post, PostFTS, RadioTrack, Setting, Thread, db
-from utils import process_comment
+from services.text import process_comment
 
 
 def create_app():
