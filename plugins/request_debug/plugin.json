@@ -1,0 +1,7 @@
+{
+  "name": "request_debug",
+  "version": "1.0.0",
+  "description": "Логирует все детали HTTP-запроса для отладки.",
+  "api_version": 1,
+  "priority": 1
+}
