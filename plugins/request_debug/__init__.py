@@ -5,20 +5,23 @@ from logging.handlers import RotatingFileHandler
 from flask import request
 
 LOG_FILE = "/opt/deepchan/logs/requests_debug.log"
+LOG_FULL_ENVIRON = True  # Поставь False, если нужно меньше данных
+LOG_REQUEST_DATA = True  # Поставь False для GET-запросов
 
 
 def init_app(app):
-    # Создаём отдельный логгер для этого плагина
     logger = logging.getLogger("request_debug")
     logger.setLevel(logging.INFO)
 
-    # Чтобы не дублировались записи при перезагрузке плагина
     if not logger.handlers:
         handler = RotatingFileHandler(LOG_FILE, maxBytes=1_000_000, backupCount=2)
         handler.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
         logger.addHandler(handler)
 
-    def debug_request(**kwargs):
+    logger.info("=== request_debug plugin loaded ===")
+
+    @app.before_request
+    def debug_request():
         info = {
             "method": request.method,
             "url": request.url,
@@ -33,6 +36,17 @@ def init_app(app):
             "is_secure": request.is_secure,
             "host": request.host,
         }
-        logger.info(f"\n{pprint.pformat(info)}")
 
-    app.on("http.before_request", debug_request)
+        if LOG_FULL_ENVIRON:
+            # Полное WSGI-окружение (может быть очень объёмным)
+            info["environ"] = dict(request.environ)
+
+        if LOG_REQUEST_DATA and request.method in ("POST", "PUT", "PATCH"):
+            try:
+                info["data"] = request.get_data(as_text=True)[
+                    :2000
+                ]  # первые 2000 символов
+            except Exception:
+                info["data"] = "<не удалось прочитать>"
+
+        logger.info(f"\n{pprint.pformat(info)}")

@@ -135,6 +135,11 @@ def create_app():
     # ======= MIDDLEWARE =======
     inject_csrf_token(app)
     check_board_closed(app)
+
+    @app.before_request
+    def _emit_http_before_request():
+        app.emit("http.before_request", request=request)
+
     app.wsgi_app = ParanoidMiddleware(app.wsgi_app)
 
     @app.route("/closed")
