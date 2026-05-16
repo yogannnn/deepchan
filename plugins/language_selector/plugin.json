@@ -1,7 +1,0 @@
-{
-  "name": "language_selector",
-  "version": "1.0.0",
-  "description": "Selects language based on identity.",
-  "api_version": 1,
-  "priority": 10
-}
