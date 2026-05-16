@@ -9,8 +9,21 @@ def init_app(app):
         identity = getattr(g, "identity", {})
         if identity and identity.get("id"):
             lang = get_preference(identity["id"], "language")
-            if lang and "SETTINGS" in current_app.config:
-                current_app.config["SETTINGS"]._cache["SITE_LANG"] = lang
+            if lang:
+                # Запоминаем оригинальную глобальную настройку и переопределяем её
+                g._original_site_lang = current_app.config.get("SITE_LANG", "ru")
+                current_app.config["SITE_LANG"] = lang
+                if "SETTINGS" in current_app.config:
+                    current_app.config["SETTINGS"]._cache["SITE_LANG"] = lang
+
+    @app.after_request
+    def restore_language(response):
+        original = g.pop("_original_site_lang", None)
+        if original is not None:
+            current_app.config["SITE_LANG"] = original
+            if "SETTINGS" in current_app.config:
+                current_app.config["SETTINGS"]._cache["SITE_LANG"] = original
+        return response
 
     def footer_widget(**kwargs):
         identity = getattr(g, "identity", {})
@@ -39,6 +52,8 @@ def init_app(app):
         if identity and identity.get("id"):
             lang = request.form.get("language", "ru")
             set_preference(identity["id"], "language", lang)
+            # Применяем сразу для текущего ответа (после редиректа сработает apply_language)
+            current_app.config["SITE_LANG"] = lang
             if "SETTINGS" in current_app.config:
                 current_app.config["SETTINGS"]._cache["SITE_LANG"] = lang
         return redirect(request.referrer or url_for("main.index"))
