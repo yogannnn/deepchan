@@ -10,7 +10,6 @@ def init_app(app):
         if identity and identity.get("id"):
             lang = get_preference(identity["id"], "language")
             if lang:
-                # Запоминаем оригинальную глобальную настройку и переопределяем её
                 g._original_site_lang = current_app.config.get("SITE_LANG", "ru")
                 current_app.config["SITE_LANG"] = lang
                 if "SETTINGS" in current_app.config:
@@ -33,13 +32,13 @@ def init_app(app):
         ru_sel = "selected" if lang == "ru" else ""
         en_sel = "selected" if lang == "en" else ""
         return (
-            '<div style="text-align: right; margin-top: 10px;">'
+            '<div style="text-align: right; margin-top: 20px;">'
             '<form method="post" action="/set-language" style="display: inline;">'
             f'<select name="language" style="width: auto; padding: 4px 8px;">'
             f'<option value="ru" {ru_sel}>RU</option>'
             f'<option value="en" {en_sel}>EN</option>'
             "</select> "
-            '<input type="submit" value="Сменить язык" style="padding: 4px 12px; width: auto;">'
+            '<input type="submit" value="→" style="padding: 4px 12px; width: auto;">'
             "</form>"
             "</div>"
         )
@@ -52,7 +51,6 @@ def init_app(app):
         if identity and identity.get("id"):
             lang = request.form.get("language", "ru")
             set_preference(identity["id"], "language", lang)
-            # Применяем сразу для текущего ответа (после редиректа сработает apply_language)
             current_app.config["SITE_LANG"] = lang
             if "SETTINGS" in current_app.config:
                 current_app.config["SETTINGS"]._cache["SITE_LANG"] = lang
