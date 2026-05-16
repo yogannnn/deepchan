@@ -17,10 +17,3 @@ def init_app(app):
             anon_id = None
             transport = "unknown"
         g.identity = {"id": anon_id, "transport": transport}
-
-    def footer_widget(**kwargs):
-        if g.identity and g.identity["id"]:
-            return f'<p style="color:#7ab37a; text-align:center; font-size:0.8rem;">I2P ID: {g.identity["id"]}</p>'
-        return ""
-
-    app.on("ui.footer_rendering", footer_widget)

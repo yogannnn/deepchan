@@ -20,13 +20,13 @@ def init_app(app):
         ru_sel = "selected" if lang == "ru" else ""
         en_sel = "selected" if lang == "en" else ""
         return (
-            '<div style="text-align:center; margin-top:10px;">'
+            '<div style="text-align: right; margin-top: 10px;">'
             '<form method="post" action="/set-language" style="display: inline;">'
-            f'<select name="language" onchange="this.form.submit()">'
+            f'<select name="language" style="width: auto; padding: 4px 8px;">'
             f'<option value="ru" {ru_sel}>RU</option>'
             f'<option value="en" {en_sel}>EN</option>'
-            "</select>"
-            '<noscript><input type="submit" value="Go"></noscript>'
+            "</select> "
+            '<input type="submit" value="Сменить язык" style="padding: 4px 12px; width: auto;">'
             "</form>"
             "</div>"
         )
