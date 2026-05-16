@@ -123,6 +123,7 @@ def create_app():
     from blueprints.admin import admin_bp
     from blueprints.admin_plugins import admin_plugins_bp
     from blueprints.board import board_bp
+    from blueprints.debug import debug_bp
     from blueprints.main import main_bp
     from blueprints.radio import radio_bp
 
@@ -130,6 +131,7 @@ def create_app():
     app.register_blueprint(board_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(admin_plugins_bp)
+    app.register_blueprint(debug_bp)
     app.register_blueprint(radio_bp)
 
     # ======= MIDDLEWARE =======

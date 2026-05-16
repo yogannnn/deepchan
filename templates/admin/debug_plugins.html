@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<h2>Отладка плагинов</h2>
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>Плагин</th>
+            <th>Версия</th>
+            <th>Приоритет</th>
+            <th>Загружен</th>
+            <th>Хуки</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in plugins %}
+        <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.version }}</td>
+            <td>{{ p.priority }}</td>
+            <td>{{ 'Да' if p.loaded else 'Нет' }}</td>
+            <td>{{ p.hooks | join(', ') or '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Нет загруженных плагинов.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

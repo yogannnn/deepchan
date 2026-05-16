@@ -123,6 +123,11 @@ def process_file(file, post, board, thread):
     current_app.emit(
         "media.before_process", file=file, post=post, board=board, thread=thread
     )
+    # Если хук отклонил файл, не сохраняем
+    from flask import g
+
+    if getattr(g, "aborted", False):
+        return []
     saved = save_files([file])
     if saved:
         current_app.emit(
