@@ -1,0 +1,7 @@
+{
+  "name": "i2p_identity",
+  "version": "1.0.0",
+  "description": "Provides lightweight I2P identity via X-I2P-DestB32 hash.",
+  "api_version": 1,
+  "priority": 1
+}
