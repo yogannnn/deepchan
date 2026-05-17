@@ -1,7 +1,7 @@
 import os
 from functools import wraps
 
-from flask import Blueprint, abort, current_app, g, redirect, request, url_for
+from flask import Blueprint, abort, current_app, flash, g, redirect, request, url_for
 
 from models import Ban, Board, Post, Thread, db
 from services.preferences import get_preference, set_preference
@@ -177,9 +177,6 @@ def init_app(app):
 
     app.on("admin.menu_rendering", menu_item)
 
-    # Кнопки рядом с тредами (на странице доски) – будут выводиться через шаблон, но здесь пример
-    # Оставим существующие хуки, но они требуют доработки шаблонов. Пока отключим, чтобы не ломать.
-    # Вместо этого можно просто показать админскую панель в подвале.
     def footer_widget(**kwargs):
         if not getattr(g, "is_admin", False):
             return ""
