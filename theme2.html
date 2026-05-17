@@ -1,0 +1,209 @@
+<!-- ========================= -->
+<!-- ТЕМА 2 — MODERN GLASS     -->
+<!-- clean / modern / mobile   -->
+<!-- ========================= -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>{{ board.name }}</title>
+
+<style>
+:root{
+    --bg:#10131a;
+    --card:#181d26cc;
+    --border:#2d3442;
+    --text:#e2e8f0;
+    --accent:#7c9cff;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle at top left,#1f2b4d 0,#10131a 40%);
+    color:var(--text);
+    font-family:Inter,sans-serif;
+    min-height:100vh;
+}
+
+.wrapper{
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.logo{
+    font-size:2rem;
+    font-weight:700;
+}
+
+.logo span{
+    color:var(--accent);
+}
+
+.post{
+    background:var(--card);
+    backdrop-filter:blur(10px);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:20px;
+    box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+
+.post-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:14px;
+}
+
+.author{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#2d3c63;
+}
+
+.name{
+    font-weight:600;
+}
+
+.trip{
+    color:#8ca8ff;
+    font-size:.9rem;
+}
+
+.meta{
+    color:#94a3b8;
+    font-size:.85rem;
+}
+
+.post-image img{
+    max-width:100%;
+    border-radius:12px;
+    margin-bottom:14px;
+}
+
+.post-text{
+    line-height:1.7;
+}
+
+.actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:14px;
+}
+
+.actions button{
+    border:none;
+    background:#232c3b;
+    color:white;
+    border-radius:10px;
+    padding:8px 12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.actions button:hover{
+    transform:translateY(-1px);
+    background:#31405c;
+}
+
+.reply-link{
+    color:var(--accent);
+    text-decoration:none;
+}
+
+@media (max-width:700px){
+
+    .post-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="topbar">
+    <div class="logo">
+        hidden<span>chan</span>
+    </div>
+
+    <div>
+        /{{ board.slug }}/
+    </div>
+</div>
+
+{% for post in posts %}
+<div class="post">
+
+    <div class="post-header">
+
+        <div class="author">
+            <div class="avatar"></div>
+
+            <div>
+                <div class="name">{{ post.name }}</div>
+                <div class="trip">{{ post.tripcode }}</div>
+            </div>
+        </div>
+
+        <div class="meta">
+            {{ post.created_at }}
+            ·
+            <a class="reply-link" href="?reply={{ post.id }}">
+                №{{ post.id }}
+            </a>
+        </div>
+
+    </div>
+
+    {% if post.image %}
+    <div class="post-image">
+        <img src="{{ post.image }}">
+    </div>
+    {% endif %}
+
+    <div class="post-text">
+        {{ post.text }}
+    </div>
+
+    {% if admin_mode %}
+    <div class="actions">
+        <button>👻 Shadow</button>
+        <button>🗑 Delete</button>
+    </div>
+    {% endif %}
+
+</div>
+{% endfor %}
+
+</div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!-- ========================= -->
+<!-- ТЕМА 1 — RETRO TERMINAL   -->
+<!-- oldschool / i2p style    -->
+<!-- ========================= -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>{{ board.name }}</title>
+
+<style>
+:root{
+    --bg:#050805;
+    --panel:#0d140d;
+    --border:#1e3b1e;
+    --text:#b3ffb3;
+    --green:#66ff66;
+    --green2:#33cc33;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Verdana,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:15px;
+}
+
+header{
+    border-bottom:1px solid var(--border);
+    margin-bottom:20px;
+    padding-bottom:10px;
+}
+
+.logo{
+    color:var(--green);
+    font-size:2rem;
+}
+
+.board-desc{
+    color:#7ab37a;
+}
+
+.post{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:16px;
+}
+
+.post-header{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:10px;
+    border-bottom:1px dashed var(--border);
+    padding-bottom:8px;
+}
+
+.name{
+    color:var(--green2);
+    font-weight:bold;
+}
+
+.trip{
+    color:#8cff8c;
+}
+
+.post-id a{
+    color:var(--green);
+}
+
+blockquote{
+    margin:0;
+    white-space:pre-wrap;
+}
+
+img{
+    max-width:250px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    margin-bottom:10px;
+}
+
+.quick-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:6px;
+    margin-top:10px;
+}
+
+.quick-actions button{
+    background:#132013;
+    color:#8cff8c;
+    border:1px solid #2f5a2f;
+    border-radius:6px;
+    padding:5px 10px;
+    cursor:pointer;
+}
+
+.quick-actions button:hover{
+    background:#1d331d;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div class="logo">hiddenchan.i2p</div>
+    <div class="board-desc">
+        /{{ board.slug }}/ — {{ board.description }}
+    </div>
+</header>
+
+{% for post in posts %}
+<div class="post">
+
+    <div class="post-header">
+        <span class="name">{{ post.name }}</span>
+        <span class="trip">{{ post.tripcode }}</span>
+        <span>{{ post.created_at }}</span>
+        <span class="post-id">
+            <a href="?reply={{ post.id }}">№{{ post.id }}</a>
+        </span>
+    </div>
+
+    {% if post.image %}
+    <img src="{{ post.image }}">
+    {% endif %}
+
+    <blockquote>{{ post.text }}</blockquote>
+
+    {% if admin_mode %}
+    <div class="quick-actions">
+        <button>👻</button>
+        <button>🗑️</button>
+    </div>
+    {% endif %}
+
+</div>
+{% endfor %}
+
+</div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>DeepChan Modern</title>
+
+<style>
+:root{
+    --bg:#0b0f14;
+    --card:#121922;
+    --border:#1f2c3a;
+    --text:#d6e2f0;
+    --muted:#7e8b9c;
+    --accent:#59ffa1;
+    --danger:#ff5f7a;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Inter,Segoe UI,Verdana,sans-serif;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    backdrop-filter:blur(12px);
+    background:rgba(10,15,20,.85);
+    border-bottom:1px solid var(--border);
+    padding:14px 24px;
+    z-index:10;
+}
+
+.topbar-inner{
+    max-width:1400px;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--accent);
+}
+
+.nav{
+    display:flex;
+    gap:18px;
+}
+
+.nav a{
+    color:var(--muted);
+    text-decoration:none;
+}
+
+.nav a:hover{
+    color:var(--accent);
+}
+
+.layout{
+    max-width:1400px;
+    margin:30px auto;
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:24px;
+    padding:0 24px;
+}
+
+.sidebar{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    height:fit-content;
+}
+
+.sidebar h3{
+    margin-top:0;
+    color:var(--accent);
+}
+
+.board-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.board-list a{
+    text-decoration:none;
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:10px;
+    transition:.15s;
+}
+
+.board-list a:hover{
+    background:#17212c;
+}
+
+.content{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.thread{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.thread-header{
+    padding:18px 22px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.thread-title{
+    font-size:1.1rem;
+    color:var(--accent);
+}
+
+.post{
+    padding:22px;
+    border-bottom:1px solid #17212c;
+}
+
+.post:last-child{
+    border-bottom:none;
+}
+
+.post-meta{
+    display:flex;
+    gap:14px;
+    margin-bottom:14px;
+    color:var(--muted);
+    font-size:.9rem;
+}
+
+.post-text{
+    line-height:1.7;
+}
+
+.post-actions{
+    margin-top:16px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+.action-btn{
+    background:#17212c;
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:10px;
+    padding:8px 12px;
+    cursor:pointer;
+}
+
+.action-btn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+}
+
+.danger:hover{
+    border-color:var(--danger);
+    color:var(--danger);
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="logo">DeepChan</div>
+
+        <nav class="nav">
+            <a href="#">Главная</a>
+            <a href="#">Каталог</a>
+            <a href="#">Поиск</a>
+            <a href="#">RSS</a>
+        </nav>
+    </div>
+</header>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <h3>Доски</h3>
+
+        <div class="board-list">
+            <a href="#">/i2p/ — Сети</a>
+            <a href="#">/tech/ — Технологии</a>
+            <a href="#">/b/ — Бред</a>
+            <a href="#">/dev/ — Разработка</a>
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <section class="thread">
+
+            <div class="thread-header">
+                <div class="thread-title">
+                    hiddenchan.i2p
+                </div>
+
+                <div style="color:var(--muted)">
+                    23 ответа
+                </div>
+            </div>
+
+            <article class="post">
+
+                <div class="post-meta">
+                    <span style="color:var(--accent)">Аноним</span>
+                    <span>17.05.26 14:01</span>
+                    <span>#1337</span>
+                </div>
+
+                <div class="post-text">
+                    Смотрю на современные борды и понимаю,
+                    насколько многие движки застряли в 2012 году.
+                </div>
+
+                <div class="post-actions">
+                    <button class="action-btn">Ответ</button>
+                    <button class="action-btn">👻</button>
+                    <button class="action-btn danger">🗑</button>
+                </div>
+
+            </article>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>
