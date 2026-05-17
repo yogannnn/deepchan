@@ -107,7 +107,6 @@ def toggle_lock(thread_id):
 @admin_bp.route("/mark-admin", methods=["POST"])
 @csrf_protect("mark_admin")
 def mark_admin():
-    """Сохраняет текущий identity как админский."""
     identity = getattr(g, "identity", {})
     if not identity or not identity.get("id"):
         flash("Не удалось определить identity. Вы используете I2P?", "error")
@@ -120,7 +119,6 @@ def mark_admin():
 @admin_bp.route("/unmark-admin", methods=["POST"])
 @csrf_protect("unmark_admin")
 def unmark_admin():
-    """Убирает админскую метку с текущего identity."""
     identity = getattr(g, "identity", {})
     if identity and identity.get("id"):
         set_preference(identity["id"], "is_admin", "false")
@@ -141,7 +139,7 @@ def init_app(app):
             except Exception:
                 pass
 
-    # Кнопка в меню админки (с правильными токенами для каждого действия)
+    # Кнопка в меню админки
     def menu_item(**kwargs):
         identity = getattr(g, "identity", {})
         if identity and identity.get("id"):
@@ -179,11 +177,8 @@ def init_app(app):
     app.on("admin.menu_rendering", menu_item)
 
     # Кнопки рядом с тредами (на странице доски)
-    def thread_actions_widget(**kwargs):
+    def thread_actions_widget(thread, **kwargs):
         if not getattr(g, "is_admin", False):
-            return ""
-        thread = kwargs.get("thread")
-        if not thread:
             return ""
         from services.csrf import generate_csrf_token
 
@@ -203,14 +198,11 @@ def init_app(app):
             "</form>"
         )
 
-    app.on("thread.opening", thread_actions_widget)
+    app.on("thread.actions", thread_actions_widget)
 
     # Кнопки рядом с постами (на странице треда)
-    def post_actions_widget(**kwargs):
+    def post_actions_widget(post, **kwargs):
         if not getattr(g, "is_admin", False):
-            return ""
-        post = kwargs.get("post")
-        if not post:
             return ""
         from services.csrf import generate_csrf_token
 
@@ -237,7 +229,7 @@ def init_app(app):
             "</form>"
         )
 
-    app.on("posts.before_render", post_actions_widget)
+    app.on("post.actions", post_actions_widget)
 
     def footer_widget(**kwargs):
         if not getattr(g, "is_admin", False):

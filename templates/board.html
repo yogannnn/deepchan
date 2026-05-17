@@ -75,7 +75,7 @@
             </div>
         </div>
         <div class="thread-actions">
-            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("board.hide") }}</a>
+            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("board.hide") }}</a> {% for widget in emit("thread.actions", thread=thread) %}{{ widget|safe }}{% endfor %}
         </div>
     </div>
     <hr>
