@@ -176,7 +176,7 @@ def init_app(app):
 
     app.on("admin.menu_rendering", menu_item)
 
-    # Кнопки рядом с тредами (минималистичные, под постом)
+    # Кнопки рядом с тредами (flex-контейнер)
     def thread_actions_widget(thread, **kwargs):
         if not getattr(g, "is_admin", False):
             return ""
@@ -186,21 +186,23 @@ def init_app(app):
             "admin_quick", "thread_actions", current_app.config["SECRET_KEY"]
         )
         return (
-            f'<form method="post" action="/admin-quick/delete-thread/{thread.id}" style="display:inline;">'
+            '<div class="thread-actions">'
+            f'<form method="post" action="/admin-quick/delete-thread/{thread.id}">'
             f'<input type="hidden" name="csrf_token" value="{token}">'
             f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
-            '<button type="submit" class="action-icon" title="Удалить тред">🗑️</button>'
-            "</form> "
-            f'<form method="post" action="/admin-quick/toggle-lock/{thread.id}" style="display:inline;">'
-            f'<input type="hidden" name="csrf_token" value="{token}">'
-            f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
-            '<button type="submit" class="action-icon" title="Закрыть/открыть">🔒</button>'
+            '<button type="submit" class="quick-action-icon" title="Удалить тред">🗑️</button>'
             "</form>"
+            f'<form method="post" action="/admin-quick/toggle-lock/{thread.id}">'
+            f'<input type="hidden" name="csrf_token" value="{token}">'
+            f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
+            '<button type="submit" class="quick-action-icon" title="Закрыть/открыть">🔒</button>'
+            "</form>"
+            "</div>"
         )
 
     app.on("thread.actions", thread_actions_widget)
 
-    # Кнопки рядом с постами (минималистичные, под постом)
+    # Кнопки рядом с постами (flex-контейнер)
     def post_actions_widget(post, **kwargs):
         if not getattr(g, "is_admin", False):
             return ""
@@ -215,20 +217,20 @@ def init_app(app):
         parts = []
         if target_hash:
             parts.append(
-                f'<form method="post" action="/admin-quick/shadow-ban/{target_hash}" style="display:inline;">'
+                f'<form method="post" action="/admin-quick/shadow-ban/{target_hash}">'
                 f'<input type="hidden" name="csrf_token" value="{token}">'
                 f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
-                '<button type="submit" class="action-icon" title="Теневой бан">👻</button>'
-                "</form> "
+                '<button type="submit" class="quick-action-icon" title="Теневой бан">👻</button>'
+                "</form>"
             )
         parts.append(
-            f'<form method="post" action="/admin-quick/delete-post/{post.id}" style="display:inline;">'
+            f'<form method="post" action="/admin-quick/delete-post/{post.id}">'
             f'<input type="hidden" name="csrf_token" value="{token}">'
             f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
-            '<button type="submit" class="action-icon" title="Удалить пост">🗑️</button>'
+            '<button type="submit" class="quick-action-icon" title="Удалить пост">🗑️</button>'
             "</form>"
         )
-        return "".join(parts)
+        return '<div class="post-actions">' + "".join(parts) + "</div>"
 
     app.on("post.actions", post_actions_widget)
 
