@@ -176,7 +176,7 @@ def init_app(app):
 
     app.on("admin.menu_rendering", menu_item)
 
-    # Кнопки рядом с тредами (на странице доски)
+    # Кнопки рядом с тредами
     def thread_actions_widget(thread, **kwargs):
         if not getattr(g, "is_admin", False):
             return ""
@@ -200,7 +200,7 @@ def init_app(app):
 
     app.on("thread.actions", thread_actions_widget)
 
-    # Кнопки рядом с постами (на странице треда)
+    # Кнопки рядом с постами
     def post_actions_widget(post, **kwargs):
         if not getattr(g, "is_admin", False):
             return ""
@@ -210,24 +210,23 @@ def init_app(app):
             "admin_quick", "post_actions", current_app.config["SECRET_KEY"]
         )
 
-        shadow_btn = ""
+        parts = []
         if post.identity_hash:
-            shadow_btn = (
+            parts.append(
                 f'<form method="post" action="/admin-quick/shadow-ban/{post.identity_hash}" style="display:inline;">'
                 f'<input type="hidden" name="csrf_token" value="{token}">'
                 f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
                 '<button type="submit" class="action-icon" title="Теневой бан">👻</button>'
                 "</form>"
             )
-
-        return (
-            shadow_btn
-            + f'<form method="post" action="/admin-quick/delete-post/{post.id}" style="display:inline;">'
+        parts.append(
+            f'<form method="post" action="/admin-quick/delete-post/{post.id}" style="display:inline;">'
             f'<input type="hidden" name="csrf_token" value="{token}">'
             f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
             '<button type="submit" class="action-icon" title="Удалить пост">🗑️</button>'
             "</form>"
         )
+        return "".join(parts)
 
     app.on("post.actions", post_actions_widget)
 
