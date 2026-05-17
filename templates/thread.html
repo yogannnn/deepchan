@@ -62,7 +62,7 @@
         <span class="datetime">{{ post.created_at.strftime('%d.%m.%y %H:%M') }}</span>
         {% if post.subject %}<span class="subject">{{ post.subject|e }}</span>{% endif %}
         {% if post.sage %}<span class="sage">SAGE</span>{% endif %}
-        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a> <a href="{{ url_for('board.report_post', board_name=board.short_name, post_id=post.id) }}" class="report-link" title="Пожаловаться">⚠️</a></span> {% for widget in emit("post.actions", post=post) %}{{ widget|safe }}{% endfor %}
+        <span class="post-id"><a href="?reply={{ post.id }}">№{{ post.id }}</a> <a href="{{ url_for('board.report_post', board_name=board.short_name, post_id=post.id) }}" class="report-link" title="Пожаловаться">⚠️</a></span>
 
         {% if post.password_hash %}
         <div class="post-delete">
@@ -100,6 +100,7 @@
     {% endfor %}
 
     <blockquote>{{ post.comment | process_comment(board.short_name, thread.id) | safe }}</blockquote>
+    <div style="text-align: right; margin-top: 4px;">{% for widget in emit("post.actions", post=post) %}{{ widget|safe }}{% endfor %}</div>
 </div>
 <hr>
 {% endfor %}
