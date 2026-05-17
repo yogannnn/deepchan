@@ -56,16 +56,22 @@ def init_app(app):
             }
         return {}
 
-    # Виджет в подвале — показывает транспорт и короткий хеш
+    # Отладочный виджет в подвале — показывает транспорт, ID, IP и ключевые заголовки
     def footer_widget(**kwargs):
         ident = g.get("identity")
         if not ident:
             return ""
         transport = ident.get("transport", "unknown")
         short_id = ident.get("id", "?")[:12] if ident.get("id") else "?"
+        ip = request.remote_addr or "нет"
+        host = request.headers.get("Host", "?")
+        i2p = request.headers.get("X-I2P-DestB32", "нет")
+        ua = request.headers.get("User-Agent", "?")[:40]
         return (
-            f'<p style="color:#7ab37a; text-align:center; font-size:0.8rem;">'
-            f"Transport: {transport} | ID: {short_id}</p>"
+            f'<p style="color:#7ab37a; text-align:center; font-size:0.75rem;">'
+            f"Transport: {transport} | ID: {short_id}<br>"
+            f"IP: {ip} | Host: {host}<br>"
+            f"I2P: {i2p} | UA: {ua}</p>"
         )
 
     app.on("ui.footer_rendering", footer_widget)
