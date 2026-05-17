@@ -35,7 +35,7 @@ def init_app(app):
         if g.identity.get("transport") == "tor":
             g.trust_score_override = 0
 
-    # Отладочный виджет в подвале
+    # Компактный виджет в подвале (только транспорт и ID)
     def footer_widget(**kwargs):
         ident = g.get("identity")
         if not ident:
@@ -43,26 +43,20 @@ def init_app(app):
 
         transport = ident.get("transport", "unknown")
         short_id = ident.get("id", "?")[:12] if ident.get("id") else "?"
-        ip = request.remote_addr or "нет"
-        host = request.headers.get("Host", "?")
-        i2p = request.headers.get("X-I2P-DestB32", "нет")
-        ua = request.headers.get("User-Agent", "?")[:40]
 
-        lines = [
-            f'<p style="color:#7ab37a; text-align:center; font-size:0.75rem;">'
-            f"Transport: {transport} | ID: {short_id}<br>"
-            f"IP: {ip} | Host: {host}<br>"
-            f"I2P: {i2p} | UA: {ua}</p>"
-        ]
-
-        # Дополнительный вывод всех заголовков, если передан ?debug_headers=1
+        # Если передан ?debug_headers=1, добавляем подробности
         if request.args.get("debug_headers") == "1":
-            headers_html = "<br>".join(f"{k}: {v}" for k, v in request.headers.items())
-            lines.append(
-                f'<p style="color:#7ab37a; text-align:center; font-size:0.65rem;">'
-                f"All headers:<br>{headers_html}</p>"
-            )
+            ip = request.remote_addr or "нет"
+            host = request.headers.get("Host", "?")
+            i2p = request.headers.get("X-I2P-DestB32", "нет")
+            ua = request.headers.get("User-Agent", "?")[:40]
+            details = f"<br>IP: {ip} | Host: {host}<br>I2P: {i2p} | UA: {ua}"
+        else:
+            details = ""
 
-        return "".join(lines)
+        return (
+            f'<p style="color:#7ab37a; text-align:center; font-size:0.75rem;">'
+            f"Transport: {transport} | ID: {short_id}{details}</p>"
+        )
 
     app.on("ui.footer_rendering", footer_widget)
