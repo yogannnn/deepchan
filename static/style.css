@@ -727,13 +727,6 @@ textarea {
     box-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
 }
 
-/* Быстрые админские кнопки (плагин admin_quick_actions) */
-.post-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
-}
 
 .post-actions form {
     margin: 0;
@@ -758,4 +751,42 @@ textarea {
     transform: translateY(-1px);
     border-color: #4cff4c;
     box-shadow: 0 0 12px rgba(0,255,0,0.35);
+}
+
+/* Быстрые админские кнопки (изоляция от глобальных стилей) */
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.post-actions form {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+}
+
+.quick-action-icon {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px;
+    font-size: 22px;
+    line-height: 1;
+    background: #102010 !important;
+    border: 1px solid #2a6e2a !important;
+}
+
+.quick-action-icon:hover {
+    transform: translateY(-1px);
+    border-color: #4cff4c;
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
 }
