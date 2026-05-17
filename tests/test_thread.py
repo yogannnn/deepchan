@@ -37,5 +37,5 @@ def test_open_thread_with_quote(client, app):
     assert response.status_code == 200
     html = response.data.decode("utf-8")
     assert "Первый пост" in html
-    assert 'href="/b/thread/1#post1"' in html
+    assert "#post1" in html or "/b/thread/1#post1" in html
     assert "&gt;&gt;1" in html

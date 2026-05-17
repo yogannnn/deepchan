@@ -9,34 +9,32 @@ from services.preferences import get_preference
 def init_app(app):
     @app.before_request
     def build_identity():
-        # 1. Определяем транспорт и получаем идентификатор
-        raw = request.headers.get("X-I2P-DestB32") or request.headers.get(
+        raw_i2p = request.headers.get("X-I2P-DestB32") or request.headers.get(
             "X-I2P-DestHash"
         )
-        if raw:
-            # I2P
+        host = request.headers.get("Host", "").lower()
+
+        # 1. I2P
+        if raw_i2p:
             secret = current_app.config.get("SECRET_KEY", "default-secret")
-            anon_id = hashlib.sha256(f"{raw}{secret}".encode()).hexdigest()[:16]
+            anon_id = hashlib.sha256(f"{raw_i2p}{secret}".encode()).hexdigest()[:16]
             g.identity = {"id": anon_id, "transport": "i2p"}
-        elif (
-            request.remote_addr in ("127.0.0.1", "::1", "localhost", None)
-            or not request.remote_addr
-        ):
-            # Tor или I2P без заголовков — считаем Tor
+        # 2. Tor: определяем только по onion-хосту
+        elif host.endswith(".onion") or (".onion:" in host):
             session_id = request.args.get("sesid") or request.form.get("sesid")
             if not session_id:
                 session_id = secrets.token_hex(16)
             g.identity = {"id": session_id, "transport": "tor"}
             g._sesid = session_id
+        # 3. Клирнет
         else:
-            # Клирнет — хешируем IP
             secret = current_app.config.get("SECRET_KEY", "default-secret")
             anon_id = hashlib.sha256(
                 f"{request.remote_addr}{secret}".encode()
             ).hexdigest()[:16]
             g.identity = {"id": anon_id, "transport": "clearnet"}
 
-        # 2. Для Tor всегда минимальный trust_score
+        # Для Tor всегда минимальный trust_score
         if g.identity.get("transport") == "tor":
             g.trust_score_override = 0
 
@@ -56,7 +54,7 @@ def init_app(app):
             }
         return {}
 
-    # Отладочный виджет в подвале — показывает транспорт, ID, IP и ключевые заголовки
+    # Отладочный виджет в подвале
     def footer_widget(**kwargs):
         ident = g.get("identity")
         if not ident:
