@@ -176,7 +176,7 @@ def init_app(app):
 
     app.on("admin.menu_rendering", menu_item)
 
-    # Кнопки рядом с тредами (без громоздких форм)
+    # Кнопки рядом с тредами (минималистичные)
     def thread_actions_widget(thread, **kwargs):
         if not getattr(g, "is_admin", False):
             return ""
@@ -200,7 +200,7 @@ def init_app(app):
 
     app.on("thread.actions", thread_actions_widget)
 
-    # Кнопки рядом с постами (с иконками, без громоздких блоков)
+    # Кнопки рядом с постами (минималистичные)
     def post_actions_widget(post, **kwargs):
         if not getattr(g, "is_admin", False):
             return ""
@@ -210,7 +210,6 @@ def init_app(app):
             "admin_quick", "post_actions", current_app.config["SECRET_KEY"]
         )
 
-        # Для старых постов без identity_hash используем IP как fallback
         target_hash = post.identity_hash or post.ip_address
 
         parts = []
