@@ -1,6 +1,7 @@
 import hashlib
+import secrets
 
-from flask import current_app, g, request
+from flask import current_app, g, make_response, request
 
 
 def init_app(app):
@@ -17,23 +18,45 @@ def init_app(app):
         if raw_i2p:
             anon_id = hashlib.sha256(f"{raw_i2p}{secret}".encode()).hexdigest()[:16]
             g.identity = {"id": anon_id, "transport": "i2p"}
-        # 2. Tor: определяем по onion-хосту и формируем хеш из UA + Accept-Language
-        elif host.endswith(".onion") or (".onion:" in host):
-            ua = request.headers.get("User-Agent", "unknown")
-            al = request.headers.get("Accept-Language", "unknown")
-            raw = f"{ua}{al}"
-            anon_id = hashlib.sha256(f"{raw}{secret}".encode()).hexdigest()[:16]
-            g.identity = {"id": anon_id, "transport": "tor"}
-        # 3. Клирнет
-        else:
-            anon_id = hashlib.sha256(
-                f"{request.remote_addr}{secret}".encode()
-            ).hexdigest()[:16]
-            g.identity = {"id": anon_id, "transport": "clearnet"}
+            return
 
-        # Для Tor всегда минимальный trust_score
-        if g.identity.get("transport") == "tor":
+        # 2. Tor: определяем по onion-хосту
+        if host.endswith(".onion") or (".onion:" in host):
+            # Сначала пробуем взять ID из куки
+            cookie_id = request.cookies.get("deepchan_tor_id")
+            if cookie_id:
+                g.identity = {"id": cookie_id, "transport": "tor"}
+                g.tor_use_cookie = True  # флаг, что кука уже есть
+            else:
+                # Куки нет – генерируем новый токен и запомним, что нужно поставить куку
+                new_id = secrets.token_hex(16)
+                g.identity = {"id": new_id, "transport": "tor"}
+                g.tor_set_cookie = new_id  # флаг для after_request
+            # Fallback: если куки отключены, cookie_id будет None, и мы бы пошли в else,
+            # но там всё равно генерируется новый токен, который будет жить до конца запроса.
+            # Дополнительный fallback на заголовки не нужен, потому что новый токен и так стабилен в рамках сессии.
             g.trust_score_override = 0
+            return
+
+        # 3. Клирнет
+        anon_id = hashlib.sha256(f"{request.remote_addr}{secret}".encode()).hexdigest()[
+            :16
+        ]
+        g.identity = {"id": anon_id, "transport": "clearnet"}
+
+    @app.after_request
+    def set_tor_cookie(response):
+        new_id = getattr(g, "tor_set_cookie", None)
+        if new_id:
+            response.set_cookie(
+                "deepchan_tor_id",
+                value=new_id,
+                path="/",
+                httponly=True,
+                samesite="Lax",
+                secure=False,  # для I2P/Tor обычно HTTP, поэтому False
+            )
+        return response
 
     # Компактный виджет в подвале (только транспорт и ID)
     def footer_widget(**kwargs):
