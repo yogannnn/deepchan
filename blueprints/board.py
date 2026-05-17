@@ -163,7 +163,7 @@ def create_post(board_name):
     form = PostForm()
 
     check_rate_limit()
-    check_ban(request.remote_addr)
+    check_ban()
 
     if current_app.config["SETTINGS"].captcha_enabled:
         captcha_answer = request.form.get("captcha_answer", "")

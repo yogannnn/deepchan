@@ -1,0 +1,8 @@
+{
+  "name": "admin_quick_actions",
+  "version": "1.0.0",
+  "description": "Быстрые админские кнопки на страницах (включая теневой бан).",
+  "api_version": 1,
+  "priority": 1,
+  "admin_identities": []
+}

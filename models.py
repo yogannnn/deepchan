@@ -42,6 +42,7 @@ class Post(db.Model):
     tripcode = db.Column(db.String(32))
     is_admin_post = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45))
+    identity_hash = db.Column(db.String(64))
     search_text = db.Column(db.Text)
     files = db.relationship(
         "PostFile", backref="post", lazy="dynamic", cascade="all, delete-orphan"
@@ -73,6 +74,7 @@ class PostFTS(db.Model):
 class Ban(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip_pattern = db.Column(db.String(45), nullable=False)
+    identity_hash = db.Column(db.String(64))
     reason = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, nullable=True)
@@ -128,6 +130,7 @@ class Report(db.Model):
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved = db.Column(db.Boolean, default=False)
+    identity_hash = db.Column(db.String(64))
     post = db.relationship("Post", backref=db.backref("reports", lazy="dynamic"))
 
 

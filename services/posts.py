@@ -5,7 +5,7 @@
 import html
 from datetime import datetime, timezone
 
-from flask import abort, current_app
+from flask import abort, current_app, g
 
 from models import Board, Post, PostFile, PostFTS, RadioTrack, Thread, db, hash_password
 from services.media import process_file, save_files
@@ -25,8 +25,14 @@ def create_post(board, thread, form, files_data, ip_address):
         thread=thread,
         form=form,
         ip_address=ip_address,
+        identity_hash=getattr(g, "identity", {}).get("id")
+        if hasattr(g, "identity")
+        else None,
     )
 
+    # Если плагин установил g.captcha_required (например, identity-based), принудительно включаем капчу
+    if getattr(g, "captcha_required", False):
+        current_app.config["SETTINGS"]._cache["CAPTCHA_ENABLED"] = True
     # Применяем фильтры
     filtered_comment = apply_word_filters(form.comment.data)
     filtered_subject = (
@@ -66,6 +72,9 @@ def create_post(board, thread, form, files_data, ip_address):
             hash_password(form.password.data) if form.password.data else None
         ),
         ip_address=ip_address,
+        identity_hash=getattr(g, "identity", {}).get("id")
+        if hasattr(g, "identity")
+        else None,
     )
     post.search_text = (post.comment + " " + (post.subject or "")).lower()
     db.session.add(post)

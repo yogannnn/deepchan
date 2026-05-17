@@ -2,7 +2,7 @@ import re
 import time
 from datetime import datetime, timezone
 
-from flask import abort, current_app, request
+from flask import abort, current_app, g, request
 
 from core.i18n import t
 from models import Ban, WordFilter
@@ -11,7 +11,11 @@ _last_post_time = {}
 
 
 def check_rate_limit():
-    ip = request.remote_addr
+    # Используем identity_hash из g.identity, если есть, иначе IP
+    from flask import g
+
+    identity = getattr(g, "identity", None)
+    ip = identity.get("id") if identity and identity.get("id") else request.remote_addr
     now = time.time()
     if ip in _last_post_time:
         elapsed = now - _last_post_time[ip]
@@ -21,7 +25,16 @@ def check_rate_limit():
     _last_post_time[ip] = now
 
 
-def check_ban(ip):
+def check_ban(ip=None):
+    from flask import g
+
+    if ip is None:
+        identity = getattr(g, "identity", None)
+        ip = (
+            identity.get("id")
+            if identity and identity.get("id")
+            else request.remote_addr
+        )
     now = datetime.now(timezone.utc)
     ban = Ban.query.filter(
         Ban.ip_pattern == ip,

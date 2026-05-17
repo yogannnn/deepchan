@@ -1,0 +1,7 @@
+{
+  "name": "shadow_ban",
+  "version": "1.0.0",
+  "description": "Скрывает посты забаненных identity от всех, кроме автора.",
+  "api_version": 1,
+  "priority": 5
+}

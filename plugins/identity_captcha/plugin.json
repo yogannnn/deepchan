@@ -1,0 +1,7 @@
+{
+  "name": "identity_captcha",
+  "version": "1.0.0",
+  "description": "Включает капчу для пользователей с низким trust_score.",
+  "api_version": 1,
+  "priority": 5
+}
