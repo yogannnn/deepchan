@@ -141,7 +141,7 @@ def init_app(app):
             except Exception:
                 pass
 
-    # Кнопка "админ на месте" в меню админки
+    # Кнопка в меню админки (с правильными токенами для каждого действия)
     def menu_item(**kwargs):
         identity = getattr(g, "identity", {})
         if identity and identity.get("id"):
@@ -150,14 +150,12 @@ def init_app(app):
             except Exception:
                 return ""
 
-            # Генерируем CSRF-токен
             from services.csrf import generate_csrf_token
 
-            token, ts = generate_csrf_token(
-                "admin_quick", "mark_admin", current_app.config["SECRET_KEY"]
-            )
-
             if is_admin_marked:
+                token, ts = generate_csrf_token(
+                    "admin_quick", "unmark_admin", current_app.config["SECRET_KEY"]
+                )
                 return (
                     '<form method="post" action="/admin-quick/unmark-admin" style="display:inline;">'
                     f'<input type="hidden" name="csrf_token" value="{token}">'
@@ -166,6 +164,9 @@ def init_app(app):
                     "</form> |"
                 )
             else:
+                token, ts = generate_csrf_token(
+                    "admin_quick", "mark_admin", current_app.config["SECRET_KEY"]
+                )
                 return (
                     '<form method="post" action="/admin-quick/mark-admin" style="display:inline;">'
                     f'<input type="hidden" name="csrf_token" value="{token}">'
@@ -176,6 +177,67 @@ def init_app(app):
         return ""
 
     app.on("admin.menu_rendering", menu_item)
+
+    # Кнопки рядом с тредами (на странице доски)
+    def thread_actions_widget(**kwargs):
+        if not getattr(g, "is_admin", False):
+            return ""
+        thread = kwargs.get("thread")
+        if not thread:
+            return ""
+        from services.csrf import generate_csrf_token
+
+        token, ts = generate_csrf_token(
+            "admin_quick", "thread_actions", current_app.config["SECRET_KEY"]
+        )
+        return (
+            f'<form method="post" action="/admin-quick/delete-thread/{thread.id}" style="display:inline;">'
+            f'<input type="hidden" name="csrf_token" value="{token}">'
+            f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
+            '<button type="submit" class="action-icon" title="Удалить тред">🗑️</button>'
+            "</form>"
+            f'<form method="post" action="/admin-quick/toggle-lock/{thread.id}" style="display:inline;">'
+            f'<input type="hidden" name="csrf_token" value="{token}">'
+            f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
+            '<button type="submit" class="action-icon" title="Закрыть/открыть">🔒</button>'
+            "</form>"
+        )
+
+    app.on("thread.opening", thread_actions_widget)
+
+    # Кнопки рядом с постами (на странице треда)
+    def post_actions_widget(**kwargs):
+        if not getattr(g, "is_admin", False):
+            return ""
+        post = kwargs.get("post")
+        if not post:
+            return ""
+        from services.csrf import generate_csrf_token
+
+        token, ts = generate_csrf_token(
+            "admin_quick", "post_actions", current_app.config["SECRET_KEY"]
+        )
+
+        shadow_btn = ""
+        if post.identity_hash:
+            shadow_btn = (
+                f'<form method="post" action="/admin-quick/shadow-ban/{post.identity_hash}" style="display:inline;">'
+                f'<input type="hidden" name="csrf_token" value="{token}">'
+                f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
+                '<button type="submit" class="action-icon" title="Теневой бан">👻</button>'
+                "</form>"
+            )
+
+        return (
+            shadow_btn
+            + f'<form method="post" action="/admin-quick/delete-post/{post.id}" style="display:inline;">'
+            f'<input type="hidden" name="csrf_token" value="{token}">'
+            f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
+            '<button type="submit" class="action-icon" title="Удалить пост">🗑️</button>'
+            "</form>"
+        )
+
+    app.on("posts.before_render", post_actions_widget)
 
     def footer_widget(**kwargs):
         if not getattr(g, "is_admin", False):
