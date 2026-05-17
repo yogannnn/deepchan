@@ -69,7 +69,23 @@ def create_app():
     plugins_dir = os.path.join(app.root_path, "plugins")
     app.plugin_registry = {}
     if os.path.isdir(plugins_dir):
+        # Собираем список папок с их приоритетами
+        plugin_dirs = []
         for plugin_name in os.listdir(plugins_dir):
+            plugin_path = os.path.join(plugins_dir, plugin_name)
+            manifest_path = os.path.join(plugin_path, "plugin.json")
+            priority = 50
+            if os.path.isfile(manifest_path):
+                try:
+                    with open(manifest_path) as f:
+                        manifest = json.load(f)
+                    priority = manifest.get("priority", 50)
+                except:
+                    pass
+            plugin_dirs.append((priority, plugin_name))
+        # Сортируем по приоритету (чем МЕНЬШЕ число, тем РАНЬШЕ загрузка)
+        plugin_dirs.sort(key=lambda x: x[0])
+        for _, plugin_name in plugin_dirs:
             plugin_path = os.path.join(plugins_dir, plugin_name)
             init_file = os.path.join(plugin_path, "__init__.py")
             if not os.path.isfile(init_file):

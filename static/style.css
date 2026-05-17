@@ -388,7 +388,7 @@ blockquote {
     color: #66ff66 !important;
     font-size: 1.2rem;
     padding: 0 5px !important;
-    margin: 0 !important;
+    margin: 0;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
@@ -481,7 +481,7 @@ code {
     color: var(--link) !important;
     text-decoration: underline;
     cursor: pointer;
-    padding: 0 !important;
+    padding: 0;
     font-size: 0.9rem;
     box-shadow: none !important;
 }
@@ -704,7 +704,7 @@ textarea {
     display: inline-block;
 }
 
-.quick-action-icon {
+.post-actions .quick-action-icon, .thread-actions .quick-action-icon {
     width: 42px;
     height: 42px;
     display: flex;
@@ -732,12 +732,12 @@ textarea {
     margin: 0;
 }
 
-.quick-action-icon {
+.post-actions .quick-action-icon, .thread-actions .quick-action-icon {
     width: 46px !important;
     height: 46px !important;
     min-width: 46px !important;
-    padding: 0 !important;
-    display: flex !important;
+    padding: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 14px;
@@ -753,6 +753,36 @@ textarea {
     box-shadow: 0 0 12px rgba(0,255,0,0.35);
 }
 
+
+/* Глобальные стили для основных форм (НЕ для плагинов) */
+form.post-form input,
+form.post-form textarea,
+form.post-form button,
+form.post-form select {
+    width: 100%;
+    margin-top: 5px;
+    padding: 10px 12px;
+}
+
+form.post-form button,
+form.post-form input[type="submit"] {
+    width: auto;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-weight: bold;
+    background: linear-gradient(145deg, #1a2a1a 0%, #0f1a0f 100%);
+    border: 1px solid var(--border-hover);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: all 0.15s;
+}
+
+form.post-form button:hover,
+form.post-form input[type="submit"]:hover {
+    background: linear-gradient(145deg, #2a4a2a 0%, #1a2a1a 100%);
+    border-color: var(--accent-glow);
+    transform: translateY(-1px);
+}
+
 /* Быстрые админские кнопки (изоляция от глобальных стилей) */
 .post-actions {
     display: flex;
@@ -763,30 +793,38 @@ textarea {
 
 .post-actions form {
     width: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
     display: inline-flex !important;
 }
 
-.quick-action-icon {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    flex: 0 0 auto !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+.post-actions .quick-action-icon, .thread-actions .quick-action-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    padding: 0;
+    margin: 0;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 999px;
     font-size: 22px;
     line-height: 1;
-    background: #102010 !important;
-    border: 1px solid #2a6e2a !important;
+    background: #102010;
+    border: 1px solid #2a6e2a;
 }
 
 .quick-action-icon:hover {
     transform: translateY(-1px);
     border-color: #4cff4c;
     box-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
+}
+
+/* Вертикальный отступ между виджетами в подвале */
+footer > p,
+footer > div,
+footer > form {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

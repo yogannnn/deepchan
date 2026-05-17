@@ -1,0 +1,7 @@
+{
+  "name": "transport_identity",
+  "version": "2.0.0",
+  "description": "Provides lightweight identity for I2P, Tor, and clearnet.",
+  "api_version": 1,
+  "priority": 1
+}
