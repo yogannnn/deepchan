@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+
+<style>
+:root{
+    --bg:#070b11;
+    --card:rgba(18,25,35,.72);
+    --border:rgba(120,160,255,.15);
+    --text:#d9e7ff;
+    --muted:#7f92b0;
+    --accent:#6cf0ff;
+    --green:#6cff91;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle at top left,#10203a,transparent 40%),
+        radial-gradient(circle at bottom right,#09111f,transparent 40%),
+        #070b11;
+    color:var(--text);
+    font-family:Inter,Segoe UI,sans-serif;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:260px;
+    height:100vh;
+    backdrop-filter:blur(18px);
+    background:rgba(8,12,18,.88);
+    border-right:1px solid var(--border);
+    padding:24px;
+}
+
+.logo{
+    font-size:26px;
+    font-weight:700;
+    color:var(--accent);
+}
+
+.logo-sub{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:4px;
+}
+
+.menu{
+    margin-top:30px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.menu a{
+    color:var(--text);
+    text-decoration:none;
+    padding:12px 14px;
+    border-radius:12px;
+    transition:.15s;
+}
+
+.menu a:hover{
+    background:rgba(255,255,255,.05);
+}
+
+.content{
+    margin-left:260px;
+    padding:30px;
+}
+
+.thread{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    backdrop-filter:blur(16px);
+    overflow:hidden;
+    margin-bottom:24px;
+}
+
+.thread-header{
+    padding:20px 24px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+}
+
+.thread-title{
+    color:var(--accent);
+    font-size:20px;
+}
+
+.post{
+    padding:22px 24px;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.post:last-child{
+    border-bottom:none;
+}
+
+.post-meta{
+    display:flex;
+    gap:12px;
+    margin-bottom:14px;
+    color:var(--muted);
+    font-size:14px;
+}
+
+.name{
+    color:var(--green);
+    font-weight:600;
+}
+
+.post-text{
+    line-height:1.8;
+}
+
+.post-actions{
+    margin-top:18px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+.btn{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:12px;
+    padding:8px 14px;
+    cursor:pointer;
+}
+
+.btn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">DeepChan</div>
+    <div class="logo-sub">
+        distributed anonymous board
+    </div>
+
+    <nav class="menu">
+        <a href="#">/i2p/</a>
+        <a href="#">/tech/</a>
+        <a href="#">/b/</a>
+        <a href="#">Каталог</a>
+        <a href="#">Настройки</a>
+    </nav>
+
+</aside>
+
+<main class="content">
+
+    <section class="thread">
+
+        <div class="thread-header">
+            <div class="thread-title">
+                hiddenchan.i2p
+            </div>
+
+            <div style="color:var(--muted)">
+                18 replies
+            </div>
+        </div>
+
+        <article class="post">
+
+            <div class="post-meta">
+                <span class="name">Аноним</span>
+                <span>17.05.26 15:12</span>
+                <span>#991</span>
+            </div>
+
+            <div class="post-text">
+                Мне кажется, современным бордам очень не хватает
+                нормального UX и экосистемности.
+            </div>
+
+            <div class="post-actions">
+                <button class="btn">Ответ</button>
+                <button class="btn">👻</button>
+                <button class="btn">🗑</button>
+            </div>
+
+        </article>
+
+    </section>
+
+</main>
+
+</body>
+</html>

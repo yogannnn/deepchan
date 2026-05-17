@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+
+<style>
+body{
+    margin:0;
+    background:#eef2ff;
+    color:#111;
+    font-family:Tahoma,Verdana,sans-serif;
+    font-size:14px;
+}
+
+.header{
+    background:linear-gradient(#394b7a,#243255);
+    color:white;
+    padding:14px;
+    border-bottom:4px solid #121b33;
+}
+
+.header-inner{
+    width:1200px;
+    margin:auto;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.subtitle{
+    color:#d0d8ff;
+    margin-top:4px;
+}
+
+.nav{
+    margin-top:10px;
+}
+
+.nav a{
+    color:#fff;
+    text-decoration:none;
+    margin-right:14px;
+    font-size:13px;
+}
+
+.wrapper{
+    width:1200px;
+    margin:20px auto;
+}
+
+.board-title{
+    background:#d8e0ff;
+    border:1px solid #8ea0d6;
+    padding:10px;
+    font-size:22px;
+    color:#243255;
+    margin-bottom:20px;
+}
+
+.thread{
+    margin-bottom:25px;
+}
+
+.op-post{
+    background:#fff;
+    border:1px solid #c8d1ef;
+    padding:14px;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
+
+.reply{
+    margin-top:10px;
+    margin-left:40px;
+    background:#f6f8ff;
+    border:1px solid #d4daf3;
+    padding:12px;
+}
+
+.post-header{
+    margin-bottom:8px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+}
+
+.name{
+    color:#117743;
+    font-weight:bold;
+}
+
+.trip{
+    color:#4466aa;
+}
+
+.post-id a{
+    color:#222;
+    text-decoration:none;
+}
+
+.post-text{
+    line-height:1.6;
+}
+
+.post-actions{
+    margin-top:12px;
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
+
+.post-actions button{
+    background:#dde4ff;
+    border:1px solid #8ea0d6;
+    padding:4px 10px;
+    cursor:pointer;
+    border-radius:4px;
+}
+
+.post-actions button:hover{
+    background:#cfd8ff;
+}
+
+.footer{
+    text-align:center;
+    color:#666;
+    padding:30px;
+    font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">DeepChan</div>
+        <div class="subtitle">old internet never dies</div>
+
+        <div class="nav">
+            <a href="#">Главная</a>
+            <a href="#">Каталог</a>
+            <a href="#">Архив</a>
+            <a href="#">RSS</a>
+        </div>
+    </div>
+</header>
+
+<div class="wrapper">
+
+    <div class="board-title">
+        /i2p/ — Анонимные сети
+    </div>
+
+    <section class="thread">
+
+        <article class="op-post">
+
+            <div class="post-header">
+                <span class="name">Аноним</span>
+                <span class="trip">◆kLh7cSYnb8</span>
+                <span>17.05.26 15:00</span>
+                <span class="post-id"><a href="#">№300</a></span>
+            </div>
+
+            <div class="post-text">
+                Есть ли смысл возрождать архивы старых i2p-борд?
+            </div>
+
+            <div class="post-actions">
+                <button>Ответ</button>
+                <button>👻</button>
+                <button>🗑</button>
+            </div>
+
+        </article>
+
+        <article class="reply">
+
+            <div class="post-header">
+                <span class="name">Аноним</span>
+                <span>17.05.26 15:04</span>
+                <span class="post-id"><a href="#">№301</a></span>
+            </div>
+
+            <div class="post-text">
+                Смотря насколько глубоко хочешь копать старый интернет.
+            </div>
+
+        </article>
+
+    </section>
+
+</div>
+
+<footer class="footer">
+    Powered by DeepChan
+</footer>
+
+</body>
+</html>
