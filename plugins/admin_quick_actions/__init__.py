@@ -186,7 +186,7 @@ def init_app(app):
             "admin_quick", "thread_actions", current_app.config["SECRET_KEY"]
         )
         return (
-            '<div class="thread-actions">'
+            '<div class="post-actions">'
             f'<form method="post" action="/admin-quick/delete-thread/{thread.id}">'
             f'<input type="hidden" name="csrf_token" value="{token}">'
             f'<input type="hidden" name="csrf_timestamp" value="{ts}">'

@@ -697,14 +697,6 @@ textarea {
     margin-right: 4px;
 }
 
-/* Быстрые админские кнопки (плагин admin_quick_actions) */
-.post-actions,
-.thread-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 8px;
-}
 
 .post-actions form,
 .thread-actions form {
@@ -733,4 +725,37 @@ textarea {
     transform: translateY(-1px);
     border-color: #4cff4c;
     box-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
+}
+
+/* Быстрые админские кнопки (плагин admin_quick_actions) */
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.post-actions form {
+    margin: 0;
+}
+
+.quick-action-icon {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #0b160b;
+    border: 1px solid #2d6b2d;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.quick-action-icon:hover {
+    transform: translateY(-1px);
+    border-color: #4cff4c;
+    box-shadow: 0 0 12px rgba(0,255,0,0.35);
 }
