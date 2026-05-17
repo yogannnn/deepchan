@@ -135,35 +135,41 @@ def init_app(app):
     def check_admin():
         identity = getattr(g, "identity", {})
         if identity and identity.get("id"):
-            if get_preference(identity["id"], "is_admin") == "true":
-                g.is_admin = True
+            try:
+                if get_preference(identity["id"], "is_admin") == "true":
+                    g.is_admin = True
+            except Exception:
+                pass
 
     # Кнопка "админ на месте" в меню админки
     def menu_item(**kwargs):
         identity = getattr(g, "identity", {})
         if identity and identity.get("id"):
-            is_admin_marked = get_preference(identity["id"], "is_admin") == "true"
+            try:
+                is_admin_marked = get_preference(identity["id"], "is_admin") == "true"
+            except Exception:
+                return ""
+
+            # Генерируем CSRF-токен
+            from services.csrf import generate_csrf_token
+
+            token, ts = generate_csrf_token(
+                "admin_quick", "mark_admin", current_app.config["SECRET_KEY"]
+            )
+
             if is_admin_marked:
                 return (
                     '<form method="post" action="/admin-quick/unmark-admin" style="display:inline;">'
-                    '<input type="hidden" name="csrf_token" value="'
-                    + str(csrf_token("admin_quick").token)
-                    + '">'
-                    '<input type="hidden" name="csrf_timestamp" value="'
-                    + str(csrf_token("admin_quick").timestamp)
-                    + '">'
+                    f'<input type="hidden" name="csrf_token" value="{token}">'
+                    f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
                     '<button type="submit" class="btn-link" style="color:#ffaa00;">Отключить быстрые кнопки</button>'
                     "</form> |"
                 )
             else:
                 return (
                     '<form method="post" action="/admin-quick/mark-admin" style="display:inline;">'
-                    '<input type="hidden" name="csrf_token" value="'
-                    + str(csrf_token("admin_quick").token)
-                    + '">'
-                    '<input type="hidden" name="csrf_timestamp" value="'
-                    + str(csrf_token("admin_quick").timestamp)
-                    + '">'
+                    f'<input type="hidden" name="csrf_token" value="{token}">'
+                    f'<input type="hidden" name="csrf_timestamp" value="{ts}">'
                     '<button type="submit" class="btn-link" style="color:#66ff66;">Активировать быстрые кнопки</button>'
                     "</form> |"
                 )
