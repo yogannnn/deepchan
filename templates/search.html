@@ -2,7 +2,7 @@
 {% block title %}{{ t("search.board_search", board=board.short_name) }}{% endblock %}
 {% block content %}
 <h2>{{ t("search.board_search", board=board.short_name) }}</h2>
-<form method="get" action="{{ url_for('search', board_name=board.short_name) }}">
+<form method="get" action="{{ url_for('board.board_search', board_name=board.short_name) }}">
     <input type="text" name="q" value="{{ query }}" placeholder="{{ t("search.query") }}" required>
     <button type="submit">{{ t("search.search_btn") }}</button>
 </form>
@@ -22,11 +22,11 @@
         {% if pagination and pagination.pages > 1 %}
         <div class="pagination">
             {% if pagination.has_prev %}
-                <a href="{{ url_for('search', board_name=board.short_name, q=query, page=pagination.prev_num) }}">← Назад</a>
+                <a href="{{ url_for('board.board_search', board_name=board.short_name, q=query, page=pagination.prev_num) }}">← Назад</a>
             {% endif %}
             <span>Стр. {{ pagination.page }} из {{ pagination.pages }}</span>
             {% if pagination.has_next %}
-                <a href="{{ url_for('search', board_name=board.short_name, q=query, page=pagination.next_num) }}">Вперёд →</a>
+                <a href="{{ url_for('board.board_search', board_name=board.short_name, q=query, page=pagination.next_num) }}">Вперёд →</a>
             {% endif %}
         </div>
         {% endif %}

@@ -26,8 +26,11 @@ def index():
 
 @main_bp.route("/captcha")
 def captcha_route():
-    data, text = generate_captcha()
-    session["captcha_text"] = text
+    import base64
+
+    image_b64, text, token = generate_captcha()
+    data = base64.b64decode(image_b64)
+    return send_file(io.BytesIO(data), mimetype="image/png")
     return send_file(io.BytesIO(data.getvalue()), mimetype="image/png")
 
 
