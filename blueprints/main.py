@@ -49,8 +49,7 @@ def global_catalog():
 
     last_replies = get_last_replies([t.id for t in threads_paginated.items])
     boards = get_boards()
-    stats = get_boards_stats([b.id for b in boards])
-    return render_template("index.html", boards=boards, boards_stats=stats)(
+    return render_template(
         "catalog_global.html",
         threads=threads_paginated.items,
         pagination=threads_paginated,
