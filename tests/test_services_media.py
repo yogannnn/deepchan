@@ -114,3 +114,113 @@ def test_media_after_process_hook(app_with_media):
             file, post=None, board=app_with_media.board, thread=app_with_media.thread
         )
         assert len(after_called) == 1
+
+
+def test_reject_invalid_extension(app_with_media):
+    """Неразрешённое расширение (.svg) должно вызывать abort 400."""
+    with app_with_media.app_context():
+        file = _make_file("test.svg", b"fake svg")
+        import pytest
+        from werkzeug.exceptions import HTTPException
+
+        from services.media import process_file
+
+        # при abort будет выброшен HTTPException
+        with pytest.raises(HTTPException) as exc:
+            process_file(
+                file,
+                post=None,
+                board=app_with_media.board,
+                thread=app_with_media.thread,
+            )
+        assert exc.value.code == 400
+
+
+def test_reject_corrupt_jpeg(app_with_media):
+    """Битый JPEG должен вызывать abort 400."""
+    with app_with_media.app_context():
+        file = _make_file("broken.jpg", b"this is not a valid jpeg")
+        import pytest
+        from werkzeug.exceptions import HTTPException
+
+        from services.media import process_file
+
+        with pytest.raises(HTTPException) as exc:
+            process_file(
+                file,
+                post=None,
+                board=app_with_media.board,
+                thread=app_with_media.thread,
+            )
+        assert exc.value.code == 400
+
+
+def test_reject_oversized_image(app_with_media):
+    """Слишком большая картинка по разрешению вызывает abort 400."""
+    with app_with_media.app_context():
+        from io import BytesIO
+
+        from PIL import Image
+
+        # Создаём картинку больше максимального размера
+        max_dim = app_with_media.config["SETTINGS"].max_image_dimension
+        img = Image.new("RGB", (max_dim + 1, max_dim + 1), color="blue")
+        buf = BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+        buf.name = "big.jpg"
+        from werkzeug.datastructures import FileStorage
+
+        file = FileStorage(stream=buf, filename="big.jpg")
+        import pytest
+        from werkzeug.exceptions import HTTPException
+
+        from services.media import process_file
+
+        with pytest.raises(HTTPException) as exc:
+            process_file(
+                file,
+                post=None,
+                board=app_with_media.board,
+                thread=app_with_media.thread,
+            )
+        assert exc.value.code == 400
+
+
+def test_media_duration_fallback_on_missing_ffprobe(app_with_media, monkeypatch):
+    """Если ffprobe отсутствует или падает, get_media_duration возвращает None."""
+    from services.media import get_media_duration
+
+    # Мокаем subprocess.run, чтобы он вызывал FileNotFoundError
+    monkeypatch.setattr(
+        "subprocess.run",
+        lambda *args, **kwargs: (_ for _ in ()).throw(FileNotFoundError),
+    )
+    result = get_media_duration("nonexistent.mp4")
+    assert result is None
+
+
+def test_process_valid_small_image(app_with_media):
+    """Маленькая валидная картинка обрабатывается и сохраняется."""
+    with app_with_media.app_context():
+        from io import BytesIO
+
+        from PIL import Image
+
+        img = Image.new("RGB", (10, 10), color="red")
+        buf = BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+        buf.name = "small.jpg"
+        from werkzeug.datastructures import FileStorage
+
+        file = FileStorage(stream=buf, filename="small.jpg")
+        from services.media import process_file
+
+        result = process_file(
+            file, post=None, board=app_with_media.board, thread=app_with_media.thread
+        )
+        assert len(result) == 1
+        fn, tn, order, size, sha, ftype, dur = result[0]
+        assert ftype == "image"
+        assert os.path.exists(os.path.join(app_with_media.config["UPLOAD_FOLDER"], fn))
