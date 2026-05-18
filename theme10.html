@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DeepChan — Ops Console</title>
+
+<style>
+body{
+    margin:0;
+    background:#111315;
+    color:#d4d4d4;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+}
+
+.topbar{
+    background:#191c20;
+    border-bottom:1px solid #2d3138;
+    padding:10px 14px;
+}
+
+.logo{
+    font-size:22px;
+    color:#4caf50;
+    font-weight:bold;
+}
+
+.nav{
+    margin-top:6px;
+}
+
+.nav a{
+    color:#bbb;
+    margin-right:10px;
+    text-decoration:none;
+}
+
+.wrapper{
+    max-width:1300px;
+    margin:auto;
+    padding:12px;
+}
+
+.thread{
+    margin-bottom:14px;
+}
+
+.post{
+    background:#1a1d21;
+    border-left:3px solid #4caf50;
+    padding:8px 10px;
+    margin-bottom:6px;
+}
+
+.post-header{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:6px;
+    color:#999;
+    font-size:12px;
+}
+
+.name{
+    color:#67d56b;
+    font-weight:bold;
+}
+
+.post-text{
+    line-height:1.45;
+}
+
+.actions{
+    margin-top:8px;
+    display:flex;
+    justify-content:flex-end;
+    gap:6px;
+}
+
+button{
+    background:#2b3138;
+    color:#ddd;
+    border:1px solid #3b424c;
+    padding:4px 8px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+button:hover{
+    background:#39414b;
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">DeepChan</div>
+
+    <div class="nav">
+        <a href="#">/i2p/</a>
+        <a href="#">/tech/</a>
+        <a href="#">catalog</a>
+        <a href="#">admin</a>
+    </div>
+
+</header>
+
+<div class="wrapper">
+
+<section class="thread">
+
+    <article class="post">
+
+        <div class="post-header">
+            <span class="name">Аноним</span>
+            <span>17.05.26 19:15</span>
+            <span>#1221</span>
+        </div>
+
+        <div class="post-text">
+            Кто-нибудь вообще еще поднимает свои борды?
+        </div>
+
+        <div class="actions">
+            <button>Reply</button>
+            <button>👻</button>
+            <button>🗑</button>
+        </div>
+
+    </article>
+
+    <article class="post">
+
+        <div class="post-header">
+            <span class="name">Аноним</span>
+            <span>17.05.26 19:18</span>
+            <span>#1222</span>
+        </div>
+
+        <div class="post-text">
+            Большинство просто арендуют VPS и ставят готовое.
+        </div>
+
+    </article>
+
+</section>
+
+</div>
+
+</body>
+</html>

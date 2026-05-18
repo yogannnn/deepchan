@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DeepChan — CRT Terminal</title>
+
+<style>
+:root{
+    --bg:#050805;
+    --card:#081108;
+    --border:#173317;
+    --text:#8cff8c;
+    --green:#66ff66;
+    --link:#55ccff;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Courier New",monospace;
+    font-size:15px;
+    line-height:1.5;
+}
+
+.wrapper{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+
+.header{
+    border:1px solid var(--border);
+    background:#061006;
+    padding:16px;
+    margin-bottom:20px;
+}
+
+.logo{
+    font-size:30px;
+    color:var(--green);
+    font-weight:bold;
+}
+
+.subtitle{
+    opacity:.8;
+    margin-top:4px;
+}
+
+.nav{
+    margin-top:12px;
+}
+
+.nav a{
+    color:var(--link);
+    margin-right:12px;
+    text-decoration:none;
+}
+
+.board-title{
+    margin-bottom:15px;
+    color:var(--green);
+    font-size:24px;
+}
+
+.thread{
+    border:1px solid var(--border);
+    background:var(--card);
+    padding:14px;
+    margin-bottom:20px;
+}
+
+.post{
+    border-left:3px solid var(--green);
+    padding-left:12px;
+    margin-bottom:14px;
+}
+
+.post-header{
+    margin-bottom:8px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    font-size:14px;
+}
+
+.name{
+    color:var(--green);
+    font-weight:bold;
+}
+
+.trip{
+    color:#55ff99;
+}
+
+.post-id a{
+    color:var(--link);
+    text-decoration:none;
+}
+
+.post-text{
+    white-space:pre-wrap;
+}
+
+.actions{
+    margin-top:10px;
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
+
+button{
+    background:#102010;
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:5px 10px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#183018;
+}
+
+.footer{
+    margin-top:40px;
+    text-align:center;
+    opacity:.7;
+    font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<header class="header">
+
+    <div class="logo">DeepChan</div>
+
+    <div class="subtitle">
+        anonymous imageboard for i2p / tor / clearnet
+    </div>
+
+    <div class="nav">
+        <a href="#">/i2p/</a>
+        <a href="#">/tech/</a>
+        <a href="#">/b/</a>
+        <a href="#">catalog</a>
+        <a href="#">rss</a>
+    </div>
+
+</header>
+
+<div class="board-title">
+    /i2p/ — anonymous networks
+</div>
+
+<section class="thread">
+
+    <article class="post">
+
+        <div class="post-header">
+            <span class="name">Аноним</span>
+            <span class="trip">◆kLh7cSYnb8</span>
+            <span>17.05.26 18:42</span>
+            <span class="post-id"><a href="#">№482</a></span>
+        </div>
+
+        <div class="post-text">
+Есть ли смысл поднимать архивы старых i2p-борд?
+Или интернет уже окончательно умер?
+        </div>
+
+        <div class="actions">
+            <button>Reply</button>
+            <button>👻</button>
+            <button>🗑</button>
+        </div>
+
+    </article>
+
+    <article class="post">
+
+        <div class="post-header">
+            <span class="name">Аноним</span>
+            <span>17.05.26 18:44</span>
+            <span class="post-id"><a href="#">№483</a></span>
+        </div>
+
+        <div class="post-text">
+Старый интернет никогда не умирает.
+Он просто уходит глубже.
+        </div>
+
+    </article>
+
+</section>
+
+<footer class="footer">
+    Powered by DeepChan
+</footer>
+
+</div>
+
+</body>
+</html>

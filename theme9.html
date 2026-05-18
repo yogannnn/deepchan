@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DeepChan — Cyberpunk Neon</title>
+
+<style>
+:root{
+    --bg:#090011;
+    --card:#140022;
+    --border:#7d3cff;
+    --text:#ddd6ff;
+    --accent:#00f0ff;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle at top left,#2d0066,transparent 40%),
+        radial-gradient(circle at bottom right,#0a001f,transparent 40%),
+        var(--bg);
+
+    color:var(--text);
+    font-family:Segoe UI,sans-serif;
+}
+
+.wrapper{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+
+.header{
+    background:rgba(20,0,34,.8);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:24px;
+    box-shadow:0 0 20px rgba(125,60,255,.25);
+}
+
+.logo{
+    font-size:34px;
+    font-weight:700;
+    color:var(--accent);
+}
+
+.subtitle{
+    margin-top:6px;
+    color:#bbaaff;
+}
+
+.nav{
+    margin-top:14px;
+}
+
+.nav a{
+    color:var(--accent);
+    margin-right:14px;
+    text-decoration:none;
+}
+
+.board-title{
+    font-size:28px;
+    margin-bottom:20px;
+    color:var(--accent);
+}
+
+.post{
+    background:rgba(20,0,34,.85);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 0 14px rgba(125,60,255,.2);
+}
+
+.post-header{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:12px;
+    color:#aa99ff;
+}
+
+.name{
+    color:var(--accent);
+    font-weight:700;
+}
+
+.post-text{
+    line-height:1.7;
+}
+
+.actions{
+    margin-top:14px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+button{
+    background:#6d28ff;
+    color:white;
+    border:none;
+    border-radius:10px;
+    padding:8px 14px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<header class="header">
+
+    <div class="logo">DeepChan</div>
+
+    <div class="subtitle">
+        neon anonymous network
+    </div>
+
+    <div class="nav">
+        <a href="#">/cyb/</a>
+        <a href="#">/tech/</a>
+        <a href="#">/void/</a>
+    </div>
+
+</header>
+
+<div class="board-title">
+    /cyb/ — cyberpunk
+</div>
+
+<article class="post">
+
+    <div class="post-header">
+        <span class="name">Аноним</span>
+        <span>17.05.26 19:01</span>
+        <span>#777</span>
+    </div>
+
+    <div class="post-text">
+        Интернет давно превратился в торговый центр.
+        Настоящая сеть осталась только в подполье.
+    </div>
+
+    <div class="actions">
+        <button>Reply</button>
+        <button>⚡</button>
+    </div>
+
+</article>
+
+<article class="post">
+
+    <div class="post-header">
+        <span class="name">Аноним</span>
+        <span>17.05.26 19:04</span>
+        <span>#778</span>
+    </div>
+
+    <div class="post-text">
+        deep web was supposed to be cyberpunk.
+        not corporate slop.
+    </div>
+
+</article>
+
+</div>
+
+</body>
+</html>
