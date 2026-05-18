@@ -11,7 +11,7 @@ from flask import (
 )
 
 from models import Board, Post, Thread, get_last_replies
-from services.boards import get_boards, get_visible_board_ids
+from services.boards import get_boards, get_boards_stats, get_visible_board_ids
 from services.captcha import generate_captcha
 
 main_bp = Blueprint("main", __name__)
@@ -20,7 +20,8 @@ main_bp = Blueprint("main", __name__)
 @main_bp.route("/")
 def index():
     boards = get_boards()
-    return render_template("index.html", boards=boards)
+    stats = get_boards_stats([b.id for b in boards])
+    return render_template("index.html", boards=boards, boards_stats=stats)
 
 
 @main_bp.route("/captcha")
@@ -48,7 +49,8 @@ def global_catalog():
 
     last_replies = get_last_replies([t.id for t in threads_paginated.items])
     boards = get_boards()
-    return render_template(
+    stats = get_boards_stats([b.id for b in boards])
+    return render_template("index.html", boards=boards, boards_stats=stats)(
         "catalog_global.html",
         threads=threads_paginated.items,
         pagination=threads_paginated,
