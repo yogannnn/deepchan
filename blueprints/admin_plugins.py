@@ -153,7 +153,34 @@ def admin_upload_plugin():
                 os.path.dirname(plugin_json)
                 or os.path.splitext(os.path.basename(plugin_json))[0]
             )
-            target_dir = os.path.join(current_app.root_path, "plugins", plugin_dir)
+            plugin_dir = os.path.normpath(plugin_dir).strip()
+            if (
+                not plugin_dir
+                or plugin_dir in (".", "..")
+                or os.path.isabs(plugin_dir)
+                or plugin_dir.startswith("..")
+            ):
+                flash("Некорректная директория плагина", "error")
+                return redirect(url_for("admin_plugins.admin_plugins"))
+
+            plugins_root = os.path.abspath(
+                os.path.join(current_app.root_path, "plugins")
+            )
+            target_dir = os.path.abspath(
+                os.path.normpath(os.path.join(plugins_root, plugin_dir))
+            )
+            if os.path.commonpath([plugins_root, target_dir]) != plugins_root:
+                flash("Некорректная директория плагина", "error")
+                return redirect(url_for("admin_plugins.admin_plugins"))
+
+            for member in zf.namelist():
+                member_target = os.path.abspath(
+                    os.path.normpath(os.path.join(target_dir, member))
+                )
+                if os.path.commonpath([target_dir, member_target]) != target_dir:
+                    flash("Некорректные пути в архиве", "error")
+                    return redirect(url_for("admin_plugins.admin_plugins"))
+
             os.makedirs(target_dir, exist_ok=True)
             zf.extractall(target_dir)
         enabled_key = f"plugin_{plugin_dir}_enabled"
