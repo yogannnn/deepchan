@@ -11,9 +11,7 @@
         <a href="{{ url_for('board.board', board_name=board.short_name) }}" style="font-size: 1.2rem;">/{{ board.short_name }}/ - {{ board.name }}</a>
         <span style="color: var(--text-dim);"> — {{ board.description }}</span>
         {% if board.id in boards_stats %}
-            <span style="color: #66ff66; margin-left: 8px;">
-                [{{ boards_stats[board.id].total_threads }} | {{ boards_stats[board.id].total_posts }} | +{{ boards_stats[board.id].posts_today }}]
-            </span>
+            <small style="color: #66ff66; margin-left: 8px;">[{{ boards_stats[board.id].total_threads }}|{{ boards_stats[board.id].total_posts }}|+{{ boards_stats[board.id].posts_today }}]</small>
         {% endif %}
     </li>
 {% else %}
