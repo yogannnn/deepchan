@@ -138,7 +138,17 @@ def admin_upload_plugin():
     try:
         with zipfile.ZipFile(io.BytesIO(f.read())) as zf:
             for member in zf.namelist():
-                if member.startswith("/") or ".." in member:
+                normalized_member = member.replace("\\", "/")
+                member_no_lead = member.lstrip("/\\")
+                drive, _ = os.path.splitdrive(member_no_lead)
+                parts = [p for p in normalized_member.split("/") if p not in ("", ".")]
+                if (
+                    "\\" in member
+                    or member.startswith(("/", "\\"))
+                    or os.path.isabs(member_no_lead)
+                    or bool(drive)
+                    or any(p == ".." for p in parts)
+                ):
                     flash("Некорректные пути в архиве", "error")
                     return redirect(url_for("admin_plugins.admin_plugins"))
             plugin_json = None
@@ -174,15 +184,31 @@ def admin_upload_plugin():
                 return redirect(url_for("admin_plugins.admin_plugins"))
 
             for member in zf.namelist():
+                safe_member = member.replace("\\", "/").lstrip("/")
                 member_target = os.path.abspath(
-                    os.path.normpath(os.path.join(target_dir, member))
+                    os.path.normpath(os.path.join(target_dir, safe_member))
                 )
                 if os.path.commonpath([target_dir, member_target]) != target_dir:
                     flash("Некорректные пути в архиве", "error")
                     return redirect(url_for("admin_plugins.admin_plugins"))
 
             os.makedirs(target_dir, exist_ok=True)
-            zf.extractall(target_dir)
+            for info in zf.infolist():
+                safe_member = info.filename.replace("\\", "/").lstrip("/")
+                member_target = os.path.abspath(
+                    os.path.normpath(os.path.join(target_dir, safe_member))
+                )
+                if os.path.commonpath([target_dir, member_target]) != target_dir:
+                    flash("Некорректные пути в архиве", "error")
+                    return redirect(url_for("admin_plugins.admin_plugins"))
+
+                if info.is_dir():
+                    os.makedirs(member_target, exist_ok=True)
+                    continue
+
+                os.makedirs(os.path.dirname(member_target), exist_ok=True)
+                with zf.open(info, "r") as src, open(member_target, "wb") as dst:
+                    dst.write(src.read())
         enabled_key = f"plugin_{plugin_dir}_enabled"
         if not Setting.query.get(enabled_key):
             db.session.add(Setting(key=enabled_key, value="false"))
