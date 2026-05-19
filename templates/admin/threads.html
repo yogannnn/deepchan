@@ -81,7 +81,22 @@
                         <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
                         <button type="submit" class="action-icon" title="{{ t("admin.delete") }}">🗑️</button>
                     </form>
-                </td>
+                
+                    <form method="post" action="{{ url_for('admin.admin_move_thread', thread_id=thread.id) }}" style="display:inline;" onsubmit="return confirm('Перенести тред на другую доску?');">
+                        {% set csrf = csrf_token('move_thread') %}
+                        <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
+                        <input type="hidden" name="csrf_timestamp" value="{{ csrf.timestamp }}">
+                        <select name="new_board_id" style="width: auto; padding: 2px; background: #050805; border: 1px solid var(--border); color: var(--text);">
+                            <option value="">-- доска --</option>
+                            {% for b in boards %}
+                                {% if b.id != thread.board_id %}
+                                <option value="{{ b.id }}">/{{ b.short_name }}/</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="action-icon" title="Перенести">📦</button>
+                    </form>
+</td>
             </tr>
             {% else %}
             <tr><td colspan="9">{{ t("admin.no_threads") }}</td></tr>

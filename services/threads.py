@@ -1,3 +1,5 @@
+from models import Board, PostFTS, Thread, db
+
 """
 Сервис для работы с тредами.
 Единая точка получения тредов и списков тредов.
@@ -24,3 +26,20 @@ def get_board_threads(board_id, only_visible=True):
     threads = query.order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc()).all()
     current_app.emit("threads.list_loaded", threads=threads, board_id=board_id)
     return threads
+
+
+def move_thread(thread_id, new_board_id):
+    """Переносит тред на другую доску. Выбрасывает ValueError, если доска не найдена."""
+    thread = Thread.query.get_or_404(thread_id)
+    board = Board.query.get_or_404(new_board_id)
+    old_board_id = thread.board_id
+    thread.board_id = new_board_id
+    PostFTS.query.filter_by(thread_id=thread.id).update({"board_id": new_board_id})
+    db.session.commit()
+    current_app.emit(
+        "thread.moved",
+        thread=thread,
+        old_board_id=old_board_id,
+        new_board_id=new_board_id,
+    )
+    return thread

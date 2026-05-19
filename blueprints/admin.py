@@ -255,6 +255,24 @@ def admin_thread_detail(thread_id):
     return render_template("admin/thread_detail.html", thread=thread, posts=posts)
 
 
+@admin_bp.route("/threads/move/<int:thread_id>", methods=["POST"])
+@admin_required
+@csrf_protect("move_thread")
+def admin_move_thread(thread_id):
+    new_board_id = request.form.get("new_board_id", type=int)
+    if not new_board_id:
+        flash("Выберите целевую доску.", "error")
+        return redirect(url_for("admin.admin_threads"))
+    try:
+        from services.threads import move_thread
+
+        move_thread(thread_id, new_board_id)
+        flash("Тред перенесён.", "success")
+    except Exception as e:
+        flash(f"Ошибка: {e}", "error")
+    return redirect(url_for("admin.admin_threads"))
+
+
 @admin_bp.route("/post/delete/<int:post_id>", methods=["POST"])
 @admin_required
 @csrf_protect("delete_post")

@@ -1,6 +1,7 @@
 import pytest
 from flask import url_for
 
+from models import Board, Thread, db
 from services.csrf import generate_csrf_token
 
 ADMIN = ("admin", "testpass")
@@ -41,8 +42,6 @@ def test_delete_board(app, client):
     data = {"short_name": "todel", "name": "To Delete"}
     data.update(csrf_for(app, "create_board"))
     client.post("/admin/boards/create", data=data, auth=ADMIN, follow_redirects=True)
-
-    from models import Board
 
     with app.app_context():
         b = Board.query.filter_by(short_name="todel").first()
@@ -113,3 +112,28 @@ def test_stats_page(app, client):
     resp = client.get("/admin/stats", auth=ADMIN)
     assert resp.status_code == 200
     assert "Статистика" in resp.data.decode()
+
+
+def test_move_thread(app, client):
+    app.config["ADMIN_PASSWORD"] = "testpass"
+    with app.app_context():
+        # используем существующую доску /b/ и создаём новую
+        b1 = Board.query.filter_by(short_name="b").first()
+        b2 = Board(short_name="movetest", name="Для переноса")
+        db.session.add(b2)
+        db.session.flush()
+        thread = Thread(board_id=b1.id)
+        db.session.add(thread)
+        db.session.commit()
+        tid = thread.id
+        b2_id = b2.id
+
+    data = {"new_board_id": b2_id}
+    data.update(csrf_for(app, "move_thread"))
+    resp = client.post(
+        f"/admin/threads/move/{tid}", data=data, auth=ADMIN, follow_redirects=True
+    )
+    assert resp.status_code == 200
+    with app.app_context():
+        t = db.session.get(Thread, tid)
+        assert t.board_id == b2_id
