@@ -5,20 +5,35 @@
 import html
 from datetime import datetime, timezone
 
-from flask import abort, current_app, g
+from flask import current_app, g
 
+from core.exceptions import CaptchaError
 from models import Board, Post, PostFile, PostFTS, RadioTrack, Thread, db, hash_password
 from services.media import process_file, save_files
 from services.security import apply_word_filters
 from services.tripcodes import generate_tripcode
 
 
-def create_post(board, thread, form, files_data, ip_address):
+def _check_captcha(captcha_answer: str, captcha_token: str) -> None:
+    """Проверяет капчу. Выбрасывает CaptchaError при несовпадении."""
+    from services.captcha import verify_captcha
+
+    if not verify_captcha(captcha_answer, captcha_token):
+        raise CaptchaError("Неверный код капчи")
+
+
+def create_post(
+    board, thread, form, files_data, ip_address, captcha_answer=None, captcha_token=None
+):
     """Создаёт пост в указанном треде (или создаёт новый тред, если thread=None).
     Вызывает хуки posts.before_create и posts.after_create.
     Возвращает объект Post.
     """
-    # Хук перед созданием — плагины могут отклонить пост (abort) или модифицировать данные
+    # Проверка капчи (если переданы данные)
+    if captcha_answer is not None and captcha_token is not None:
+        _check_captcha(captcha_answer, captcha_token)
+
+    # Хук перед созданием — плагины могут отклонить пост или модифицировать данные
     current_app.emit(
         "posts.before_create",
         board=board,
@@ -33,6 +48,7 @@ def create_post(board, thread, form, files_data, ip_address):
     # Если плагин установил g.captcha_required (например, identity-based), принудительно включаем капчу
     if getattr(g, "captcha_required", False):
         current_app.config["SETTINGS"]._cache["CAPTCHA_ENABLED"] = True
+
     # Применяем фильтры
     filtered_comment = apply_word_filters(form.comment.data)
     filtered_subject = (
@@ -134,6 +150,5 @@ def create_post(board, thread, form, files_data, ip_address):
 def get_post(post_id):
     """Возвращает пост по id, пропуская через хук posts.before_render."""
     post = Post.query.get_or_404(post_id)
-    # Хук позволяет плагинам модифицировать пост перед отображением
     current_app.emit("posts.before_render", post=post)
     return post
