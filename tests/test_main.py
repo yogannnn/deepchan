@@ -18,7 +18,7 @@ def test_index_has_board_stats(app, client):
     resp = client.get("/")
     html = resp.data.decode()
     # Проверяем, что есть хотя бы одна доска со статистикой в формате [x|y|+z]
-    assert "[0|0|+0]" in html or "[1|" in html
+    assert "[0|0]" in html or "[1|" in html
 
 
 def test_captcha_returns_image(app, client):
