@@ -1,3 +1,4 @@
+"""Медиа-сервис: обработка изображений, видео, аудио."""
 import hashlib
 import json
 import os
@@ -8,6 +9,11 @@ from flask import abort, current_app
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
 from core.exceptions import MediaValidationError
+from services.media.validation import (
+    validate_extension,
+    validate_file_size,
+    validate_image_resolution,
+)
 
 
 def add_watermark(img, text, position=(5, 5)):
@@ -159,8 +165,7 @@ def save_files(files):
         if f.filename == "":
             continue
         ext = os.path.splitext(f.filename)[1].lower().lstrip(".")
-        if ext not in allowed_extensions:
-            raise MediaValidationError(f"Недопустимый формат: {ext}")
+        validate_extension(ext, allowed_extensions)
         f.stream.seek(0, os.SEEK_END)
         file_size = f.tell()
         f.stream.seek(0)
