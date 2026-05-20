@@ -60,7 +60,7 @@
         {% endif %}
         <div class="thread-info">
             <div class="thread-title">
-                <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
+                {% if thread.is_pinned %}📌 {% endif %}<a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
                     {{ op.subject|e if op and op.subject else t('catalog.no_subject') }}
                 </a>
                 <span class="thread-badges">
@@ -73,12 +73,18 @@
                 <span>📅 {{ thread.created_at.strftime('%d.%m.%y %H:%M') }}</span>
                 <span>🔼 {{ thread.bumped_at.strftime('%d.%m.%y %H:%M') }}</span>
             </div>
-{% if last_posts_map and last_posts_map.get(thread.id) %}
-    {% set last_posts = last_posts_map[thread.id] %}
-    {% if last_posts|length > 1 %}
-    <details class="thread-last-posts" style="margin-top: 10px; width: 100%; flex-basis: 100%;">
-        <summary style="cursor: pointer; color: #66ff66;">Последние ответы</summary>
-        {% for p in last_posts %}
+        </div>
+        <div class="thread-actions">
+            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("board.hide") }}</a>
+            {% for widget in emit("thread.actions", thread=thread) %}{{ widget|safe }}{% endfor %}
+        </div>
+
+        <!-- Спойлер с последними постами -->
+        {% if last_posts_map and last_posts_map.get(thread.id) %}
+        {% set last_posts = last_posts_map[thread.id] %}
+        <details class="thread-last-posts" style="margin-top: 10px; width: 100%; flex-basis: 100%;">
+            <summary style="cursor: pointer; color: #66ff66;">Последние ответы</summary>
+            {% for p in last_posts %}
             <div class="post" style="margin-left: 20px; padding: 8px; background: #0a0f0a; border: 1px solid #1e3b1e; border-radius: 6px; margin-bottom: 5px;">
                 <div class="post-row">
                     {% if p.files %}
@@ -95,15 +101,9 @@
                     </div>
                 </div>
             </div>
-        {% endfor %}
-    </details>
-    {% endif %}
-{% endif %}
-
-        </div>
-        <div class="thread-actions">
-            <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("board.hide") }}</a> {% for widget in emit("thread.actions", thread=thread) %}{{ widget|safe }}{% endfor %}
-        </div>
+            {% endfor %}
+        </details>
+        {% endif %}
     </div>
     <hr>
     {% endif %}
