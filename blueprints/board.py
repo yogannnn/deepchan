@@ -36,6 +36,7 @@ from services.media import get_media_duration, save_files
 from services.radio import get_file_hash
 from services.security import apply_word_filters, check_ban, check_rate_limit
 from services.text import process_comment
+from services.threads import get_board_threads, get_last_posts_for_threads, get_thread
 from services.tripcodes import generate_tripcode
 
 board_bp = Blueprint("board", __name__, url_prefix="")
@@ -76,21 +77,21 @@ def csrf_protect(action):
 def board(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     page = request.args.get("page", 1, type=int)
-    per_page = current_app.config["SETTINGS"].threads_per_page
+    per_page = 42  # пасхалка
     threads_paginated = (
         board.threads.filter(
             Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
         )
-        .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
+        .order_by(Thread.bumped_at.desc())  # без is_pinned
         .paginate(page=page, per_page=per_page, error_out=False)
     )
     form = PostForm()
-
     captcha_data = None
     captcha_token = None
-
     if current_app.config["SETTINGS"].captcha_enabled:
         captcha_data, _, captcha_token = generate_captcha()
+
+    last_posts_map = get_last_posts_for_threads([t.id for t in threads_paginated.items])
 
     current_app.emit("board.opening", board=board)
     return render_template(
@@ -101,6 +102,7 @@ def board(board_name):
         form=form,
         captcha_data=captcha_data,
         captcha_token=captcha_token,
+        last_posts_map=last_posts_map,
     )
 
 
@@ -108,7 +110,7 @@ def board(board_name):
 def board_catalog(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
     per_page = current_app.config["SETTINGS"].threads_per_page
-    from services.threads import get_board_threads
+    from services.threads import get_board_threads, get_last_posts_for_threads
 
     threads = get_board_threads(board.id)
     from models import get_last_replies

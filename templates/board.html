@@ -73,6 +73,33 @@
                 <span>📅 {{ thread.created_at.strftime('%d.%m.%y %H:%M') }}</span>
                 <span>🔼 {{ thread.bumped_at.strftime('%d.%m.%y %H:%M') }}</span>
             </div>
+{% if last_posts_map and last_posts_map.get(thread.id) %}
+    {% set last_posts = last_posts_map[thread.id] %}
+    {% if last_posts|length > 1 %}
+    <details class="thread-last-posts" style="margin-top: 10px; clear: both;">
+        <summary style="cursor: pointer; color: #66ff66;">Последние ответы</summary>
+        {% for p in last_posts %}
+            <div class="post" style="margin-left: 20px; padding: 8px; background: #0a0f0a; border: 1px solid #1e3b1e; border-radius: 6px; margin-bottom: 5px;">
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    {% if p.files %}
+                    <div style="display: flex; gap: 4px;">
+                        {% for pf in p.files %}
+                            <img src="{{ url_for('static', filename='uploads/thumbs/' + pf.thumb_path) }}" style="max-width: 50px; max-height: 50px; border: 1px solid var(--border); border-radius: 4px;" loading="lazy">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <span class="post-author"><span class="name">{{ p.name|e }}</span>{% if p.tripcode %}<span class="tripcode">{{ p.tripcode }}</span>{% endif %}</span>
+                        <span class="datetime" style="color: #7ab37a; font-size: 0.8rem;">{{ p.created_at.strftime('%d.%m.%y %H:%M') }}</span>
+                        <div class="post-text" style="margin-top: 5px;">{{ p.comment[:200] }}{% if p.comment|length > 200 %}...{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </details>
+    {% endif %}
+{% endif %}
+
         </div>
         <div class="thread-actions">
             <a href="{{ url_for('board.hide_thread', board_name=board.short_name, thread_id=thread.id) }}">{{ t("board.hide") }}</a> {% for widget in emit("thread.actions", thread=thread) %}{{ widget|safe }}{% endfor %}

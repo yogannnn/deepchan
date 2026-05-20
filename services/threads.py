@@ -1,12 +1,10 @@
-from models import Board, PostFTS, Thread, db
-
 """
 Сервис для работы с тредами.
 Единая точка получения тредов и списков тредов.
 """
 from flask import current_app
 
-from models import Thread
+from models import Board, Post, PostFTS, Thread, db
 
 
 def get_thread(thread_id):
@@ -44,3 +42,19 @@ def move_thread(thread_id, new_board_id):
         new_board_id=new_board_id,
     )
     return thread
+
+
+def get_last_posts_for_threads(thread_ids, limit=3):
+    """Возвращает словарь {thread_id: [Post, ...]} с последними постами (от старых к новым)."""
+    if not thread_ids:
+        return {}
+    posts = {}
+    for tid in thread_ids:
+        last_posts = (
+            Post.query.filter_by(thread_id=tid)
+            .order_by(Post.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+        posts[tid] = list(reversed(last_posts))
+    return posts
