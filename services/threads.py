@@ -16,14 +16,15 @@ def get_thread(thread_id):
     return thread
 
 
-def get_board_threads(board_id, only_visible=True):
-    """Возвращает список тредов доски. Если only_visible=True, то только из видимых досок."""
+def get_board_threads(board_id, only_visible=True, limit=42):
+    """Возвращает список тредов доски. Если only_visible=True, то только из видимых досок.
+    По умолчанию возвращает последние 42 треда, отсортированные по дате."""
     query = Thread.query.filter(Thread.board_id == board_id, Thread.posts.any())
     if only_visible:
         from services.boards import get_visible_board_ids
 
         query = query.filter(Thread.board_id.in_(get_visible_board_ids()))
-    threads = query.order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc()).all()
+    threads = query.order_by(Thread.bumped_at.desc()).limit(limit).all()
     current_app.emit("threads.list_loaded", threads=threads, board_id=board_id)
     return threads
 

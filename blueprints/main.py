@@ -40,15 +40,15 @@ def global_catalog():
 
     board_id = request.args.get("board_id", type=int)
     page = request.args.get("page", 1, type=int)
-    per_page = current_app.config["SETTINGS"].threads_per_page
+    per_page = 42
     query = Thread.query.filter(
         Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
     )
     if board_id:
         query = query.filter(Thread.board_id == board_id)
-    threads_paginated = query.order_by(
-        Thread.is_pinned.desc(), Thread.bumped_at.desc()
-    ).paginate(page=page, per_page=per_page, error_out=False)
+    threads_paginated = query.order_by(Thread.bumped_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
 
     last_replies = get_last_replies([t.id for t in threads_paginated.items])
     boards = get_boards()
