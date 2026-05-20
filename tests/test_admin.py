@@ -137,3 +137,25 @@ def test_move_thread(app, client):
     with app.app_context():
         t = db.session.get(Thread, tid)
         assert t.board_id == b2_id
+
+
+def test_toggle_pin(app, client):
+    app.config["ADMIN_PASSWORD"] = "testpass"
+    with app.app_context():
+        board = Board.query.filter_by(short_name="b").first()
+        thread = Thread(board_id=board.id)
+        db.session.add(thread)
+        db.session.commit()
+        tid = thread.id
+
+    data = csrf_for(app, "toggle_pin")
+    resp = client.post(
+        f"/admin/threads/toggle_pin/{tid}",
+        data=data,
+        auth=("admin", "testpass"),
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with app.app_context():
+        t = db.session.get(Thread, tid)
+        assert t.is_pinned == True
