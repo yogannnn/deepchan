@@ -319,7 +319,9 @@ def save_files(files):
                 if thumb_img.mode not in ("RGB", "RGBA"):
                     thumb_img = thumb_img.convert("RGB")
                 thumb_img.thumbnail((200, 200))
-                thumb_img = add_watermark(thumb_img, "img")
+                thumb_img = add_watermark(
+                    thumb_img, "gif" if is_animated_gif else "img"
+                )
                 if webp_enabled:
                     thumb_img.save(thumb_path, format="WEBP", quality=80, method=6)
                 else:
