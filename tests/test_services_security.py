@@ -29,7 +29,7 @@ def test_check_rate_limit_too_fast(app):
         with patch("time.time", return_value=1005.0):
             with pytest.raises(Exception) as exc:
                 check_rate_limit()
-            assert exc.value.code == 429
+            assert exc.value.status_code == 429
 
 
 def test_check_rate_limit_with_identity(app):
@@ -46,7 +46,7 @@ def test_check_rate_limit_with_identity(app):
             g.identity = {"id": "user123"}
             with pytest.raises(Exception) as exc:
                 check_rate_limit()
-            assert exc.value.code == 429
+            assert exc.value.status_code == 429
 
 
 def test_check_ban_no_ban(app):
@@ -66,7 +66,7 @@ def test_check_ban_banned_identity(app):
         g.identity = {"id": "banned_user"}
         with pytest.raises(Exception) as exc:
             check_ban()
-        assert exc.value.code == 403
+        assert exc.value.status_code == 403
 
 
 def test_check_ban_expired(app):

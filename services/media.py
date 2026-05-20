@@ -7,6 +7,8 @@ import subprocess
 from flask import abort, current_app
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
+from core.exceptions import MediaValidationError
+
 
 def add_watermark(img, text, position=(5, 5)):
     draw = ImageDraw.Draw(img)
@@ -142,7 +144,7 @@ def save_files(files):
         return saved
     max_files = int(current_app.config["SETTINGS"].max_files)
     if len(files) > max_files:
-        abort(400, description=f"Слишком много файлов (максимум {max_files})")
+        raise MediaValidationError(f"Слишком много файлов (максимум {max_files})")
     max_image_dimension = current_app.config["SETTINGS"].max_image_dimension
     max_video_duration = current_app.config["SETTINGS"].max_video_duration
     max_video_size = current_app.config["SETTINGS"].max_video_size
@@ -158,7 +160,7 @@ def save_files(files):
             continue
         ext = os.path.splitext(f.filename)[1].lower().lstrip(".")
         if ext not in allowed_extensions:
-            abort(400, description=f"Недопустимый формат: {ext}")
+            raise MediaValidationError(f"Недопустимый формат: {ext}")
         f.stream.seek(0, os.SEEK_END)
         file_size = f.tell()
         f.stream.seek(0)
@@ -186,7 +188,7 @@ def save_files(files):
             picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
             if not clean_media_metadata(video_tmp, picture_path):
                 os.remove(video_tmp)
-                abort(400, description="Ошибка обработки видео")
+                raise MediaValidationError("Ошибка обработки видео")
             os.remove(video_tmp)
             thumb_fn = random_hex + "_thumb.webp"
             thumb_path = os.path.join(
@@ -214,7 +216,7 @@ def save_files(files):
             duration = get_media_duration(audio_tmp)
             if duration is None:
                 os.remove(audio_tmp)
-                abort(400, description="Не удалось определить длительность аудио")
+                raise MediaValidationError("Не удалось определить длительность аудио")
             if duration > max_audio_duration:
                 os.remove(audio_tmp)
                 abort(
@@ -226,7 +228,7 @@ def save_files(files):
             picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
             if not clean_media_metadata(audio_tmp, picture_path, is_audio=True):
                 os.remove(audio_tmp)
-                abort(400, description="Ошибка обработки аудио")
+                raise MediaValidationError("Ошибка обработки аудио")
             os.remove(audio_tmp)
             thumb_fn = random_hex + "_thumb.webp"
             thumb_path = os.path.join(
@@ -249,7 +251,7 @@ def save_files(files):
                 img = Image.open(f.stream)
                 img.verify()
             except (UnidentifiedImageError, Exception) as e:
-                abort(400, description=f"Некорректный файл изображения: {str(e)}")
+                raise MediaValidationError(f"Некорректный файл изображения: {str(e)}")
             f.stream.seek(0)
             img = Image.open(f.stream)
             if img.width > max_image_dimension or img.height > max_image_dimension:

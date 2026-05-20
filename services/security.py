@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from flask import abort, current_app, g, request
 
+from core.exceptions import BannedError, RateLimitError, ValidationError
 from core.i18n import t
 from models import Ban, WordFilter
 
@@ -21,7 +22,7 @@ def check_rate_limit():
         elapsed = now - _last_post_time[ip]
         limit = current_app.config["SETTINGS"].rate_limit_seconds
         if elapsed < limit:
-            abort(429, description=t("rate_limit", seconds=limit - int(elapsed)))
+            raise RateLimitError(t("rate_limit", seconds=limit - int(elapsed)))
     _last_post_time[ip] = now
 
 
@@ -42,7 +43,7 @@ def check_ban(ip=None):
         (Ban.expires_at == None) | (Ban.expires_at > now),
     ).first()
     if ban:
-        abort(403, description=t("banned", reason=ban.reason or "не указана"))
+        raise BannedError(t("banned", reason=ban.reason or "не указана"))
 
 
 def apply_word_filters(text):

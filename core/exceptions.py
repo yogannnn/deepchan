@@ -25,3 +25,7 @@ class RateLimitError(DeepChanError):
 
 class ValidationError(DeepChanError):
     status_code = 400
+
+
+class MediaValidationError(ValidationError):
+    pass

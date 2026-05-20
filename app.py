@@ -8,6 +8,7 @@ from flask import Flask, g, render_template, request
 from flask_compress import Compress
 
 from config import Config
+from core.exceptions import DeepChanError
 from core.middleware import ParanoidMiddleware, check_board_closed, inject_csrf_token
 from core.settings import Settings
 from migrate import run_migrations
@@ -197,6 +198,10 @@ def create_app():
             "Content-Security-Policy"
         ] = "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         return response
+
+    @app.errorhandler(DeepChanError)
+    def handle_domain_error(e):
+        return render_template("error.html", description=str(e)), e.status_code
 
     @app.errorhandler(400)
     def bad_request(e):

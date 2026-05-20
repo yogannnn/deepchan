@@ -15,7 +15,7 @@
 
 ## Контакты
 
-- Email: `garlic@mail.i2p`
+- Email: `yogannnn@gmail.com`
 - Telegram: `@DeepChanBoard`
 - Tox: `B82FA1AB98D895053C3A8A2E27AF200DB35A1480B87BC6676FA1126FE9C5E4785FF927C67465`
 

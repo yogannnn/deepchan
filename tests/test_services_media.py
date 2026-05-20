@@ -9,8 +9,10 @@ import pytest
 from flask import abort, g
 from PIL import Image
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import HTTPException
 
 from app import create_app
+from core.exceptions import MediaValidationError
 from models import Board, Post, Thread
 from models import db as _db
 from services.media import process_file, save_files
@@ -19,7 +21,9 @@ from services.media import process_file, save_files
 @pytest.fixture
 def app_with_media():
     """Создаёт изолированное приложение с временной папкой для загрузок."""
-    os.environ["DEEPCHAN_TESTING"] = "1"
+    import os as _os
+
+    _os.environ["DEEPCHAN_TESTING"] = "1"
     app = create_app()
     app.config["TESTING"] = True
     app.config["SERVER_NAME"] = "localhost"
@@ -46,7 +50,7 @@ def app_with_media():
     with app.app_context():
         _db.drop_all()
     shutil.rmtree(tmp_upload)
-    os.environ.pop("DEEPCHAN_TESTING", None)
+    _os.environ.pop("DEEPCHAN_TESTING", None)
 
 
 def _make_file(filename="test.jpg", content=None):
@@ -79,9 +83,9 @@ def test_save_files_invalid_extension(app_with_media):
     """Проверяет, что save_files отклоняет неразрешённые расширения."""
     with app_with_media.app_context():
         file = _make_file("test.svg", b"fake svg")
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(MediaValidationError) as exc:
             save_files([file])
-        assert exc.value.code == 400
+        assert exc.value.status_code == 400
 
 
 def test_media_before_process_hook(app_with_media):
@@ -117,66 +121,43 @@ def test_media_after_process_hook(app_with_media):
 
 
 def test_reject_invalid_extension(app_with_media):
-    """Неразрешённое расширение (.svg) должно вызывать abort 400."""
+    """Неразрешённое расширение (.svg) должно вызывать MediaValidationError."""
     with app_with_media.app_context():
         file = _make_file("test.svg", b"fake svg")
-        import pytest
-        from werkzeug.exceptions import HTTPException
-
-        from services.media import process_file
-
-        # при abort будет выброшен HTTPException
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(MediaValidationError) as exc:
             process_file(
                 file,
                 post=None,
                 board=app_with_media.board,
                 thread=app_with_media.thread,
             )
-        assert exc.value.code == 400
+        assert exc.value.status_code == 400
 
 
 def test_reject_corrupt_jpeg(app_with_media):
-    """Битый JPEG должен вызывать abort 400."""
+    """Битый JPEG должен вызывать MediaValidationError."""
     with app_with_media.app_context():
         file = _make_file("broken.jpg", b"this is not a valid jpeg")
-        import pytest
-        from werkzeug.exceptions import HTTPException
-
-        from services.media import process_file
-
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(MediaValidationError) as exc:
             process_file(
                 file,
                 post=None,
                 board=app_with_media.board,
                 thread=app_with_media.thread,
             )
-        assert exc.value.code == 400
+        assert exc.value.status_code == 400
 
 
 def test_reject_oversized_image(app_with_media):
     """Слишком большая картинка по разрешению вызывает abort 400."""
     with app_with_media.app_context():
-        from io import BytesIO
-
-        from PIL import Image
-
-        # Создаём картинку больше максимального размера
         max_dim = app_with_media.config["SETTINGS"].max_image_dimension
         img = Image.new("RGB", (max_dim + 1, max_dim + 1), color="blue")
         buf = BytesIO()
         img.save(buf, format="JPEG")
         buf.seek(0)
         buf.name = "big.jpg"
-        from werkzeug.datastructures import FileStorage
-
         file = FileStorage(stream=buf, filename="big.jpg")
-        import pytest
-        from werkzeug.exceptions import HTTPException
-
-        from services.media import process_file
-
         with pytest.raises(HTTPException) as exc:
             process_file(
                 file,
@@ -191,7 +172,6 @@ def test_media_duration_fallback_on_missing_ffprobe(app_with_media, monkeypatch)
     """Если ffprobe отсутствует или падает, get_media_duration возвращает None."""
     from services.media import get_media_duration
 
-    # Мокаем subprocess.run, чтобы он вызывал FileNotFoundError
     monkeypatch.setattr(
         "subprocess.run",
         lambda *args, **kwargs: (_ for _ in ()).throw(FileNotFoundError),
@@ -203,20 +183,12 @@ def test_media_duration_fallback_on_missing_ffprobe(app_with_media, monkeypatch)
 def test_process_valid_small_image(app_with_media):
     """Маленькая валидная картинка обрабатывается и сохраняется."""
     with app_with_media.app_context():
-        from io import BytesIO
-
-        from PIL import Image
-
         img = Image.new("RGB", (10, 10), color="red")
         buf = BytesIO()
         img.save(buf, format="JPEG")
         buf.seek(0)
         buf.name = "small.jpg"
-        from werkzeug.datastructures import FileStorage
-
         file = FileStorage(stream=buf, filename="small.jpg")
-        from services.media import process_file
-
         result = process_file(
             file, post=None, board=app_with_media.board, thread=app_with_media.thread
         )

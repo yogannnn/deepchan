@@ -184,7 +184,7 @@ def admin_upload_plugin():
             os.makedirs(target_dir, exist_ok=True)
             zf.extractall(target_dir)
         enabled_key = f"plugin_{plugin_dir}_enabled"
-        if not Setting.query.get(enabled_key):
+        if not db.session.get(Setting, enabled_key):
             db.session.add(Setting(key=enabled_key, value="false"))
             db.session.commit()
         flash(
