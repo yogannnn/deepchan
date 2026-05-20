@@ -91,7 +91,7 @@
                     <div class="post-content">
                         <span class="post-author"><span class="name">{{ p.name|e }}</span>{% if p.tripcode %}<span class="tripcode">{{ p.tripcode }}</span>{% endif %}</span>
                         <span class="datetime" style="color: #7ab37a; font-size: 0.8rem;">{{ p.created_at.strftime('%d.%m.%y %H:%M') }}</span>
-                        <div class="post-text" style="margin-top: 5px;">{{ p.comment[:200] }}{% if p.comment|length > 200 %}...{% endif %}</div>
+                        <div class="post-text" style="margin-top: 5px;">{{ p.comment | truncate_long_words }}</div>
                     </div>
                 </div>
             </div>

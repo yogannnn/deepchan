@@ -13,7 +13,7 @@ from core.middleware import ParanoidMiddleware, check_board_closed, inject_csrf_
 from core.settings import Settings
 from migrate import run_migrations
 from models import Board, Post, PostFTS, RadioTrack, Setting, Thread, db
-from services.text import process_comment
+from services.text import process_comment, truncate_long_words
 
 
 def create_app():
@@ -25,6 +25,7 @@ def create_app():
     db.init_app(app)
     app.secret_key = app.config["SECRET_KEY"]
     app.jinja_env.filters["process_comment"] = process_comment
+    app.jinja_env.filters["truncate_long_words"] = truncate_long_words
 
     from core.i18n import t
 

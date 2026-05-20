@@ -90,3 +90,21 @@ def process_comment(text, board_name, thread_id):
     text = parse_bbcode(text)
     text = process_urls(text)
     return text
+
+
+def truncate_long_words(text, max_len=60, head=20, tail=10):
+    """Обрезает слишком длинные слова, заменяя середину на '...'."""
+    import re
+
+    def _truncate_word(match):
+        word = match.group(0)
+        if len(word) > max_len:
+            return (
+                word[:head] + "..." + word[-tail:]
+                if len(word) > head + tail
+                else word[:head] + "..."
+            )
+        return word
+
+    # Применяем к каждому слову (буквы, цифры, дефисы, точки – типичные символы URL)
+    return re.sub(r"[\w\-\.]{60,}", _truncate_word, text)
