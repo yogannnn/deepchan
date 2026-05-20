@@ -828,3 +828,27 @@ footer > form {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+/* Исправление для спойлера последних постов */
+.thread-last-posts .post {
+    overflow: hidden;
+}
+.thread-last-posts .post-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+}
+.thread-last-posts .post-files {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.thread-last-posts .post-content {
+    flex: 1;
+    min-width: 0;
+}
+.post-text {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
