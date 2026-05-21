@@ -9,7 +9,6 @@ import pytest
 from flask import abort, g
 from PIL import Image
 from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import HTTPException
 
 from app import create_app
 from core.exceptions import MediaValidationError
