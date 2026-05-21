@@ -166,17 +166,15 @@ def admin_upload_plugin():
             plugins_root = os.path.abspath(
                 os.path.join(current_app.root_path, "plugins")
             )
-            target_dir = os.path.abspath(
-                os.path.normpath(os.path.join(plugins_root, plugin_dir))
-            )
+            # Проверяем, что plugin_dir не пытается выйти за пределы plugins_root
+            target_dir = os.path.realpath(os.path.join(plugins_root, plugin_dir))
             if os.path.commonpath([plugins_root, target_dir]) != plugins_root:
                 flash("Некорректная директория плагина", "error")
                 return redirect(url_for("admin_plugins.admin_plugins"))
 
+            # Проверяем, что ни один файл в архиве не вылезет за target_dir
             for member in zf.namelist():
-                member_target = os.path.abspath(
-                    os.path.normpath(os.path.join(target_dir, member))
-                )
+                member_target = os.path.realpath(os.path.join(target_dir, member))
                 if os.path.commonpath([target_dir, member_target]) != target_dir:
                     flash("Некорректные пути в архиве", "error")
                     return redirect(url_for("admin_plugins.admin_plugins"))
