@@ -5,7 +5,7 @@ import os
 import secrets
 import subprocess
 
-from flask import abort, current_app
+from flask import current_app
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
 from core.exceptions import MediaValidationError
@@ -173,9 +173,8 @@ def save_files(files):
         is_audio = ext in audio_exts
         if is_video:
             if file_size > max_video_size:
-                abort(
-                    400,
-                    description=f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)",
+                raise MediaValidationError(
+                    f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)",
                 )
             video_tmp = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
@@ -210,9 +209,8 @@ def save_files(files):
             )
         elif is_audio:
             if file_size > max_audio_size:
-                abort(
-                    400,
-                    description=f"Аудио слишком большое (макс {max_audio_size//1024//1024} МБ)",
+                raise MediaValidationError(
+                    f"Аудио слишком большое (макс {max_audio_size//1024//1024} МБ)",
                 )
             audio_tmp = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
@@ -224,9 +222,8 @@ def save_files(files):
                 raise MediaValidationError("Не удалось определить длительность аудио")
             if duration > max_audio_duration:
                 os.remove(audio_tmp)
-                abort(
-                    400,
-                    description=f"Аудио слишком длинное (макс {max_audio_duration} сек)",
+                raise MediaValidationError(
+                    f"Аудио слишком длинное (макс {max_audio_duration} сек)",
                 )
             random_hex = secrets.token_hex(16)
             picture_fn = random_hex + "." + ext
@@ -260,9 +257,8 @@ def save_files(files):
             f.stream.seek(0)
             img = Image.open(f.stream)
             if img.width > max_image_dimension or img.height > max_image_dimension:
-                abort(
-                    400,
-                    description=f"Разрешение превышает {max_image_dimension}x{max_image_dimension}",
+                raise MediaValidationError(
+                    f"Разрешение превышает {max_image_dimension}x{max_image_dimension}",
                 )
             is_animated_gif = False
             if img.format == "GIF":

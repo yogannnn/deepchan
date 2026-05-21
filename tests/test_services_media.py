@@ -149,7 +149,7 @@ def test_reject_corrupt_jpeg(app_with_media):
 
 
 def test_reject_oversized_image(app_with_media):
-    """Слишком большая картинка по разрешению вызывает abort 400."""
+    """Слишком большая картинка по разрешению вызывает MediaValidationError."""
     with app_with_media.app_context():
         max_dim = app_with_media.config["SETTINGS"].max_image_dimension
         img = Image.new("RGB", (max_dim + 1, max_dim + 1), color="blue")
@@ -158,14 +158,16 @@ def test_reject_oversized_image(app_with_media):
         buf.seek(0)
         buf.name = "big.jpg"
         file = FileStorage(stream=buf, filename="big.jpg")
-        with pytest.raises(HTTPException) as exc:
+        from core.exceptions import MediaValidationError
+
+        with pytest.raises(MediaValidationError) as exc:
             process_file(
                 file,
                 post=None,
                 board=app_with_media.board,
                 thread=app_with_media.thread,
             )
-        assert exc.value.code == 400
+        assert exc.value.status_code == 400
 
 
 def test_media_duration_fallback_on_missing_ffprobe(app_with_media, monkeypatch):

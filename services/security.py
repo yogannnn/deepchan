@@ -2,7 +2,7 @@ import re
 import time
 from datetime import datetime, timezone
 
-from flask import abort, current_app, g, request
+from flask import current_app, g, request
 
 from core.exceptions import BannedError, RateLimitError, ValidationError
 from core.i18n import t
@@ -52,19 +52,13 @@ def apply_word_filters(text):
         if f.is_regex:
             if re.search(f.pattern, text, re.IGNORECASE):
                 if f.action == "block":
-                    abort(
-                        400,
-                        description=t("wordfilter_block", pattern=f.pattern),
-                    )
+                    raise ValidationError(t("wordfilter_block", pattern=f.pattern))
                 elif f.action == "replace":
                     text = re.sub(f.pattern, f.replacement, text, flags=re.IGNORECASE)
         else:
             if f.pattern.lower() in text.lower():
                 if f.action == "block":
-                    abort(
-                        400,
-                        description=t("wordfilter_word", pattern=f.pattern),
-                    )
+                    raise ValidationError(t("wordfilter_word", pattern=f.pattern))
                 elif f.action == "replace":
                     text = text.replace(f.pattern, f.replacement)
     return text

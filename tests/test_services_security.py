@@ -103,15 +103,17 @@ def test_apply_word_filters_replace(app):
 
 
 def test_apply_word_filters_block(app):
-    """Слово с action=block вызывает abort 400."""
+    """Слово с action=block вызывает ValidationError (статус 400)."""
     with app.app_context():
         wf = WordFilter(pattern="запрещено", action="block", active=True)
         db.session.add(wf)
         db.session.commit()
 
-        with pytest.raises(Exception) as exc:
+        from core.exceptions import ValidationError
+
+        with pytest.raises(ValidationError) as exc:
             apply_word_filters("здесь запрещено слово")
-        assert exc.value.code == 400
+        assert exc.value.status_code == 400
 
 
 def test_apply_word_filters_regex(app):
