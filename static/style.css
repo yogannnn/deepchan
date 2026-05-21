@@ -868,3 +868,7 @@ footer > form {
     display: inline-block;
     max-width: 100%;
 }
+
+.thread-last-posts .post-row {
+    flex-direction: column;
+}
