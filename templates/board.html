@@ -60,7 +60,7 @@
         {% endif %}
         <div class="thread-info">
             <div class="thread-title">
-                {% if thread.is_pinned %}📌 {% endif %}<a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
+                <a href="{{ url_for('board.thread', board_name=board.short_name, thread_id=thread.id) }}">
                     {{ op.subject|e if op and op.subject else t('catalog.no_subject') }}
                 </a>
                 <span class="thread-badges">
