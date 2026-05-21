@@ -872,3 +872,8 @@ footer > form {
 .thread-last-posts .post-row {
     flex-direction: column;
 }
+
+/* Сохраняем переносы строк в спойлере */
+.thread-last-posts .post-text {
+    white-space: pre-wrap;
+}
