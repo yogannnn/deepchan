@@ -877,3 +877,83 @@ footer > form {
 .thread-last-posts .post-text {
     white-space: pre-wrap;
 }
+
+/* ===== Живые эффекты DeepChan ===== */
+
+/* 1. Hover-реакции у тредов */
+.thread {
+    transition: 0.2s ease;
+}
+.thread:hover {
+    transform: translateY(-2px);
+    border-color: #3f8f3f;
+    box-shadow: 0 0 12px rgba(80,255,80,0.15);
+}
+
+/* 2. Плавное свечение ссылок */
+a {
+    transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+a:hover {
+    text-shadow: 0 0 6px #66ff66;
+}
+
+/* 3. Плавное раскрытие спойлеров */
+details[open] {
+    animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 4. Терминальный курсор в логотипе */
+.logo::after {
+    content: "_";
+    animation: blink 1s steps(1) infinite;
+    color: #66ff66;
+    font-weight: bold;
+}
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* 5. CRT scanlines (едва заметные) */
+body::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.02),
+        rgba(255,255,255,0.02) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    z-index: 9999;
+}
+
+/* 6. Пульсация закреплённых тредов */
+.thread.pinned {
+    animation: pulse 4s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 rgba(80,255,80,0.4); }
+    50% { box-shadow: 0 0 10px rgba(80,255,80,0.2); }
+    100% { box-shadow: 0 0 0 rgba(80,255,80,0.4); }
+}
+
+
+/* 11. Подсветка поста через :target */
+.post:target {
+    border-color: #66ff66;
+    box-shadow: 0 0 10px #66ff66;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* 14. Hover-превью картинок */
+.post img:hover {
+    transform: scale(1.03);
+    transition: transform 0.15s ease;
+}
