@@ -1,150 +1,123 @@
-# Система хуков DeepChan
+Система хуков DeepChan
 
-Все плагины взаимодействуют с ядром только через hooks/events.
+Все плагины взаимодействуют с ядром только через хуки/события.
 
----
+Подписка на хук
 
-## Подписка на хук
-
-```python
 def init_app(app):
 
     def my_handler(**kwargs):
         print("Событие произошло")
 
     app.on("core.started", my_handler)
-```
 
----
+Список хуков
 
-# Основные хуки
+core.started
+- Когда: после загрузки всех плагинов.
+- Аргументы: app
+- Пример: app.on("core.started", lambda **kw: print("Ready"))
 
-## core.started
+http.before_request
+- Когда: перед обработкой любого HTTP-запроса.
+- Аргументы: request
+- Пример: app.on("http.before_request", lambda **kw: print(kw["request"].path))
 
-**Когда:** при старте приложения
+ui.header_rendering
+- Когда: перед рендерингом шапки.
+- Аргументы: request
+- Возврат: HTML-строка, которая вставится в <header>.
+- Пример: app.on("ui.header_rendering", lambda **kw: "<span>Hello</span>")
 
-**Контекст:**
+ui.footer_rendering
+- Когда: перед рендерингом подвала.
+- Аргументы: request
+- Возврат: HTML-строка, которая вставится в <footer>.
+- Пример: app.on("ui.footer_rendering", lambda **kw: "<p>Stats</p>")
 
-- `app`
+boards.filter_list
+- Когда: перед отображением списка досок.
+- Аргументы: boards (список объектов Board, можно мутировать)
+- Пример: app.on("boards.filter_list", lambda boards, **kw: boards.clear())
 
-**Использование:**
+board.opening
+- Когда: при открытии страницы доски.
+- Аргументы: board
+- Пример: app.on("board.opening", lambda **kw: print(kw["board"].short_name))
 
-- запуск фоновых задач
-- инициализация
-- миграции
+thread.opening
+- Когда: при открытии треда.
+- Аргументы: thread, board
+- Пример: app.on("thread.opening", lambda **kw: print(kw["thread"].id))
 
----
+thread.actions
+- Когда: при выводе кнопок действий у треда (на странице доски).
+- Аргументы: thread
+- Возврат: HTML-строка.
+- Пример: app.on("thread.actions", lambda **kw: "<button>Pin</button>")
 
-## http.before_request
+post.actions
+- Когда: при выводе кнопок действий у поста.
+- Аргументы: post
+- Возврат: HTML-строка.
+- Пример: app.on("post.actions", lambda **kw: "<button>Report</button>")
 
-**Когда:** перед обработкой HTTP-запроса
+posts.before_create
+- Когда: перед созданием поста.
+- Аргументы: board, thread, form, ip_address, identity_hash
+- Пример: app.on("posts.before_create", lambda **kw: print(kw["form"].comment.data))
 
-**Контекст:**
+posts.after_create
+- Когда: после создания поста.
+- Аргументы: post, board, thread
+- Пример: app.on("posts.after_create", lambda **kw: print(kw["post"].id))
 
-- `request`
+posts.before_render
+- Когда: перед отображением поста.
+- Аргументы: post
+- Пример: app.on("posts.before_render", lambda **kw: print(kw["post"].comment))
 
----
+threads.before_render
+- Когда: перед отображением треда.
+- Аргументы: thread
+- Пример: app.on("threads.before_render", lambda **kw: print(kw["thread"].id))
 
-## http.after_request
+threads.list_loaded
+- Когда: после загрузки списка тредов доски.
+- Аргументы: threads (список), board_id
+- Пример: app.on("threads.list_loaded", lambda **kw: print(len(kw["threads"])))
 
-**Когда:** после обработки HTTP-запроса
+thread.moved
+- Когда: после переноса треда на другую доску.
+- Аргументы: thread, old_board_id, new_board_id
+- Пример: app.on("thread.moved", lambda **kw: print(kw["old_board_id"]))
 
-**Контекст:**
+media.before_process
+- Когда: перед обработкой файла.
+- Аргументы: file, post, board, thread
+- Пример: app.on("media.before_process", lambda **kw: print(kw["file"].filename))
 
-- `request`
-- `response`
+media.after_process
+- Когда: после обработки файла.
+- Аргументы: file (кортеж), post, board, thread
+- Пример: app.on("media.after_process", lambda **kw: print(kw["file"][0]))
 
----
+admin.menu_rendering
+- Когда: при рендеринге меню админки.
+- Возврат: HTML-строка.
+- Пример: app.on("admin.menu_rendering", lambda **kw: "<a href='/admin/stats'>Stats</a>")
 
-## boards.filter_list
+content.changed
+- Когда: после удаления поста/треда.
+- Аргументы: action ("deleted"), post, thread, board
+- Пример: app.on("content.changed", lambda **kw: print(kw["action"]))
 
-Позволяет изменить список досок перед отображением.
+Рекомендации
 
-### Пример
-
-```python
-def hide_boards(boards, **kwargs):
-    boards[:] = [
-        b for b in boards
-        if b.short_name != "hidden"
-    ]
-```
-
----
-
-## posts.before_create
-
-Вызывается перед созданием поста.
-
-### Использование
-
-- антиспам
-- wordfilter
-- AI-модерация
-- watermark
-
----
-
-## posts.after_create
-
-Вызывается после создания поста.
-
-### Использование
-
-- уведомления
-- федерация
-- индексация
-- логирование
-
----
-
-## media.before_process
-
-Перед обработкой файла.
-
----
-
-## media.after_process
-
-После обработки файла.
-
----
-
-## admin.menu_rendering
-
-Позволяет добавить пункт в админское меню.
-
----
-
-# Рекомендации
-
-## Hooks
-
-Используются для изменения данных.
-
-Например:
-
-- `boards.filter_list`
-- `posts.before_render`
-
----
-
-## Events
-
-Используются для уведомлений.
-
-Например:
-
-- `posts.created`
-- `posts.deleted`
-
----
-
-# Важно
-
-Плагины не должны:
-
-- monkeypatch'ить ядро
-- напрямую менять глобальное состояние
-- импортировать другие плагины
-- регистрировать Blueprint вне `init_app()`
+- Хуки (on) используются для изменения данных.
+- События (emit) используются для уведомлений.
+- Плагины не должны:
+  - monkeypatch'ить ядро
+  - напрямую менять глобальное состояние
+  - импортировать другие плагины
+  - регистрировать Blueprint вне init_app()
