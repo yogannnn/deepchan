@@ -907,15 +907,7 @@ details[open] {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 4. Терминальный курсор в логотипе */
-.logo::after {
-    content: "_";
-    animation: blink 1s steps(1) infinite;
-    color: #66ff66;
-    font-weight: bold;
-}
-@keyframes blink {
-    50% { opacity: 0; }
+
 }
 
 /* 5. CRT scanlines (едва заметные) */
@@ -926,8 +918,8 @@ body::before {
     inset: 0;
     background: repeating-linear-gradient(
         to bottom,
-        rgba(255,255,255,0.04),
-        rgba(255,255,255,0.04) 1px,
+        rgba(255,255,255,0.015),
+        rgba(255,255,255,0.015) 1px,
         transparent 1px,
         transparent 3px
     );
