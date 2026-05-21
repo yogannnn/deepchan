@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}400 — Неверный запрос{% endblock %}
+{% block title %}400 — Кривой запрос{% endblock %}
 {% block content %}
 <div style="text-align: center; margin-top: 50px;">
-    <h2 style="color: var(--error);">⚠️ 400 — Неверный запрос</h2>
-    <p style="color: var(--text-dim);">{{ description or 'Сервер не может обработать ваш запрос.' }}</p>
-    <p><a href="{{ url_for('main.index') }}" style="color: var(--accent);">← На главную</a></p>
+    <h2 style="color: var(--error);">🤦 400 — Кривой запрос</h2>
+    <p style="color: var(--text-dim);">{{ description or 'Сервер не понял, что ты от него хочешь. Попробуй переформулировать, а лучше — просто смирись.' }}</p>
+    <p><a href="{{ url_for('main.index') }}" style="color: var(--accent);">← На главную, подальше от этого позора</a></p>
 </div>
 {% endblock %}

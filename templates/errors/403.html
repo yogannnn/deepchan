@@ -2,8 +2,8 @@
 {% block title %}403 — Доступ запрещён{% endblock %}
 {% block content %}
 <div style="text-align: center; margin-top: 50px;">
-    <h2 style="color: var(--error);">🔒 403 — Доступ запрещён</h2>
-    <p style="color: var(--text-dim);">{{ description or 'У вас нет прав для просмотра этой страницы.' }}</p>
-    <p><a href="{{ url_for('main.index') }}" style="color: var(--accent);">← На главную</a></p>
+    <h2 style="color: var(--error);">🚫 403 — Доступ запрещён</h2>
+    <p style="color: var(--text-dim);">{{ description or 'Ты не пройдёшь! Сервер тебя не пускает. Может, ты забыл представиться или просто не заслужил.' }}</p>
+    <p><a href="{{ url_for('main.index') }}" style="color: var(--accent);">← На главную, пока не забанили навсегда</a></p>
 </div>
 {% endblock %}
