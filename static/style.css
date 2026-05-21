@@ -868,8 +868,3 @@ footer > form {
     display: inline-block;
     max-width: 100%;
 }
-
-/* Сохраняем переносы строк в спойлере */
-.thread-last-posts .post-text {
-    white-space: pre-wrap;
-}
