@@ -850,12 +850,12 @@ footer > form {
 }
 .post-text {
     overflow-wrap: anywhere;
-    word-break: break-word;
+    
 }
 
 /* Ломаем длинные ссылки в спойлере */
 .thread-last-posts .post-text {
-    word-break: break-all;
+    
     max-width: 100%;
 }
 .thread-last-posts .post-content {
@@ -864,7 +864,7 @@ footer > form {
     max-width: 100%;
 }
 .thread-last-posts a {
-    word-break: break-all;
+    
     display: inline-block;
     max-width: 100%;
 }
