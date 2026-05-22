@@ -2,7 +2,7 @@ import re
 import time
 from datetime import datetime, timezone
 
-from flask import current_app, g, request
+from flask import current_app, request
 
 from core.exceptions import BannedError, RateLimitError, ValidationError
 from core.i18n import t
