@@ -2,6 +2,7 @@
 Сервис для работы с постами.
 Единая точка создания и получения постов.
 """
+
 import html
 from datetime import datetime, timezone
 
@@ -40,9 +41,9 @@ def create_post(
         thread=thread,
         form=form,
         ip_address=ip_address,
-        identity_hash=getattr(g, "identity", {}).get("id")
-        if hasattr(g, "identity")
-        else None,
+        identity_hash=(
+            getattr(g, "identity", {}).get("id") if hasattr(g, "identity") else None
+        ),
     )
 
     # Если плагин установил g.captcha_required (например, identity-based), принудительно включаем капчу
@@ -88,9 +89,9 @@ def create_post(
             hash_password(form.password.data) if form.password.data else None
         ),
         ip_address=ip_address,
-        identity_hash=getattr(g, "identity", {}).get("id")
-        if hasattr(g, "identity")
-        else None,
+        identity_hash=(
+            getattr(g, "identity", {}).get("id") if hasattr(g, "identity") else None
+        ),
     )
     post.search_text = (post.comment + " " + (post.subject or "")).lower()
     db.session.add(post)

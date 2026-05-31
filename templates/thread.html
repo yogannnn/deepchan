@@ -105,6 +105,8 @@
 <hr>
 {% endfor %}
 
+{% for widget in emit("thread.content_bottom", thread=thread) %}{{ widget|safe }}{% endfor %}
+
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}

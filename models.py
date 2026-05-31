@@ -171,3 +171,9 @@ def get_last_replies(thread_ids):
             short = short[:120] + "..."
         result[thread_id] = short
     return result
+
+
+class ThreadFTS(db.Model):
+    __tablename__ = "thread_fts"
+    thread_id = db.Column(db.Integer, primary_key=True)
+    search_text = db.Column(db.Text)
