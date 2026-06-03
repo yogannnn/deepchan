@@ -949,3 +949,31 @@ body::before {
     transform: scale(1.03);
     transition: transform 0.15s ease;
 }
+
+/* Плавающая кнопка "Наверх" */
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1a2a1a 0%, #0f1a0f 100%);
+    border: 1px solid #2a6e2a;
+    color: #66ff66;
+    text-align: center;
+    line-height: 44px;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+}
+.scroll-to-top:hover {
+    background: linear-gradient(145deg, #2a4a2a 0%, #1a2a1a 100%);
+    border-color: #33cc33;
+    box-shadow: 0 4px 12px rgba(0,255,0,0.2);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
