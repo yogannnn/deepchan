@@ -20,6 +20,6 @@ def init_app(app):
         parts.append(f"{minutes}m")
 
         uptime_str = " ".join(parts)
-        return f'<p style="text-align:center; color:#7ab37a; font-size:0.75rem;">🟢 Аптайм: {uptime_str}</p>'
+        return f'<p style="text-align:center; color:#7ab37a; font-size:0.75rem;">🟢 Uptime: {uptime_str}</p>'
 
     app.on("ui.footer_rendering", on_footer_render)
