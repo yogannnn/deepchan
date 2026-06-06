@@ -1,0 +1,7 @@
+{
+  "name": "Uptime Footer",
+  "version": "1.0.0",
+  "description": "Показывает время работы сервера в подвале.",
+  "api_version": 1,
+  "priority": 5
+}
