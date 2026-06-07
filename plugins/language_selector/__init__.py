@@ -32,7 +32,7 @@ def init_app(app):
                 if "SETTINGS" in current_app.config:
                     current_app.config["SETTINGS"]._cache["SITE_LANG"] = lang
 
-    @app.after_request
+    # @app.after_request
     def restore_language(response):
         original = g.pop("_original_site_lang", None)
         if original is not None:
