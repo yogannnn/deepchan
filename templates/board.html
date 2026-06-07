@@ -12,7 +12,8 @@
 <a href="{{ url_for('board.board_rss', board_name=board.short_name) }}">{{ t("board.rss") }}</a>
 <hr>
 
-<h3>{{ t("board.create_thread") }}</h3>
+<details{% if form_open %} open{% endif %}>
+    <summary style="cursor: pointer; color: #66ff66;">➕ {{ t("board.create_thread") }}</summary>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name) }}">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
@@ -33,6 +34,7 @@
     <input type="submit" value="{{ t('board.create_button') }}">
     <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
+</details>
 <hr>
 
 {% if pagination.pages > 1 %}

@@ -15,7 +15,8 @@
 <hr>
 
 {% if not thread.is_locked %}
-<h3> {{ t("thread.reply") }}</h3>
+<details{% if form_open %} open{% endif %}>
+    <summary style="font-weight: bold; display: inline-block; background: linear-gradient(145deg, #1a2a1a 0%, #0f1a0f 100%); border: 1px solid #2a6e2a; border-radius: 30px; padding: 8px 20px; cursor: pointer; color: #66ff66; margin-bottom: 10px;">💬 {{ t("thread.reply") }}</summary>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('board.create_post', board_name=board.short_name, thread_id=thread.id) }}">
     {% set csrf = csrf_token('post') %}
     <input type="hidden" name="csrf_token" value="{{ csrf.token }}">
@@ -35,6 +36,7 @@
     <input type="submit" value=" {{ t('thread.reply') }}">
     <input type="hidden" name="captcha_token" value="{{ captcha_token }}">
 </form>
+</details>
 <hr>
 {% endif %}
 
@@ -66,7 +68,7 @@
 
         {% if post.password_hash %}
         <div class="post-delete">
-            <details>
+            <details{% if form_open %} open{% endif %}>
                 <summary>🗑️</summary>
                 <form method="post" action="{{ url_for('board.delete_post', board_name=board.short_name, post_id=post.id) }}" class="delete-form">
                     {% set csrf = csrf_token('delete_post') %}

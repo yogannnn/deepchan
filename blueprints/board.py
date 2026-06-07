@@ -162,6 +162,51 @@ def thread(board_name, thread_id):
 @csrf_protect("post")
 def create_post(board_name):
     board = Board.query.filter_by(short_name=board_name).first_or_404()
+
+    # Если нажата кнопка "Обновить капчу" — перерендерить страницу с новой капчей
+    if request.form.get("refresh_captcha") == "1":
+        captcha_data, _, captcha_token = generate_captcha()
+        thread_id = request.args.get("thread_id", type=int)
+        if thread_id:
+            thread = Thread.query.get_or_404(thread_id)
+            posts_paginated = thread.posts.order_by(Post.created_at.asc()).paginate(
+                page=request.args.get("page", 1, type=int),
+                per_page=current_app.config["SETTINGS"].posts_per_page,
+                error_out=False,
+            )
+            return render_template(
+                "thread.html",
+                board=board,
+                thread=thread,
+                posts=posts_paginated.items,
+                pagination=posts_paginated,
+                form=form,
+                quote_text=request.args.get("reply", ""),
+                captcha_data=captcha_data,
+                captcha_token=captcha_token,
+            )
+        else:
+            threads_paginated = (
+                board.threads.filter(
+                    Thread.board_id.in_(get_visible_board_ids()),
+                    Thread.posts.any(),
+                )
+                .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())
+                .paginate(
+                    page=request.args.get("page", 1, type=int),
+                    per_page=current_app.config["SETTINGS"].threads_per_page,
+                    error_out=False,
+                )
+            )
+            return render_template(
+                "board.html",
+                board=board,
+                threads=threads_paginated.items,
+                pagination=threads_paginated,
+                form=form,
+                captcha_data=captcha_data,
+                captcha_token=captcha_token,
+            )
     form = PostForm()
 
     check_rate_limit()
@@ -199,6 +244,7 @@ def create_post(board_name):
                         quote_text=quote_text,
                         captcha_data=captcha_data,
                         captcha_token=captcha_token,
+                        form_open=True,
                         captcha_error=captcha_error,
                     ),
                     400,
@@ -222,6 +268,7 @@ def create_post(board_name):
                         form=form,
                         captcha_data=captcha_data,
                         captcha_token=captcha_token,
+                        form_open=True,
                         captcha_error=captcha_error,
                     ),
                     400,

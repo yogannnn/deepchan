@@ -977,3 +977,20 @@ body::before {
     transform: translateY(-2px);
     text-decoration: none;
 }
+
+/* Стилизация спойлера создания треда как кнопки */
+details > summary {
+    font-weight: bold;
+    display: inline-block;
+    background: linear-gradient(145deg, #1a2a1a 0%, #0f1a0f 100%);
+    border: 1px solid #2a6e2a;
+    border-radius: 30px;
+    padding: 8px 20px;
+    cursor: pointer;
+    color: #66ff66;
+    margin-bottom: 10px;
+}
+details > summary:hover {
+    background: linear-gradient(145deg, #2a4a2a 0%, #1a2a1a 100%);
+    border-color: #33cc33;
+}
