@@ -82,7 +82,7 @@ def board(board_name):
         board.threads.filter(
             Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
         )
-        .order_by(Thread.bumped_at.desc())  # без is_pinned
+        .order_by(Thread.is_pinned.desc(), Thread.bumped_at.desc())  # без is_pinned
         .paginate(page=page, per_page=per_page, error_out=False)
     )
     form = PostForm()
