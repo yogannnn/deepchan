@@ -130,6 +130,10 @@ def create_post(
         thread.bumped_at = datetime.now(timezone.utc)
 
     # Полнотекстовый поиск
+    # Удаляем возможный дубликат перед вставкой
+    db.session.execute(
+        db.text("DELETE FROM post_fts WHERE post_id = :pid"), {"pid": post.id}
+    )
     fts_entry = PostFTS(
         post_id=post.id,
         board_id=board.id,
