@@ -6,14 +6,12 @@ from services.preferences import get_preference, set_preference
 
 
 def get_available_languages():
-    """Возвращает список кодов языков, для которых есть JSON-файлы в translations/."""
     translations_dir = os.path.join(current_app.root_path, "translations")
     if not os.path.isdir(translations_dir):
-        return ["ru"]  # fallback
+        return ["ru"]
     langs = []
     for fname in os.listdir(translations_dir):
         if fname.endswith(".json"):
-            # убираем расширение .json
             lang_code = fname[:-5]
             langs.append(lang_code)
     return sorted(langs) or ["ru"]
@@ -27,6 +25,9 @@ def init_app(app):
             lang = get_preference(identity["id"], "language")
             if lang:
                 g._original_site_lang = current_app.config.get("SITE_LANG", "ru")
+                import logging
+
+                logging.warning(f"LANG: set to {lang} for {identity['id']}")
                 current_app.config["SITE_LANG"] = lang
                 if "SETTINGS" in current_app.config:
                     current_app.config["SETTINGS"]._cache["SITE_LANG"] = lang
@@ -35,6 +36,9 @@ def init_app(app):
     def restore_language(response):
         original = g.pop("_original_site_lang", None)
         if original is not None:
+            import logging
+
+            logging.warning(f"LANG: restored to {original}")
             current_app.config["SITE_LANG"] = original
             if "SETTINGS" in current_app.config:
                 current_app.config["SETTINGS"]._cache["SITE_LANG"] = original
@@ -51,7 +55,6 @@ def init_app(app):
         options = ""
         for lang_code in available:
             selected = "selected" if lang_code == current_lang else ""
-            # Отображаем код языка заглавными буквами (RU, EN, DE…)
             label = lang_code.upper()
             options += f'<option value="{lang_code}" {selected}>{label}</option>'
         return (
@@ -70,7 +73,6 @@ def init_app(app):
         identity = getattr(g, "identity", {})
         if identity and identity.get("id"):
             lang = request.form.get("language", "ru")
-            # Принимаем только языки, для которых есть файл перевода
             available = get_available_languages()
             if lang in available:
                 set_preference(identity["id"], "language", lang)
