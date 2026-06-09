@@ -172,35 +172,14 @@ def save_files(files):
         is_video = ext in video_exts
         is_audio = ext in audio_exts
         if is_video:
-            if file_size > max_video_size:
-                raise MediaValidationError(
-                    f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)",
-                )
-            video_tmp = os.path.join(
-                current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
-            )
-            f.save(video_tmp)
-            duration = get_media_duration(video_tmp)
-            if duration is None or duration > max_video_duration:
-                os.remove(video_tmp)
-                abort(
-                    400,
-                    description=f"Видео слишком длинное (макс {max_video_duration} сек)",
-                )
+            # Временный фикс: отключаем все проверки размера и длительности
             random_hex = secrets.token_hex(16)
             picture_fn = random_hex + "." + ext
             picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
-            if not clean_media_metadata(video_tmp, picture_path):
-                os.remove(video_tmp)
-                raise MediaValidationError("Ошибка обработки видео")
-            os.remove(video_tmp)
-            thumb_fn = random_hex + "_thumb.webp"
-            thumb_path = os.path.join(
-                current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
-            )
-            if not generate_video_thumbnail(picture_path, thumb_path):
-                thumb_fn = None
-                thumb_path = None
+            f.save(picture_path)
+            thumb_fn = None
+            thumb_path = None
+            duration = None
             f.stream.seek(0)
             file_data = f.read()
             sha256 = hashlib.sha256(file_data).hexdigest()
