@@ -65,7 +65,7 @@
         <p class="hint">{{ t("admin.settings_hint") }}</p>
         <label>
             {{ t("admin.settings_max_file_size") }}:
-            <input type="number" name="max_content_length" value="{{ max_content_length }}" min="1" max="100">
+            <input type="number" name="max_content_length" value="{{ max_content_length }}" min="1" max="500">
         </label>
         <label>
             {{ t("admin.settings_max_resolution") }}:
@@ -73,19 +73,19 @@
         </label>
         <label>
             {{ t("admin.settings_max_video_duration") }}:
-            <input type="number" name="max_video_duration" value="{{ max_video_duration }}" min="10" max="600">
+            <input type="number" name="max_video_duration" value="{{ max_video_duration }}" min="10">
         </label>
         <label>
             {{ t("admin.settings_max_video_size") }}:
-            <input type="number" name="max_video_size" value="{{ max_video_size }}" min="1" max="500">
+            <input type="number" name="max_video_size" value="{{ max_video_size }}" min="1">
         </label>
         <label>
             {{ t("admin.settings_max_audio_duration") }}:
-            <input type="number" name="max_audio_duration" value="{{ max_audio_duration }}" min="10" max="3600">
+            <input type="number" name="max_audio_duration" value="{{ max_audio_duration }}" min="10">
         </label>
         <label>
             {{ t("admin.settings_max_audio_size") }}:
-            <input type="number" name="max_audio_size" value="{{ max_audio_size }}" min="1" max="500">
+            <input type="number" name="max_audio_size" value="{{ max_audio_size }}" min="1">
         </label>
         <label>
             <input type="checkbox" name="webp_convert_enabled" {% if webp_convert_enabled %}checked{% endif %}>
