@@ -20,6 +20,8 @@ def create_app():
     app = Flask(__name__)
     Compress(app)
     app.config.from_object(Config)
+    app.config["DEBUG"] = True
+    app.config["PROPAGATE_EXCEPTIONS"] = True
     if os.environ.get("DEEPCHAN_TESTING") == "1":
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     db.init_app(app)

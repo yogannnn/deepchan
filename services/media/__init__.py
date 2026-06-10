@@ -44,12 +44,27 @@ def get_media_duration(filepath):
             ],
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=120,
         )
         if result.returncode == 0:
             data = json.loads(result.stdout)
             return float(data["format"]["duration"])
-    except Exception:
+    except subprocess.TimeoutExpired:
+        import logging
+
+        logging.getLogger(__name__).error("ffprobe timed out")
+        pass
+    except subprocess.CalledProcessError as e:
+        import logging
+
+        logging.getLogger(__name__).error(
+            "ffprobe failed (returncode=%d): %s", e.returncode, e.stderr
+        )
+        pass
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).exception("get_media_duration failed")
         pass
     return None
 
@@ -72,7 +87,7 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
                 tmp_thumb,
             ],
             capture_output=True,
-            timeout=15,
+            timeout=120,
             check=True,
         )
         img = Image.open(tmp_thumb)
@@ -80,7 +95,22 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
         img.save(thumb_path, format="WEBP", quality=80)
         os.remove(tmp_thumb)
         return True
-    except Exception:
+    except subprocess.TimeoutExpired:
+        import logging
+
+        logging.getLogger(__name__).error("ffmpeg clean_metadata timed out")
+        return False
+    except subprocess.CalledProcessError as e:
+        import logging
+
+        logging.getLogger(__name__).error(
+            "ffmpeg clean_metadata failed (returncode=%d): %s", e.returncode, e.stderr
+        )
+        return False
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).exception("clean_media_metadata failed")
         return False
 
 
@@ -99,11 +129,26 @@ def clean_media_metadata(input_path, output_path, is_audio=False):
                 output_path,
             ],
             capture_output=True,
-            timeout=30,
+            timeout=120,
             check=True,
         )
         return True
-    except Exception:
+    except subprocess.TimeoutExpired:
+        import logging
+
+        logging.getLogger(__name__).error("ffmpeg clean_metadata timed out")
+        return False
+    except subprocess.CalledProcessError as e:
+        import logging
+
+        logging.getLogger(__name__).error(
+            "ffmpeg clean_metadata failed (returncode=%d): %s", e.returncode, e.stderr
+        )
+        return False
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).exception("clean_media_metadata failed")
         return False
 
 
@@ -167,7 +212,7 @@ def save_files(files):
         ext = os.path.splitext(f.filename)[1].lower().lstrip(".")
         validate_extension(ext, allowed_extensions)
         f.stream.seek(0, os.SEEK_END)
-        file_size = f.tell()
+        file_size = f.stream.tell()
         f.stream.seek(0)
         is_video = ext in video_exts
         is_audio = ext in audio_exts
@@ -180,9 +225,10 @@ def save_files(files):
             thumb_fn = None
             thumb_path = None
             duration = None
-            f.stream.seek(0)
-            file_data = f.read()
-            sha256 = hashlib.sha256(file_data).hexdigest()
+            sha256 = hashlib.sha256()
+            for chunk in iter(lambda: f.stream.read(8192), b""):
+                sha256.update(chunk)
+            sha256 = sha256.hexdigest()
             saved.append(
                 (picture_fn, thumb_fn, idx, file_size, sha256, "video", duration)
             )
@@ -220,9 +266,10 @@ def save_files(files):
                 thumb_img.save(thumb_path, format="WEBP", quality=80)
             except Exception:
                 thumb_fn = None
-            f.stream.seek(0)
-            file_data = f.read()
-            sha256 = hashlib.sha256(file_data).hexdigest()
+            sha256 = hashlib.sha256()
+            for chunk in iter(lambda: f.stream.read(8192), b""):
+                sha256.update(chunk)
+            sha256 = sha256.hexdigest()
             saved.append(
                 (picture_fn, thumb_fn, idx, file_size, sha256, "audio", duration)
             )
@@ -303,8 +350,9 @@ def save_files(files):
                     thumb_img.save(thumb_path, optimize=True, quality=80)
             except Exception:
                 thumb_fn = None
-            f.stream.seek(0)
-            file_data = f.read()
-            sha256 = hashlib.sha256(file_data).hexdigest()
+            sha256 = hashlib.sha256()
+            for chunk in iter(lambda: f.stream.read(8192), b""):
+                sha256.update(chunk)
+            sha256 = sha256.hexdigest()
             saved.append((picture_fn, thumb_fn, idx, file_size, sha256, "image", None))
     return saved

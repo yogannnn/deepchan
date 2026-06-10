@@ -53,7 +53,7 @@ class PostFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
     file_path = db.Column(db.String(255), nullable=False)
-    thumb_path = db.Column(db.String(255), nullable=False)
+    thumb_path = db.Column(db.String(255), nullable=True)
     file_order = db.Column(db.Integer, default=0)
     file_size = db.Column(db.Integer, default=0)
     md5_hash = db.Column(db.String(32))
