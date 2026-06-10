@@ -74,7 +74,13 @@ def create_post(
     safe_subject = html.escape(form.subject.data) if form.subject.data else None
 
     # Сохраняем файлы (вызывается после создания поста)
+    import logging
+
+    logging.warning(
+        f"POST: saving {len(files_data)} files: {[f.filename for f in files_data]}"
+    )
     saved_files = save_files(files_data)
+    logging.warning(f"POST: saved_files result: {len(saved_files)} items")
 
     # Создаём пост
     post = Post(

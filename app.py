@@ -174,7 +174,7 @@ def create_app():
         footer_widgets = app.emit("ui.footer_rendering", request=request)
         return dict(header_widgets=header_widgets, footer_widgets=footer_widgets)
 
-    @app.errorhandler(Exception)
+    #     @app.errorhandler(Exception)
     def handle_all_errors(e):
         code = getattr(e, "code", 500)
         desc = getattr(e, "description", "")
@@ -202,7 +202,7 @@ def create_app():
             response.cache_control.no_store = True
         return response
 
-    @app.errorhandler(Exception)
+    #     @app.errorhandler(Exception)
     def handle_all_errors(e):
         code = getattr(e, "code", 500)
         desc = getattr(e, "description", "")

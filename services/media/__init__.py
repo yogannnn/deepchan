@@ -217,7 +217,6 @@ def save_files(files):
         is_video = ext in video_exts
         is_audio = ext in audio_exts
         if is_video:
-            # Временный фикс: отключаем все проверки размера и длительности
             random_hex = secrets.token_hex(16)
             picture_fn = random_hex + "." + ext
             picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
@@ -225,10 +224,9 @@ def save_files(files):
             thumb_fn = None
             thumb_path = None
             duration = None
-            sha256 = hashlib.sha256()
-            for chunk in iter(lambda: f.stream.read(8192), b""):
-                sha256.update(chunk)
-            sha256 = sha256.hexdigest()
+            f.stream.seek(0)
+            file_data = f.read()
+            sha256 = hashlib.sha256(file_data).hexdigest()
             saved.append(
                 (picture_fn, thumb_fn, idx, file_size, sha256, "video", duration)
             )
