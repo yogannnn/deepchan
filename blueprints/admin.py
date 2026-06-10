@@ -554,7 +554,6 @@ def admin_settings():
         save_setting("WEBP_CONVERT_ENABLED", "webp_convert_enabled" in request.form)
         save_setting("STEALTH_TRIM", "stealth_trim" in request.form)
         save_setting("ADMIN_TRIP_SECRET", request.form.get("admin_trip_secret", ""))
-        save_setting("RADIO_ENABLED", "radio_enabled" in request.form)
         save_setting("RADIO_BITRATE", request.form.get("radio_bitrate", "128k"))
         flash(t("settings_saved"), "success")
         return redirect(url_for("admin.admin_settings"))
