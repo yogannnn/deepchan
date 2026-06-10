@@ -2,7 +2,6 @@
 Сервис для работы с постами.
 Единая точка создания и получения постов.
 """
-
 import html
 from datetime import datetime, timezone
 
@@ -41,12 +40,12 @@ def create_post(
         thread=thread,
         form=form,
         ip_address=ip_address,
-        identity_hash=(
-            getattr(g, "identity", {}).get("id") if hasattr(g, "identity") else None
-        ),
+        identity_hash=getattr(g, "identity", {}).get("id")
+        if hasattr(g, "identity")
+        else None,
     )
 
-    # Если плагин установил g.captcha_required (например, identity-based), принудительно включаем капчу
+    # Если плагин установил g.captcha_required, принудительно включаем капчу
     if getattr(g, "captcha_required", False):
         current_app.config["SETTINGS"]._cache["CAPTCHA_ENABLED"] = True
 
@@ -73,14 +72,9 @@ def create_post(
     safe_name = html.escape(display_name) if display_name else "Аноним"
     safe_subject = html.escape(form.subject.data) if form.subject.data else None
 
-    # Сохраняем файлы (вызывается после создания поста)
-    import logging
-
-    logging.warning(
-        f"POST: saving {len(files_data)} files: {[f.filename for f in files_data]}"
-    )
-    saved_files = save_files(files_data)
-    logging.warning(f"POST: saved_files result: {len(saved_files)} items")
+    # Сохраняем файлы (защита от None)
+    files_to_save = files_data if files_data else []
+    saved_files = save_files(files_to_save)
 
     # Создаём пост
     post = Post(
@@ -95,9 +89,9 @@ def create_post(
             hash_password(form.password.data) if form.password.data else None
         ),
         ip_address=ip_address,
-        identity_hash=(
-            getattr(g, "identity", {}).get("id") if hasattr(g, "identity") else None
-        ),
+        identity_hash=getattr(g, "identity", {}).get("id")
+        if hasattr(g, "identity")
+        else None,
     )
     post.search_text = (post.comment + " " + (post.subject or "")).lower()
     db.session.add(post)
@@ -108,7 +102,7 @@ def create_post(
         pf = PostFile(
             post_id=post.id,
             file_path=fn,
-            thumb_path=tn,
+            thumb_path=tn or "",  # гарантируем строку, если None
             file_order=order,
             file_size=size,
             md5_hash=sha256,
@@ -136,10 +130,6 @@ def create_post(
         thread.bumped_at = datetime.now(timezone.utc)
 
     # Полнотекстовый поиск
-    # Удаляем возможный дубликат перед вставкой
-    db.session.execute(
-        db.text("DELETE FROM post_fts WHERE post_id = :pid"), {"pid": post.id}
-    )
     fts_entry = PostFTS(
         post_id=post.id,
         board_id=board.id,
