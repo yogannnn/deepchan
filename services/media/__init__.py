@@ -53,19 +53,16 @@ def get_media_duration(filepath):
         import logging
 
         logging.getLogger(__name__).error("ffprobe timed out")
-        pass
     except subprocess.CalledProcessError as e:
         import logging
 
         logging.getLogger(__name__).error(
             "ffprobe failed (returncode=%d): %s", e.returncode, e.stderr
         )
-        pass
     except Exception as e:
         import logging
 
         logging.getLogger(__name__).exception("get_media_duration failed")
-        pass
     return None
 
 
@@ -98,20 +95,18 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
     except subprocess.TimeoutExpired:
         import logging
 
-        logging.getLogger(__name__).error("ffmpeg clean_metadata timed out")
-        return False
+        logging.getLogger(__name__).error("ffmpeg thumbnail timed out")
     except subprocess.CalledProcessError as e:
         import logging
 
         logging.getLogger(__name__).error(
-            "ffmpeg clean_metadata failed (returncode=%d): %s", e.returncode, e.stderr
+            "ffmpeg thumbnail failed (returncode=%d): %s", e.returncode, e.stderr
         )
-        return False
     except Exception as e:
         import logging
 
-        logging.getLogger(__name__).exception("clean_media_metadata failed")
-        return False
+        logging.getLogger(__name__).exception("generate_video_thumbnail failed")
+    return False
 
 
 def clean_media_metadata(input_path, output_path, is_audio=False):
@@ -137,19 +132,17 @@ def clean_media_metadata(input_path, output_path, is_audio=False):
         import logging
 
         logging.getLogger(__name__).error("ffmpeg clean_metadata timed out")
-        return False
     except subprocess.CalledProcessError as e:
         import logging
 
         logging.getLogger(__name__).error(
             "ffmpeg clean_metadata failed (returncode=%d): %s", e.returncode, e.stderr
         )
-        return False
     except Exception as e:
         import logging
 
         logging.getLogger(__name__).exception("clean_media_metadata failed")
-        return False
+    return False
 
 
 def generate_audio_thumbnail(text="AUDIO", width=200, height=200):
@@ -172,11 +165,9 @@ def generate_audio_thumbnail(text="AUDIO", width=200, height=200):
 
 
 def process_file(file, post, board, thread):
-    """Обрабатывает файл перед сохранением, вызывая хуки media.before_process и media.after_process."""
     current_app.emit(
         "media.before_process", file=file, post=post, board=board, thread=thread
     )
-    # Если хук отклонил файл, не сохраняем
     from flask import g
 
     if getattr(g, "aborted", False):
@@ -196,6 +187,7 @@ def save_files(files):
     max_files = int(current_app.config["SETTINGS"].max_files)
     if len(files) > max_files:
         raise MediaValidationError(f"Слишком много файлов (максимум {max_files})")
+
     max_image_dimension = current_app.config["SETTINGS"].max_image_dimension
     max_video_duration = current_app.config["SETTINGS"].max_video_duration
     max_video_size = current_app.config["SETTINGS"].max_video_size
@@ -206,6 +198,7 @@ def save_files(files):
     allowed_extensions = current_app.config["SETTINGS"].allowed_extensions
     video_exts = {"mp4", "webm", "mov", "avi", "mkv"}
     audio_exts = {"mp3", "ogg", "flac", "wav", "m4a"}
+
     for idx, f in enumerate(files):
         if f.filename == "":
             continue
@@ -216,24 +209,55 @@ def save_files(files):
         f.stream.seek(0)
         is_video = ext in video_exts
         is_audio = ext in audio_exts
+
         if is_video:
+            if file_size > max_video_size:
+                raise MediaValidationError(
+                    f"Видео слишком большое (макс {max_video_size//1024//1024} МБ)"
+                )
+            video_tmp = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
+            )
+            f.save(video_tmp)
+            duration = get_media_duration(video_tmp)
+            if duration is None or duration > max_video_duration:
+                os.remove(video_tmp)
+                raise MediaValidationError(
+                    f"Видео слишком длинное (макс {max_video_duration} сек)"
+                )
             random_hex = secrets.token_hex(16)
             picture_fn = random_hex + "." + ext
             picture_path = os.path.join(current_app.config["UPLOAD_FOLDER"], picture_fn)
-            f.save(picture_path)
-            thumb_fn = None
-            thumb_path = None
-            duration = None
-            f.stream.seek(0)
-            file_data = f.read()
-            sha256 = hashlib.sha256(file_data).hexdigest()
+            if not clean_media_metadata(video_tmp, picture_path):
+                os.remove(video_tmp)
+                raise MediaValidationError("Ошибка обработки видео")
+            os.remove(video_tmp)
+            thumb_fn = random_hex + "_thumb.webp"
+            thumb_path = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
+            )
+            if not generate_video_thumbnail(picture_path, thumb_path):
+                import logging
+
+                logging.getLogger(__name__).warning(
+                    "Не удалось создать превью для видео, сохраняю без него"
+                )
+                thumb_fn = None
+                thumb_path = None
+            # Потоковое вычисление SHA-256
+            sha256 = hashlib.sha256()
+            with open(picture_path, "rb") as f_video:
+                for chunk in iter(lambda: f_video.read(65536), b""):
+                    sha256.update(chunk)
+            sha256 = sha256.hexdigest()
             saved.append(
                 (picture_fn, thumb_fn, idx, file_size, sha256, "video", duration)
             )
+
         elif is_audio:
             if file_size > max_audio_size:
                 raise MediaValidationError(
-                    f"Аудио слишком большое (макс {max_audio_size//1024//1024} МБ)",
+                    f"Аудио слишком большое (макс {max_audio_size//1024//1024} МБ)"
                 )
             audio_tmp = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], secrets.token_hex(16) + "." + ext
@@ -246,7 +270,7 @@ def save_files(files):
             if duration > max_audio_duration:
                 os.remove(audio_tmp)
                 raise MediaValidationError(
-                    f"Аудио слишком длинное (макс {max_audio_duration} сек)",
+                    f"Аудио слишком длинное (макс {max_audio_duration} сек)"
                 )
             random_hex = secrets.token_hex(16)
             picture_fn = random_hex + "." + ext
@@ -264,13 +288,13 @@ def save_files(files):
                 thumb_img.save(thumb_path, format="WEBP", quality=80)
             except Exception:
                 thumb_fn = None
-            sha256 = hashlib.sha256()
-            for chunk in iter(lambda: f.stream.read(8192), b""):
-                sha256.update(chunk)
-            sha256 = sha256.hexdigest()
+            f.stream.seek(0)
+            file_data = f.read()
+            sha256 = hashlib.sha256(file_data).hexdigest()
             saved.append(
                 (picture_fn, thumb_fn, idx, file_size, sha256, "audio", duration)
             )
+
         else:
             try:
                 f.stream.seek(0)
@@ -282,7 +306,7 @@ def save_files(files):
             img = Image.open(f.stream)
             if img.width > max_image_dimension or img.height > max_image_dimension:
                 raise MediaValidationError(
-                    f"Разрешение превышает {max_image_dimension}x{max_image_dimension}",
+                    f"Разрешение превышает {max_image_dimension}x{max_image_dimension}"
                 )
             is_animated_gif = False
             if img.format == "GIF":
@@ -348,9 +372,9 @@ def save_files(files):
                     thumb_img.save(thumb_path, optimize=True, quality=80)
             except Exception:
                 thumb_fn = None
-            sha256 = hashlib.sha256()
-            for chunk in iter(lambda: f.stream.read(8192), b""):
-                sha256.update(chunk)
-            sha256 = sha256.hexdigest()
+            f.stream.seek(0)
+            file_data = f.read()
+            sha256 = hashlib.sha256(file_data).hexdigest()
             saved.append((picture_fn, thumb_fn, idx, file_size, sha256, "image", None))
+
     return saved
