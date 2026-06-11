@@ -16,16 +16,29 @@ from services.media.validation import (
 )
 
 
+def _format_size(size_bytes):
+    if size_bytes < 1024:
+        return f"{size_bytes}B"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f}KB"
+    else:
+        return f"{size_bytes / (1024 * 1024):.1f}MB"
+
+
 def add_watermark(img, text, position=(5, 5)):
     draw = ImageDraw.Draw(img)
     try:
         font = ImageFont.truetype(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 12
         )
     except:
         font = ImageFont.load_default()
-    draw.text((position[0] + 1, position[1] + 1), text, font=font, fill=(0, 0, 0))
-    draw.text(position, text, font=font, fill=(255, 255, 255))
+    lines = text.split("\n")
+    y = position[1]
+    for line in lines:
+        draw.text((position[0] + 1, y + 1), line, font=font, fill=(0, 0, 0))
+        draw.text((position[0], y), line, font=font, fill=(255, 255, 255))
+        y += 15
     return img
 
 
@@ -66,7 +79,7 @@ def get_media_duration(filepath):
     return None
 
 
-def generate_video_thumbnail(video_path, thumb_path, width=200):
+def generate_video_thumbnail(video_path, thumb_path, label="video", width=200):
     try:
         tmp_thumb = thumb_path + ".tmp.webp"
         subprocess.run(
@@ -88,7 +101,7 @@ def generate_video_thumbnail(video_path, thumb_path, width=200):
             check=True,
         )
         img = Image.open(tmp_thumb)
-        img = add_watermark(img, "video")
+        img = add_watermark(img, label)
         img.save(thumb_path, format="WEBP", quality=80)
         os.remove(tmp_thumb)
         return True
@@ -150,17 +163,15 @@ def generate_audio_thumbnail(text="AUDIO", width=200, height=200):
     draw = ImageDraw.Draw(img)
     try:
         font = ImageFont.truetype(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 12
         )
     except:
         font = ImageFont.load_default()
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-    x = (width - text_width) // 2
-    y = (height - text_height) // 2
-    draw.text((x + 1, y + 1), text, font=font, fill=(0, 0, 0))
-    draw.text((x, y), text, font=font, fill=(255, 255, 255))
+    lines = text.split("\n")
+    y = 10
+    for line in lines:
+        draw.text((5, y), line, font=font, fill=(255, 255, 255))
+        y += 15
     return img
 
 
@@ -236,7 +247,13 @@ def save_files(files):
             thumb_path = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
             )
-            if not generate_video_thumbnail(picture_path, thumb_path):
+            # Формируем метку: MP4 15MB 0:30
+            video_label = f"{ext.upper()} {_format_size(file_size)}"
+            if duration:
+                video_label += f" {int(duration // 60)}:{int(duration % 60):02d}"
+            if not generate_video_thumbnail(
+                picture_path, thumb_path, label=video_label
+            ):
                 import logging
 
                 logging.getLogger(__name__).warning(
@@ -244,7 +261,6 @@ def save_files(files):
                 )
                 thumb_fn = None
                 thumb_path = None
-            # Потоковое вычисление SHA-256
             sha256 = hashlib.sha256()
             with open(picture_path, "rb") as f_video:
                 for chunk in iter(lambda: f_video.read(65536), b""):
@@ -283,14 +299,22 @@ def save_files(files):
             thumb_path = os.path.join(
                 current_app.config["UPLOAD_FOLDER"], "thumbs", thumb_fn
             )
+            audio_label = f"{ext.upper()} {_format_size(file_size)}"
+            if duration:
+                audio_label += f"\n{int(duration // 60)}:{int(duration % 60):02d}"
             try:
-                thumb_img = generate_audio_thumbnail()
+                thumb_img = generate_audio_thumbnail(text=audio_label)
                 thumb_img.save(thumb_path, format="WEBP", quality=80)
             except Exception:
                 thumb_fn = None
-            f.stream.seek(0)
-            file_data = f.read()
-            sha256 = hashlib.sha256(file_data).hexdigest()
+            sha256 = hashlib.sha256()
+            with open(audio_tmp + ".hash", "wb") as _:
+                pass
+            # Потоковый SHA-256 для аудио
+            with open(picture_path, "rb") as f_audio:
+                for chunk in iter(lambda: f_audio.read(65536), b""):
+                    sha256.update(chunk)
+            sha256 = sha256.hexdigest()
             saved.append(
                 (picture_fn, thumb_fn, idx, file_size, sha256, "audio", duration)
             )
@@ -363,18 +387,22 @@ def save_files(files):
                 if thumb_img.mode not in ("RGB", "RGBA"):
                     thumb_img = thumb_img.convert("RGB")
                 thumb_img.thumbnail((200, 200))
-                thumb_img = add_watermark(
-                    thumb_img, "gif" if is_animated_gif else "img"
+                # Метка: GIF 800x600 2.1MB
+                img_label = (
+                    f"{ext.upper()} {img.width}x{img.height} {_format_size(file_size)}"
                 )
+                thumb_img = add_watermark(thumb_img, img_label)
                 if webp_enabled:
                     thumb_img.save(thumb_path, format="WEBP", quality=80, method=6)
                 else:
                     thumb_img.save(thumb_path, optimize=True, quality=80)
             except Exception:
                 thumb_fn = None
+            sha256 = hashlib.sha256()
             f.stream.seek(0)
-            file_data = f.read()
-            sha256 = hashlib.sha256(file_data).hexdigest()
+            for chunk in iter(lambda: f.stream.read(65536), b""):
+                sha256.update(chunk)
+            sha256 = sha256.hexdigest()
             saved.append((picture_fn, thumb_fn, idx, file_size, sha256, "image", None))
 
     return saved
