@@ -388,9 +388,7 @@ def save_files(files):
                     thumb_img = thumb_img.convert("RGB")
                 thumb_img.thumbnail((200, 200))
                 # Метка: GIF 800x600 2.1MB
-                img_label = (
-                    f"{ext.upper()} {img.width}x{img.height} {_format_size(file_size)}"
-                )
+                img_label = f"{ext.lstrip('.').upper()} {img.width}x{img.height} {_format_size(file_size)}"
                 thumb_img = add_watermark(thumb_img, img_label)
                 if webp_enabled:
                     thumb_img.save(thumb_path, format="WEBP", quality=80, method=6)
