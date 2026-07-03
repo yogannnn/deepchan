@@ -40,7 +40,7 @@ def global_catalog():
 
     board_id = request.args.get("board_id", type=int)
     page = request.args.get("page", 1, type=int)
-    per_page = 42
+    per_page = 30
     query = Thread.query.filter(
         Thread.board_id.in_(get_visible_board_ids()), Thread.posts.any()
     )

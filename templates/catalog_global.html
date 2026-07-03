@@ -47,11 +47,11 @@
 {% if pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
+        <a href="{{ url_for('main.global_catalog', board_id=selected_board, page=pagination.prev_num) }}">{{ t("pagination.prev") }}</a>
     {% endif %}
     <span>{{ t("pagination.page") }} {{ pagination.page }} {{ t("pagination.of") }} {{ pagination.pages }}</span>
     {% if pagination.has_next %}
-        <a href="{{ url_for('global_catalog', board_id=selected_board, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
+        <a href="{{ url_for('main.global_catalog', board_id=selected_board, page=pagination.next_num) }}">{{ t("pagination.next") }}</a>
     {% endif %}
 </div>
 {% endif %}

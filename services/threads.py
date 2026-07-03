@@ -14,7 +14,7 @@ def get_thread(thread_id):
     return thread
 
 
-def get_board_threads(board_id, only_visible=True, limit=42):
+def get_board_threads(board_id, only_visible=True, limit=None):
     """Возвращает список тредов доски. Если only_visible=True, то только из видимых досок.
     По умолчанию возвращает последние 42 треда, отсортированные по дате."""
     query = Thread.query.filter(Thread.board_id == board_id, Thread.posts.any())
