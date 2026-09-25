@@ -1,0 +1,16 @@
+### COMMAND
+/usr/sbin/asterisk -rx rtp\ show\ settings 
+### OUTPUT
+
+
+General Settings:
+----------------
+  Port start:      10000
+  Port end:        20000
+  Checksums:       Yes
+  DTMF Timeout:    1200
+  Strict RTP:      Yes
+  Probation:       4 frames
+  Replay Protect:  Yes
+  ICE support:     Yes
+  STUN address:    0.0.0.0:0

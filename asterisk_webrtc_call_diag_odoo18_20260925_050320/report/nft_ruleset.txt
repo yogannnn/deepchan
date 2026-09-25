@@ -1,0 +1,164 @@
+### COMMAND
+/usr/sbin/nft list ruleset 
+### OUTPUT
+# Warning: table ip nat is managed by iptables-nft, do not touch!
+table ip nat {
+	chain POSTROUTING {
+		type nat hook postrouting priority srcnat; policy accept;
+		ip saddr 172.17.0.0/16 oifname != "docker0" counter packets 25965 bytes 1574086 masquerade
+		ip saddr 172.17.0.2 ip daddr 172.17.0.2 tcp dport 3001 counter packets 0 bytes 0 masquerade
+	}
+
+	chain PREROUTING {
+		type nat hook prerouting priority dstnat; policy accept;
+		fib daddr type local counter packets 323336 bytes 66096037 jump DOCKER
+	}
+
+	chain OUTPUT {
+		type nat hook output priority dstnat; policy accept;
+		ip daddr != 127.0.0.0/8 fib daddr type local counter packets 10 bytes 600 jump DOCKER
+	}
+
+	chain DOCKER {
+		iifname "docker0" counter packets 0 bytes 0 return
+		ip daddr 127.0.0.1 iifname != "docker0" tcp dport 3001 counter packets 0 bytes 0 dnat to 172.17.0.2:3001
+	}
+}
+# Warning: table ip filter is managed by iptables-nft, do not touch!
+table ip filter {
+	chain DOCKER {
+		ip daddr 172.17.0.2 iifname != "docker0" oifname "docker0" tcp dport 3001 counter packets 0 bytes 0 accept
+	}
+
+	chain DOCKER-ISOLATION-STAGE-1 {
+		iifname "docker0" oifname != "docker0" counter packets 187213 bytes 49193931 jump DOCKER-ISOLATION-STAGE-2
+		counter packets 794810 bytes 1358572115 return
+	}
+
+	chain FORWARD {
+		type filter hook forward priority filter; policy drop;
+		counter packets 922683 bytes 1422047430 jump DOCKER-USER
+		counter packets 794810 bytes 1358572115 jump DOCKER-ISOLATION-STAGE-1
+		oifname "docker0" ct state related,established counter packets 222331 bytes 446471145 accept
+		oifname "docker0" counter packets 0 bytes 0 jump DOCKER
+		iifname "docker0" oifname != "docker0" counter packets 187213 bytes 49193931 accept
+		iifname "docker0" oifname "docker0" counter packets 0 bytes 0 accept
+	}
+
+	chain DOCKER-USER {
+		counter packets 1576619 bytes 3205584514 return
+	}
+
+	chain INPUT {
+		type filter hook input priority filter; policy drop;
+		iifname "lo" counter packets 1254121 bytes 1088450875 accept
+		ct state related,established counter packets 2253807 bytes 587782220 accept
+		udp dport 5060-5091 xt match "string" counter packets 25 bytes 11020 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 5060-5091 xt match "string" counter packets 860 bytes 344006 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 5060-5091 xt match "string" counter packets 45 bytes 43782 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 5060-5091 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 35000 xt match "string" counter packets 0 bytes 0 drop
+		udp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 36000-36011 xt match "string" counter packets 0 bytes 0 drop
+		tcp dport 22 counter packets 89079 bytes 5565873 accept
+		tcp dport 80 counter packets 25578 bytes 1505075 accept
+		tcp dport 443 counter packets 20242 bytes 1173096 accept
+		tcp dport 7443 counter packets 52 bytes 2480 accept
+		tcp dport 5060-5091 counter packets 61241 bytes 3183068 accept
+		udp dport 5060-5091 counter packets 25640 bytes 16915214 accept
+		tcp dport 35000 counter packets 8 bytes 336 accept
+		udp dport 35000 counter packets 1 bytes 396 accept
+		tcp dport 36000-36011 counter packets 33 bytes 1372 accept
+		udp dport 36000-36011 counter packets 12 bytes 4695 accept
+		udp dport 16384-32768 counter packets 15430 bytes 5570274 accept
+		ip protocol icmp icmp type echo-request counter packets 5773 bytes 372942 accept
+		udp dport 1194 counter packets 35 bytes 1907 accept
+		udp dport 10000-20000 counter packets 7571 bytes 1509947 accept
+	}
+
+	chain OUTPUT {
+		type filter hook output priority filter; policy accept;
+	}
+
+	chain DOCKER-ISOLATION-STAGE-2 {
+		oifname "docker0" counter packets 0 bytes 0 drop
+		counter packets 208133 bytes 57382024 return
+	}
+}
+# Warning: table ip6 filter is managed by iptables-nft, do not touch!
+table ip6 filter {
+	chain INPUT {
+		type filter hook input priority filter; policy drop;
+		iifname "lo" counter packets 8 bytes 560 accept
+		ct state related,established counter packets 160108 bytes 1907748736 accept
+		meta l4proto ipv6-icmp counter packets 6687 bytes 455208 accept
+		iifname "lo" counter packets 0 bytes 0 accept
+		ct state related,established counter packets 0 bytes 0 accept
+	}
+
+	chain FORWARD {
+		type filter hook forward priority filter; policy drop;
+	}
+
+	chain OUTPUT {
+		type filter hook output priority filter; policy accept;
+	}
+}
+# Warning: table ip mangle is managed by iptables-nft, do not touch!
+table ip mangle {
+	chain OUTPUT {
+		type route hook output priority mangle; policy accept;
+		udp sport 16384-32768 counter packets 13931 bytes 2253935 ip dscp set 0x2e
+		udp sport 5060-5091 counter packets 46739 bytes 25159085 ip dscp set 0x1a
+		tcp sport 5060-5091 counter packets 62640 bytes 2813028 ip dscp set 0x1a
+		udp sport 35000 counter packets 0 bytes 0 ip dscp set 0x1a
+		udp sport 36000-36011 counter packets 2 bytes 128 ip dscp set 0x1a
+		tcp sport 36000-36011 counter packets 130 bytes 20543 ip dscp set 0x1a
+	}
+}
+table inet f2b-table {
+	set addr-set-sshd {
+		type ipv4_addr
+		elements = { 62.60.130.201 }
+	}
+
+	chain f2b-chain {
+		type filter hook input priority filter - 1; policy accept;
+		tcp dport 22 ip saddr @addr-set-sshd reject with icmp port-unreachable
+	}
+}

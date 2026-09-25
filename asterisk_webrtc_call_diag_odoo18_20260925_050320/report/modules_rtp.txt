@@ -1,0 +1,11 @@
+### COMMAND
+/usr/sbin/asterisk -rx module\ show\ like\ rtp 
+### OUTPUT
+Module                         Description                              Use Count  Status      Support Level
+bridge_native_rtp.so           Native RTP bridging module               0          Running              core
+chan_rtp.so                    RTP Media Channel                        0          Running              core
+res_pjsip_sdp_rtp.so           PJSIP SDP RTP/AVP stream handler         0          Running              core
+res_rtp_asterisk.so            Asterisk RTP Stack                       0          Running              core
+res_rtp_multicast.so           Multicast RTP Engine                     1          Running              core
+res_srtp.so                    Secure RTP (SRTP)                        0          Running              core
+6 modules loaded

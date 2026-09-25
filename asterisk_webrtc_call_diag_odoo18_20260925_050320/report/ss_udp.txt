@@ -1,0 +1,10 @@
+### COMMAND
+/usr/bin/ss -lunp 
+### OUTPUT
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                              
+UNCONN 0      0            0.0.0.0:43017      0.0.0.0:*    users:(("asterisk",pid=89918,fd=10))
+UNCONN 0      0            0.0.0.0:4520       0.0.0.0:*    users:(("asterisk",pid=89918,fd=24))
+UNCONN 0      0            0.0.0.0:4569       0.0.0.0:*    users:(("asterisk",pid=89918,fd=20))
+UNCONN 0      0            0.0.0.0:5000       0.0.0.0:*    users:(("asterisk",pid=89918,fd=25))
+UNCONN 0      0            0.0.0.0:5060       0.0.0.0:*    users:(("asterisk",pid=89918,fd=12))
+UNCONN 0      0               [::]:59025         [::]:*    users:(("asterisk",pid=89918,fd=11))

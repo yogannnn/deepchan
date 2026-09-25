@@ -1,0 +1,2 @@
+local 89.58.15.243 dev lo src 89.58.15.243 uid 0 
+    cache <local> 

@@ -1,0 +1,2 @@
+1.1.1.1 via 89.58.12.1 dev eth0 src 89.58.15.243 uid 0 
+    cache 

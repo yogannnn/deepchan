@@ -1,0 +1,11 @@
+### COMMAND
+iptables-legacy -L -n -v 
+### OUTPUT
+Chain INPUT (policy ACCEPT 570K packets, 66M bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain FORWARD (policy ACCEPT 93034 packets, 114M bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain OUTPUT (policy ACCEPT 781K packets, 938M bytes)
+ pkts bytes target     prot opt in     out     source               destination         

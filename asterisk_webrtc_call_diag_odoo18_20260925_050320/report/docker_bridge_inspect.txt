@@ -1,0 +1,48 @@
+### COMMAND
+/usr/bin/docker network inspect bridge 
+### OUTPUT
+[
+    {
+        "Name": "bridge",
+        "Id": "2e9e25f84940f02443ef29aab43e352e14e30be0ce95e7a4af67e3829fe5ccd7",
+        "Created": "2026-09-23T07:44:27.66234455+02:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16",
+                    "Gateway": "172.17.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "1caa54061bda513c5b7a879a22d2c804f12624c036973cec56c9d78d840d835b": {
+                "Name": "freellmapi",
+                "EndpointID": "9908f2b939304d63d80bed60ebecf5c01a0d34a172ca7c1aceadd44e5a3d6813",
+                "MacAddress": "02:42:ac:11:00:02",
+                "IPv4Address": "172.17.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.bridge.default_bridge": "true",
+            "com.docker.network.bridge.enable_icc": "true",
+            "com.docker.network.bridge.enable_ip_masquerade": "true",
+            "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+            "com.docker.network.bridge.name": "docker0",
+            "com.docker.network.driver.mtu": "1500"
+        },
+        "Labels": {}
+    }
+]

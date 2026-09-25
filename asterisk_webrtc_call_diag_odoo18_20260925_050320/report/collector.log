@@ -1,0 +1,8 @@
+[2026-09-25 05:03:20] Starting Asterisk WebRTC/SIP RTP diagnostic
+[2026-09-25 05:03:20] Duration: 30s
+[2026-09-25 05:03:20] Output: /tmp/asterisk_webrtc_call_diag_odoo18_20260925_050320
+[2026-09-25 05:03:21] Capture interface: eth0
+[2026-09-25 05:03:21] Enabling temporary RTP debug and PJSIP logger
+[2026-09-25 05:03:21] Live capture is running. Place ONE test WebRTC -> external SIP call now.
+[2026-09-25 05:03:52] Capture interval ended. Final state will be saved and runtime debug restored.
+[2026-09-25 05:03:52] Stopping background captures and restoring Asterisk runtime flags...

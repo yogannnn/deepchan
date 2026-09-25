@@ -1,0 +1,12 @@
+### COMMAND
+/usr/sbin/ip neigh 
+### OUTPUT
+89.58.12.1 dev eth0 lladdr 00:00:5e:00:01:01 REACHABLE 
+89.58.12.2 dev eth0 lladdr bc:0f:fe:37:fb:a2 STALE 
+89.58.12.3 dev eth0 lladdr bc:0f:fe:33:fc:e2 STALE 
+172.17.0.2 dev docker0 lladdr 02:42:ac:11:00:02 STALE 
+2a03:4000:60::2 dev eth0 FAILED 
+fe80::be0f:fe00:be33:fce2 dev eth0 lladdr bc:0f:fe:33:fc:e2 router STALE 
+fe80::be0f:fe00:be37:fba2 dev eth0 lladdr bc:0f:fe:37:fb:a2 router STALE 
+fe80::1 dev eth0 lladdr 00:00:5e:00:02:02 router STALE 
+2a03:4000:60::3 dev eth0 FAILED 

@@ -1,0 +1,5 @@
+### COMMAND
+/usr/sbin/asterisk -rx pjsip\ show\ channelstats 
+### OUTPUT
+No objects found.
+

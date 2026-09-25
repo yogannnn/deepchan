@@ -1,0 +1,8 @@
+### COMMAND
+/usr/sbin/asterisk -rx module\ show\ like\ opus 
+### OUTPUT
+Module                         Description                              Use Count  Status      Support Level
+codec_opus.so                  OPUS Coder/Decoder                       0          Running          extended
+format_ogg_opus.so             OGG/Opus audio                           0          Running              core
+res_format_attr_opus.so        Opus Format Attribute Module             1          Running              core
+3 modules loaded

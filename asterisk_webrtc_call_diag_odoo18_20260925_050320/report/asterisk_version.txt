@@ -1,0 +1,4 @@
+### COMMAND
+/usr/sbin/asterisk -rx core\ show\ version 
+### OUTPUT
+Asterisk 21.12.3 built by root @ odoo18 on a x86_64 running Linux on 2026-09-24 12:47:57 UTC

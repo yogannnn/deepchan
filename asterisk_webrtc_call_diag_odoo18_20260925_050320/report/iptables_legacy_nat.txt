@@ -1,0 +1,14 @@
+### COMMAND
+iptables-legacy -t nat -L -n -v 
+### OUTPUT
+Chain PREROUTING (policy ACCEPT 35345 packets, 3403K bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain INPUT (policy ACCEPT 15069 packets, 2105K bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain OUTPUT (policy ACCEPT 2967 packets, 192K bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain POSTROUTING (policy ACCEPT 9359 packets, 580K bytes)
+ pkts bytes target     prot opt in     out     source               destination         

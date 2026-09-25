@@ -1,0 +1,17 @@
+### COMMAND
+/usr/sbin/asterisk -rx pjsip\ show\ channels 
+### OUTPUT
+
+  Channel:  <ChannelId........................................>  <State.....>  <Time.....>
+      Exten: <DialedExten.............>  CLCID: <ConnectedLineCID.......>
+==========================================================================================
+
+  Channel: PJSIP/120-webrtc-00000018/Dial                        Up            00:00:20   
+      Exten: 79995708096                 CLCID: "" <79995708096>
+
+  Channel: PJSIP/zadarma-00000019/AppDial                        Up            00:00:20   
+      Exten:                             CLCID: "" <45664-100>
+
+
+Objects found: 2
+

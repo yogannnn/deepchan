@@ -1,0 +1,22 @@
+### COMMAND
+/usr/sbin/asterisk -rx http\ show\ status 
+### OUTPUT
+HTTP Server Status:
+Prefix: 
+Server: Asterisk
+Server Enabled and Bound to 0.0.0.0:8088
+
+HTTPS Server Enabled and Bound to 0.0.0.0:8089
+
+Enabled URI's:
+/phoneprov/... => Asterisk HTTP Phone Provisioning Tool
+/metrics/... => Prometheus Metrics URI
+/media/... => Media over Websocket
+/ari/... => Asterisk RESTful API
+/ws => Asterisk HTTP WebSocket
+
+Enabled Redirects:
+  None.
+
+Path Restrictions:
+  None.

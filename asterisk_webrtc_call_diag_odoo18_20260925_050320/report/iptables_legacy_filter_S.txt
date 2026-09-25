@@ -1,0 +1,6 @@
+### COMMAND
+iptables-legacy -S 
+### OUTPUT
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT

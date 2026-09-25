@@ -1,0 +1,6 @@
+### COMMAND
+/usr/sbin/asterisk -rx module\ show\ like\ srtp 
+### OUTPUT
+Module                         Description                              Use Count  Status      Support Level
+res_srtp.so                    Secure RTP (SRTP)                        0          Running              core
+1 modules loaded

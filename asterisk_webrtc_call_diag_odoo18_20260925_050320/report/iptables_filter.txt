@@ -1,0 +1,94 @@
+### COMMAND
+/usr/sbin/iptables -L -n -v 
+### OUTPUT
+# Warning: iptables-legacy tables present, use iptables-legacy to see them
+Chain INPUT (policy DROP 196K packets, 24M bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+1254K 1088M ACCEPT     all  --  lo     *       0.0.0.0/0            0.0.0.0/0           
+2254K  588M ACCEPT     all  --  *      *       0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED
+   25 11020 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "friendly-scanner" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "friendly-scanner" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "friendly-scanner" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "friendly-scanner" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "friendly-scanner" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "friendly-scanner" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "sipcli/" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "sipcli/" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "sipcli/" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "sipcli/" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "sipcli/" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "sipcli/" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "VaxSIPUserAgent/" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "VaxSIPUserAgent/" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "VaxSIPUserAgent/" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "VaxSIPUserAgent/" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "VaxSIPUserAgent/" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "VaxSIPUserAgent/" ALGO name bm ICASE
+  860  344K DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "pplsip" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "pplsip" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "pplsip" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "pplsip" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "pplsip" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "pplsip" ALGO name bm ICASE
+   45 43782 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "system " ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "system " ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "system " ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "system " ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "system " ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "system " ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "exec." ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "exec." ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "exec." ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "exec." ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "exec." ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "exec." ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091 STRING match  "multipart/mixed;boundary" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091 STRING match  "multipart/mixed;boundary" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000 STRING match  "multipart/mixed;boundary" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000 STRING match  "multipart/mixed;boundary" ALGO name bm ICASE
+    0     0 DROP       udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011 STRING match  "multipart/mixed;boundary" ALGO name bm ICASE
+    0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011 STRING match  "multipart/mixed;boundary" ALGO name bm ICASE
+89079 5566K ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:22
+25578 1505K ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:80
+20242 1173K ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:443
+   52  2480 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:7443
+61241 3183K ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:5060:5091
+25640   17M ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:5060:5091
+    8   336 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpt:35000
+    1   396 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:35000
+   33  1372 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            tcp dpts:36000:36011
+   12  4695 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:36000:36011
+15430 5570K ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:16384:32768
+ 5773  373K ACCEPT     icmp --  *      *       0.0.0.0/0            0.0.0.0/0            icmptype 8
+   35  1907 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpt:1194
+ 7571 1510K ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0            udp dpts:10000:20000
+
+Chain FORWARD (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+ 923K 1422M DOCKER-USER  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+ 795K 1359M DOCKER-ISOLATION-STAGE-1  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+ 222K  446M ACCEPT     all  --  *      docker0  0.0.0.0/0            0.0.0.0/0            ctstate RELATED,ESTABLISHED
+    0     0 DOCKER     all  --  *      docker0  0.0.0.0/0            0.0.0.0/0           
+ 187K   49M ACCEPT     all  --  docker0 !docker0  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  docker0 docker0  0.0.0.0/0            0.0.0.0/0           
+
+Chain OUTPUT (policy ACCEPT 5318K packets, 4855M bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain DOCKER (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 ACCEPT     tcp  --  !docker0 docker0  0.0.0.0/0            172.17.0.2           tcp dpt:3001
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+ 187K   49M DOCKER-ISOLATION-STAGE-2  all  --  docker0 !docker0  0.0.0.0/0            0.0.0.0/0           
+ 795K 1359M RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+
+Chain DOCKER-ISOLATION-STAGE-2 (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DROP       all  --  *      docker0  0.0.0.0/0            0.0.0.0/0           
+ 208K   57M RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+
+Chain DOCKER-USER (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+1577K 3206M RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0           

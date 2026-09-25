@@ -1,0 +1,13 @@
+### COMMAND
+/usr/sbin/asterisk -rx pjsip\ show\ channelstats 
+### OUTPUT
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:20 opus      549       0    0   0.000    549       0    0   0.000   0.074
+ 7438a1ab zadarma-00000019   00:00:20 alaw      564       0    0   0.000    549       0    0   0.000   0.005
+
+Objects found: 2
+

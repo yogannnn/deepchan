@@ -1,0 +1,5 @@
+### COMMAND
+/usr/bin/docker ps -a --no-trunc 
+### OUTPUT
+CONTAINER ID                                                       IMAGE                                     COMMAND                                                           CREATED        STATUS                  PORTS                      NAMES
+1caa54061bda513c5b7a879a22d2c804f12624c036973cec56c9d78d840d835b   ghcr.io/tashfeenahmed/freellmapi:latest   "/usr/local/bin/docker-entrypoint.sh node server/dist/index.js"   45 hours ago   Up 45 hours (healthy)   127.0.0.1:3001->3001/tcp   freellmapi

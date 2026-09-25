@@ -1,0 +1,81 @@
+### COMMAND
+/usr/sbin/iptables -S 
+### OUTPUT
+# Warning: iptables-legacy tables present, use iptables-legacy to see them
+-P INPUT DROP
+-P FORWARD DROP
+-P OUTPUT ACCEPT
+-N DOCKER
+-N DOCKER-ISOLATION-STAGE-1
+-N DOCKER-ISOLATION-STAGE-2
+-N DOCKER-USER
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "friendly-scanner" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "friendly-scanner" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "friendly-scanner" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "friendly-scanner" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "friendly-scanner" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "friendly-scanner" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "sipcli/" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "sipcli/" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "sipcli/" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "sipcli/" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "sipcli/" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "sipcli/" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "VaxSIPUserAgent/" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "VaxSIPUserAgent/" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "VaxSIPUserAgent/" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "VaxSIPUserAgent/" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "VaxSIPUserAgent/" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "VaxSIPUserAgent/" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "pplsip" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "pplsip" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "pplsip" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "pplsip" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "pplsip" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "pplsip" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "system " --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "system " --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "system " --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "system " --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "system " --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "system " --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "exec." --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "exec." --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "exec." --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "exec." --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "exec." --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "exec." --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 5060:5091 -m string --string "multipart/mixed;boundary" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 5060:5091 -m string --string "multipart/mixed;boundary" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 35000 -m string --string "multipart/mixed;boundary" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 35000 -m string --string "multipart/mixed;boundary" --algo bm --icase -j DROP
+-A INPUT -p udp -m udp --dport 36000:36011 -m string --string "multipart/mixed;boundary" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 36000:36011 -m string --string "multipart/mixed;boundary" --algo bm --icase -j DROP
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 7443 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 5060:5091 -j ACCEPT
+-A INPUT -p udp -m udp --dport 5060:5091 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 35000 -j ACCEPT
+-A INPUT -p udp -m udp --dport 35000 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 36000:36011 -j ACCEPT
+-A INPUT -p udp -m udp --dport 36000:36011 -j ACCEPT
+-A INPUT -p udp -m udp --dport 16384:32768 -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+-A INPUT -p udp -m udp --dport 1194 -j ACCEPT
+-A INPUT -p udp -m udp --dport 10000:20000 -j ACCEPT
+-A FORWARD -j DOCKER-USER
+-A FORWARD -j DOCKER-ISOLATION-STAGE-1
+-A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -o docker0 -j DOCKER
+-A FORWARD -i docker0 ! -o docker0 -j ACCEPT
+-A FORWARD -i docker0 -o docker0 -j ACCEPT
+-A DOCKER -d 172.17.0.2/32 ! -i docker0 -o docker0 -p tcp -m tcp --dport 3001 -j ACCEPT
+-A DOCKER-ISOLATION-STAGE-1 -i docker0 ! -o docker0 -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -j RETURN
+-A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -j RETURN
+-A DOCKER-USER -j RETURN

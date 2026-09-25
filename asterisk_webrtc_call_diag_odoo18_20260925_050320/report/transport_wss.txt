@@ -1,0 +1,40 @@
+### COMMAND
+/usr/sbin/asterisk -rx pjsip\ show\ transport\ transport-wss 
+### OUTPUT
+
+Transport:  <TransportId........>  <Type>  <cos>  <tos>  <BindAddress....................>
+==========================================================================================
+
+Transport:  transport-wss             wss      0      0  0.0.0.0:8089
+
+ ParameterName               : ParameterValue
+ =================================================
+ allow_reload                : false
+ allow_wildcard_certs        : No
+ async_operations            : 1
+ bind                        : 0.0.0.0:8089
+ ca_list_file                : 
+ ca_list_path                : 
+ cert_file                   : 
+ cipher                      : 
+ cos                         : 0
+ domain                      : 
+ external_media_address      : 89.58.15.243
+ external_signaling_address  : 89.58.15.243
+ external_signaling_port     : 0
+ local_net                   : 127.0.0.0/255.0.0.0
+ method                      : unspecified
+ password                    : 
+ priv_key_file               : 
+ protocol                    : wss
+ require_client_cert         : No
+ symmetric_transport         : true
+ tcp_keepalive_enable        : false
+ tcp_keepalive_idle_time     : 30
+ tcp_keepalive_interval_time : 1
+ tcp_keepalive_probe_count   : 5
+ tos                         : 0
+ verify_client               : No
+ verify_server               : No
+ websocket_write_timeout     : 100
+

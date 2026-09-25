@@ -1,0 +1,12 @@
+### COMMAND
+/usr/sbin/asterisk -rx pjsip\ show\ transports 
+### OUTPUT
+
+Transport:  <TransportId........>  <Type>  <cos>  <tos>  <BindAddress....................>
+==========================================================================================
+
+Transport:  transport-udp             udp      0      0  0.0.0.0:5060
+Transport:  transport-wss             wss      0      0  0.0.0.0:8089
+
+Objects found: 2
+

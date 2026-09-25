@@ -1,0 +1,226 @@
+===== 2026-09-25 05:03:21 =====
+No objects found.
+
+===== 2026-09-25 05:03:22 =====
+No objects found.
+
+===== 2026-09-25 05:03:23 =====
+No objects found.
+
+===== 2026-09-25 05:03:24 =====
+No objects found.
+
+===== 2026-09-25 05:03:25 =====
+No objects found.
+
+===== 2026-09-25 05:03:26 =====
+No objects found.
+
+===== 2026-09-25 05:03:27 =====
+No objects found.
+
+===== 2026-09-25 05:03:28 =====
+No objects found.
+
+===== 2026-09-25 05:03:29 =====
+No objects found.
+
+===== 2026-09-25 05:03:30 =====
+No objects found.
+
+===== 2026-09-25 05:03:31 =====
+No objects found.
+
+===== 2026-09-25 05:03:32 =====
+No objects found.
+
+===== 2026-09-25 05:03:33 =====
+No objects found.
+
+===== 2026-09-25 05:03:34 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ PJSIP/120-webrtc-00000018 not valid
+ PJSIP/zadarma-00000019 not valid
+
+Objects found: 2
+
+===== 2026-09-25 05:03:35 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ PJSIP/120-webrtc-00000018 not valid
+ PJSIP/zadarma-00000019 not valid
+
+Objects found: 2
+
+===== 2026-09-25 05:03:36 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ PJSIP/120-webrtc-00000018 not valid
+ PJSIP/zadarma-00000019 not valid
+
+Objects found: 2
+
+===== 2026-09-25 05:03:37 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ PJSIP/120-webrtc-00000018 not valid
+ PJSIP/zadarma-00000019 not valid
+
+Objects found: 2
+
+===== 2026-09-25 05:03:38 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+          120-webrtc-0000001 00:00:05 opus        0       0    0   0.000      0       0    0   0.000   0.000
+          zadarma-00000019   00:00:05 ulaw        0       0    0   0.000      0       0    0   0.000   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:39 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+          120-webrtc-0000001 00:00:06 opus        0       0    0   0.000      0       0    0   0.000   0.000
+          zadarma-00000019   00:00:06 ulaw       49       0    0   0.000      0       0    0   0.001   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:40 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+          120-webrtc-0000001 00:00:07 opus        0       0    0   0.000      0       0    0   0.000   0.000
+          zadarma-00000019   00:00:07 ulaw      101       0    0   0.000      0       0    0   0.000   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:41 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+          120-webrtc-0000001 00:00:08 opus        0       0    0   0.000      0       0    0   0.000   0.000
+          zadarma-00000019   00:00:08 ulaw        1       0    0   0.000      0       0    0   0.000   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:42 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:09 opus       33       0    0   0.000     33       0    0   0.000   0.000
+ 7438a1ab zadarma-00000019   00:00:09 alaw       48       0    0   0.000     33       0    0   0.001   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:43 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:10 opus       84       0    0   0.000     85       0    0   0.000   0.000
+ 7438a1ab zadarma-00000019   00:00:10 alaw      100       0    0   0.000     84       0    0   0.001   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:44 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:11 opus      136       0    0   0.001    136       0    0   0.000   0.074
+ 7438a1ab zadarma-00000019   00:00:11 alaw      151       0    0   0.000    136       0    0   0.001   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:45 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:12 opus      188       0    0   0.001    188       0    0   0.000   0.074
+ 7438a1ab zadarma-00000019   00:00:12 alaw      203       0    0   0.000    188       0    0   0.001   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:46 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:13 opus      240       0    0   0.001    240       0    0   0.000   0.074
+ 7438a1ab zadarma-00000019   00:00:13 alaw      255       0    0   0.000    240       0    0   0.001   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:47 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:14 opus      291       0    0   0.001    292       0    0   0.000   0.074
+ 7438a1ab zadarma-00000019   00:00:14 alaw      307       0    0   0.000    291       0    0   0.000   0.000
+
+Objects found: 2
+
+===== 2026-09-25 05:03:48 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:15 opus      343       0    0   0.001    343       0    0   0.000   0.074
+ 7438a1ab zadarma-00000019   00:00:15 alaw      358       0    0   0.000    343       0    0   0.001   0.005
+
+Objects found: 2
+
+===== 2026-09-25 05:03:49 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:16 opus      395       0    0   0.001    395       0    0   0.002   0.074
+ 7438a1ab zadarma-00000019   00:00:16 alaw      410       0    0   0.000    395       0    0   0.000   0.005
+
+Objects found: 2
+
+===== 2026-09-25 05:03:50 =====
+
+                                             ...........Receive......... .........Transmit..........
+ BridgeId ChannelId ........ UpTime.. Codec.   Count    Lost Pct  Jitter   Count    Lost Pct  Jitter RTT....
+ ===========================================================================================================
+
+ 7438a1ab 120-webrtc-0000001 00:00:17 opus      446       0    0   0.001    447       0    0   0.001   0.074
+ 7438a1ab zadarma-00000019   00:00:17 alaw      462       0    0   0.000    446       0    0   0.000   0.005
+
+Objects found: 2
+
